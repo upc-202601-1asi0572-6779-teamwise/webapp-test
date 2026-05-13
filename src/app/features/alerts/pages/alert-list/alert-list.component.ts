@@ -2,7 +2,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize, interval, startWith, Subscription, switchMap } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { Alert, AlertCount } from '../../models/alert.model';
 import { AlertService } from '../../services/alert.service';
 
@@ -62,11 +62,8 @@ export class AlertListComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.saving.set(0)))
       .subscribe({
         next: () => this.load(),
-        error: (error: unknown) => {
-          const message =
-            error instanceof HttpErrorResponse ? error.error?.message : null;
-          this.actionError.set(message || 'No se pudo confirmar la alerta.');
-        },
+        error: (error: unknown) =>
+          this.actionError.set(getApiErrorMessage(error, 'No se pudo confirmar la alerta.')),
       });
   }
 

@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { Alert } from '../../models/alert.model';
 import { AlertService } from '../../services/alert.service';
 
@@ -46,10 +46,8 @@ export class AlertDetailComponent implements OnInit {
           this.actionSuccess.set('Recepcion confirmada correctamente.');
           this.load(current.id);
         },
-        error: (error: unknown) => {
-          const message = error instanceof HttpErrorResponse ? error.error?.message : null;
-          this.actionError.set(message || 'No se pudo confirmar la alerta.');
-        },
+        error: (error: unknown) =>
+          this.actionError.set(getApiErrorMessage(error, 'No se pudo confirmar la alerta.')),
       });
   }
 
