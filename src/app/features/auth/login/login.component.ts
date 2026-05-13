@@ -30,7 +30,7 @@ export class LoginComponent {
       .login(this.form.getRawValue())
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigate(['/subscription/plans']),
+        next: () => this.router.navigate(['/dashboard']),
         error: () => (this.error = 'Credenciales incorrectas. Intenta de nuevo.'),
       });
   }

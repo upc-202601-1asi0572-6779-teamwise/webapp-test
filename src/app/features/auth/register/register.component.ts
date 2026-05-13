@@ -48,7 +48,7 @@ export class RegisterComponent {
       .register(this.form.getRawValue())
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigate(['/subscription/plans']),
+        next: () => this.router.navigate(['/dashboard']),
         error: (err) => {
           this.error = err?.error?.message ?? 'Error al registrar. Intenta de nuevo.';
         },
