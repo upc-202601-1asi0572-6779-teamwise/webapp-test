@@ -13,8 +13,8 @@ export class PlansComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
 
   plans = signal<SubscriptionPlan[]>([]);
-  loading = false;
-  error = '';
+  loading = signal(false);
+  error = signal('');
 
   constructor() {}
 
@@ -23,13 +23,14 @@ export class PlansComponent implements OnInit {
   }
 
   private load(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.error.set('');
     this.subscriptionService
       .getPlans()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (p) => this.plans.set(p),
-        error: () => (this.error = 'Error al cargar los planes.'),
+        error: () => this.error.set('Error al cargar los planes.'),
       });
   }
 }

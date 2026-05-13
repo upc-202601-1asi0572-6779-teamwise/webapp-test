@@ -8,14 +8,14 @@
       Elige el plan ideal para tus hect&aacute;reas
     </p>
 
-    @if (loading) {
+    @if (loading()) {
     <div class="flex flex-col items-center justify-center pt-20 gap-3">
       <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
       <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">Cargando planes...</p>
     </div>
-    } @else if (error) {
+    } @else if (error()) {
     <div class="px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
-      {{ error }}
+      {{ error() }}
     </div>
     } @else {
     <div class="flex flex-col gap-4">

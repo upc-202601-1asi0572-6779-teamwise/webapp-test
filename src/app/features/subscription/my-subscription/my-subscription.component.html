@@ -5,26 +5,26 @@
       Mi suscripci&oacute;n
     </h1>
 
-    @if (loading) {
+    @if (loading()) {
     <div class="flex flex-col items-center justify-center pt-20 gap-3">
       <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
       <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">Cargando...</p>
     </div>
-    } @else if (error) {
+    } @else if (error()) {
     <div class="px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
-      {{ error }}
+      {{ error() }}
     </div>
     } @else if (subscription(); as sub) {
 
-    @if (actionSuccess) {
+    @if (actionSuccess()) {
     <div class="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style="background: var(--color-emerald-15); color: var(--color-success); border: 1px solid var(--color-success); font-family: var(--font-body)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      {{ actionSuccess }}
+      {{ actionSuccess() }}
     </div>
     }
-    @if (actionError) {
+    @if (actionError()) {
     <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
-      {{ actionError }}
+      {{ actionError() }}
     </div>
     }
 
@@ -80,15 +80,15 @@
     </div>
 
     <div class="flex gap-3 mb-4">
-      <button (click)="renew()" [disabled]="actionLoading === 'renew'"
+      <button (click)="renew()" [disabled]="actionLoading() === 'renew'"
         class="flex-1 py-3.5 rounded-xl font-semibold text-base transition disabled:opacity-50 active:scale-[0.98]"
         style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">
-        {{ actionLoading === 'renew' ? 'Renovando...' : 'Renovar' }}
+        {{ actionLoading() === 'renew' ? 'Renovando...' : 'Renovar' }}
       </button>
-      <button (click)="cancel()" [disabled]="actionLoading === 'cancel'"
+      <button (click)="cancel()" [disabled]="actionLoading() === 'cancel'"
         class="flex-1 py-3.5 rounded-xl font-semibold text-base transition disabled:opacity-50 active:scale-[0.98]"
         style="background: var(--color-bg-soft); color: var(--color-danger); font-family: var(--font-heading); border-radius: var(--radius-md); border: 1px solid var(--color-danger)">
-        {{ actionLoading === 'cancel' ? 'Cancelando...' : 'Cancelar' }}
+        {{ actionLoading() === 'cancel' ? 'Cancelando...' : 'Cancelar' }}
       </button>
     </div>
 
