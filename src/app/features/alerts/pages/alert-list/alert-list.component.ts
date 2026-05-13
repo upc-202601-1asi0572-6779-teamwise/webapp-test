@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, interval, startWith, Subscription, switchMap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Alert, AlertCount } from '../../models/alert.model';
 import { AlertService } from '../../services/alert.service';
@@ -11,7 +11,7 @@ import { AlertService } from '../../services/alert.service';
   imports: [DatePipe, RouterLink],
   templateUrl: './alert-list.component.html',
 })
-export class AlertListComponent implements OnInit {
+export class AlertListComponent implements OnInit, OnDestroy {
   private readonly alertService = inject(AlertService);
 
   alerts = signal<Alert[]>([]);
@@ -22,9 +22,27 @@ export class AlertListComponent implements OnInit {
   activeTab = signal<'active' | 'resolved'>('active');
   badgeCount = signal<AlertCount | null>(null);
 
+  private pollSubscription: Subscription | null = null;
+
   ngOnInit(): void {
     this.load();
     this.loadCount();
+    this.startPolling();
+  }
+
+  ngOnDestroy(): void {
+    this.pollSubscription?.unsubscribe();
+  }
+
+  private startPolling(): void {
+    this.pollSubscription = interval(60000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.alertService.count()),
+      )
+      .subscribe({
+        next: (count) => this.badgeCount.set(count),
+      });
   }
 
   setTab(tab: 'active' | 'resolved'): void {
