@@ -1,0 +1,60 @@
+<div class="min-h-dvh px-6 py-8" style="background: var(--color-bg-page)">
+  <div class="mx-auto w-full" style="max-width: var(--mobile-content-max)">
+
+    <h1 class="mb-2" style="font-family: var(--font-heading); font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: var(--color-text-primary); line-height: var(--line-height-h2)">
+      Planes de suscripci&oacute;n
+    </h1>
+    <p class="mb-6" style="font-family: var(--font-body); font-size: var(--font-size-body); line-height: var(--line-height-body); color: var(--color-text-secondary)">
+      Elige el plan que mejor se adapte a tus hect&aacute;reas
+    </p>
+
+    @if (loading) {
+    <p style="font-family: var(--font-body); color: var(--color-text-muted); text-align: center; padding-top: 4rem">
+      Cargando planes...
+    </p>
+    } @else if (error) {
+    <div class="px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
+      {{ error }}
+    </div>
+    } @else {
+    <div class="flex flex-col gap-4">
+      @for (plan of plans(); track plan.id) {
+      <div class="rounded-xl p-5" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card); border: 2px solid transparent"
+        [style.border-color]="plan.id === 'plan-cosecha' ? 'var(--color-brand-secondary)' : 'var(--color-border-subtle)'">
+        <div class="flex justify-between items-start mb-3">
+          <h2 style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); color: var(--color-text-primary); line-height: var(--line-height-h3)">
+            {{ plan.name }}
+          </h2>
+          @if (plan.id === 'plan-cosecha') {
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium" style="background: var(--color-brand-secondary); color: var(--color-brand-deep); font-family: var(--font-body)">
+            Recomendado
+          </span>
+          }
+        </div>
+
+        <p class="mb-4" style="font-family: var(--font-heading); font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); color: var(--color-brand-primary); line-height: 1">
+          S/ {{ plan.priceMonthly | number:'1.2-2' }}
+        </p>
+
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: var(--color-bg-soft); color: var(--color-text-secondary); font-family: var(--font-body)">
+            Hasta {{ plan.maxHectares }} ha
+          </span>
+          <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: var(--color-bg-soft); color: var(--color-text-secondary); font-family: var(--font-body)">
+            {{ plan.maxDevices }} dispositivos
+          </span>
+        </div>
+
+        <ul class="flex flex-col gap-1.5 mb-0">
+          @for (feature of plan.features; track feature) {
+          <li class="flex items-start gap-2" style="font-family: var(--font-body); font-size: var(--font-size-small); line-height: var(--line-height-small); color: var(--color-text-secondary)">
+            <span style="color: var(--color-success)">&#10003;</span> {{ feature }}
+          </li>
+          }
+        </ul>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
