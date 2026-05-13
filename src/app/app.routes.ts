@@ -29,11 +29,7 @@ export const routes: Routes = [
       },
       {
         path: 'dispositivos',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Mis dispositivos' },
+        loadChildren: () => import('./features/devices/device.routes').then((m) => m.deviceRoutes),
       },
       {
         path: 'alertas',
