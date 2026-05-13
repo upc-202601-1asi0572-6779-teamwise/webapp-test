@@ -1,4 +1,4 @@
-<div class="min-h-dvh px-6 py-8" style="background: var(--color-bg-page)">
+<div class="min-h-dvh px-5 py-6" style="background: var(--color-bg-page)">
   <div class="mx-auto w-full" style="max-width: var(--mobile-content-max)">
 
     <h1 class="mb-6" style="font-family: var(--font-heading); font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: var(--color-text-primary); line-height: var(--line-height-h2)">
@@ -6,9 +6,10 @@
     </h1>
 
     @if (loading) {
-    <p style="font-family: var(--font-body); color: var(--color-text-muted); text-align: center; padding-top: 4rem">
-      Cargando...
-    </p>
+    <div class="flex flex-col items-center justify-center pt-20 gap-3">
+      <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+      <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">Cargando...</p>
+    </div>
     } @else if (error) {
     <div class="px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
       {{ error }}
@@ -16,81 +17,79 @@
     } @else if (subscription(); as sub) {
 
     @if (actionSuccess) {
-    <div class="mb-4 px-4 py-3 rounded-lg text-sm" style="background: var(--color-emerald-15); color: var(--color-success); border: 1px solid var(--color-success); font-family: var(--font-body)">
+    <div class="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style="background: var(--color-emerald-15); color: var(--color-success); border: 1px solid var(--color-success); font-family: var(--font-body)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       {{ actionSuccess }}
     </div>
     }
     @if (actionError) {
-    <div class="mb-4 px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
+    <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
       {{ actionError }}
     </div>
     }
 
-    <div class="rounded-xl p-5 mb-6" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card)">
-      <div class="flex items-center justify-between mb-4">
+    <div class="rounded-2xl p-6 mb-5" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card)">
+      <div class="flex items-center justify-between mb-5">
         <h2 style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
           {{ sub.planName }}
         </h2>
-        <span class="px-2 py-0.5 rounded-full text-xs font-medium" [style.background]="sub.status === 'active' ? 'var(--color-emerald-15)' : 'var(--color-warning-10)'" [style.color]="sub.status === 'active' ? 'var(--color-brand-primary)' : 'var(--color-warning)'" style="font-family: var(--font-body)">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" [style.background]="sub.status === 'active' ? 'var(--color-emerald-15)' : 'var(--color-warning-10)'" [style.color]="sub.status === 'active' ? 'var(--color-brand-primary)' : 'var(--color-warning)'" style="font-family: var(--font-body)">
+          <span class="w-2 h-2 rounded-full" [style.background]="sub.status === 'active' ? 'var(--color-success)' : 'var(--color-warning)'"></span>
           {{ sub.status === 'active' ? 'Activo' : sub.status }}
         </span>
       </div>
 
-      <dl class="flex flex-col gap-3 mb-4">
-        <div>
-          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
-            Vigencia
-          </dt>
-          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
-            {{ sub.startDate | date:'dd/MM/yyyy' }} — {{ sub.endDate | date:'dd/MM/yyyy' }}
-          </dd>
-        </div>
-        <div>
-          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
-            D&iacute;as restantes
-          </dt>
-          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
-            {{ sub.daysRemaining }} d&iacute;as
-          </dd>
-        </div>
-        <div>
-          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
-            Dispositivos
-          </dt>
-          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
-            {{ sub.usedDevices }} / {{ sub.maxDevices }} en uso
-          </dd>
-        </div>
-        <div>
-          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
-            Hect&aacute;reas monitoreadas
-          </dt>
-          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
-            {{ sub.usedHectares }} / {{ sub.maxHectares }} ha
-          </dd>
-        </div>
-        <div>
-          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
-            Renovaci&oacute;n autom&aacute;tica
-          </dt>
-          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
-            {{ sub.autoRenew ? 'Activada' : 'Desactivada' }}
-          </dd>
-        </div>
-      </dl>
-
-      <div class="flex gap-3">
-        <button (click)="renew()" [disabled]="actionLoading === 'renew'"
-          class="flex-1 py-3 rounded-lg font-semibold text-base transition disabled:opacity-50"
-          style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">
-          {{ actionLoading === 'renew' ? 'Renovando...' : 'Renovar' }}
-        </button>
-        <button (click)="cancel()" [disabled]="actionLoading === 'cancel'"
-          class="flex-1 py-3 rounded-lg font-semibold text-base transition disabled:opacity-50"
-          style="background: var(--color-bg-soft); color: var(--color-danger); font-family: var(--font-heading); border-radius: var(--radius-md); border: 1px solid var(--color-danger)">
-          {{ actionLoading === 'cancel' ? 'Cancelando...' : 'Cancelar' }}
-        </button>
+      <div class="rounded-xl p-4 mb-5" style="background: var(--color-bg-soft)">
+        <p class="mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted)">Vigencia</p>
+        <p style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-medium); color: var(--color-text-primary)">
+          {{ sub.startDate | date:'dd MMM yyyy' }} — {{ sub.endDate | date:'dd MMM yyyy' }}
+        </p>
+        <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-secondary); margin-top: 0.25rem">
+          {{ sub.daysRemaining }} d&iacute;as restantes
+        </p>
       </div>
+
+      <div class="mb-5">
+        <div class="flex justify-between mb-2">
+          <span style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-secondary)">Hect&aacute;reas monitoreadas</span>
+          <span style="font-family: var(--font-body); font-size: var(--font-size-small); font-weight: var(--font-weight-medium); color: var(--color-text-primary)">{{ sub.usedHectares }} / {{ sub.maxHectares }} ha</span>
+        </div>
+        <div class="h-2 rounded-full overflow-hidden" style="background: var(--color-bg-soft)">
+          <div class="h-full rounded-full transition-all duration-500" style="width: {{ (sub.usedHectares / sub.maxHectares) * 100 }}%; background: var(--color-brand-primary)"></div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <div class="flex justify-between mb-2">
+          <span style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-secondary)">Dispositivos</span>
+          <span style="font-family: var(--font-body); font-size: var(--font-size-small); font-weight: var(--font-weight-medium); color: var(--color-text-primary)">{{ sub.usedDevices }} / {{ sub.maxDevices }}</span>
+        </div>
+        <div class="h-2 rounded-full overflow-hidden" style="background: var(--color-bg-soft)">
+          <div class="h-full rounded-full transition-all duration-500" style="width: {{ (sub.usedDevices / sub.maxDevices) * 100 }}%; background: var(--color-accent-cyan)"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mb-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+        <span style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">
+          Renovaci&oacute;n autom&aacute;tica: {{ sub.autoRenew ? 'Activada' : 'Desactivada' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mb-4">
+      <button (click)="renew()" [disabled]="actionLoading === 'renew'"
+        class="flex-1 py-3.5 rounded-xl font-semibold text-base transition disabled:opacity-50 active:scale-[0.98]"
+        style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">
+        {{ actionLoading === 'renew' ? 'Renovando...' : 'Renovar' }}
+      </button>
+      <button (click)="cancel()" [disabled]="actionLoading === 'cancel'"
+        class="flex-1 py-3.5 rounded-xl font-semibold text-base transition disabled:opacity-50 active:scale-[0.98]"
+        style="background: var(--color-bg-soft); color: var(--color-danger); font-family: var(--font-heading); border-radius: var(--radius-md); border: 1px solid var(--color-danger)">
+        {{ actionLoading === 'cancel' ? 'Cancelando...' : 'Cancelar' }}
+      </button>
     </div>
 
     }
