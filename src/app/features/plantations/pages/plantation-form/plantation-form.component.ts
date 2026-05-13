@@ -1,0 +1,114 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { PlantationService } from '../../services/plantation.service';
+import { CreatePlantationRequest, Plantation } from '../../models/plantation.model';
+
+@Component({
+  selector: 'app-plantation-form',
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './plantation-form.component.html',
+})
+export class PlantationFormComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly plantationService = inject(PlantationService);
+
+  readonly soilTypes = ['arcilloso_humedo', 'franco_arenoso', 'franco_arcilloso', 'arenoso'];
+  readonly phenologicalPhases = ['produccion', 'establecimiento'] as const;
+
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly error = signal('');
+  readonly isEditMode = signal(false);
+  readonly plantationId = signal<number | null>(null);
+
+  readonly form = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    location: ['', [Validators.required]],
+    totalHectares: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
+    soilType: ['arcilloso_humedo', [Validators.required]],
+    cropAge: ['', [Validators.required]],
+    phenologicalPhase: ['produccion' as 'produccion' | 'establecimiento', [Validators.required]],
+    latitude: [0, [Validators.required]],
+    longitude: [0, [Validators.required]],
+  });
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!Number.isNaN(id)) {
+      this.isEditMode.set(true);
+      this.plantationId.set(id);
+      this.loadPlantation(id);
+    }
+  }
+
+  get title(): string {
+    return this.isEditMode() ? 'Editar plantacion' : 'Nueva plantacion';
+  }
+
+  get submitLabel(): string {
+    if (this.saving()) {
+      return this.isEditMode() ? 'Guardando...' : 'Creando...';
+    }
+    return this.isEditMode() ? 'Guardar cambios' : 'Crear plantacion';
+  }
+
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const payload: CreatePlantationRequest = this.form.getRawValue();
+    this.saving.set(true);
+    this.error.set('');
+
+    const request$ = this.isEditMode() && this.plantationId() !== null
+      ? this.plantationService.update(this.plantationId()!, payload)
+      : this.plantationService.create(payload);
+
+    request$
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (plantation) => this.router.navigate(['/plantaciones', plantation.id]),
+        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo guardar la plantacion.')),
+      });
+  }
+
+  private loadPlantation(id: number): void {
+    this.loading.set(true);
+    this.error.set('');
+
+    this.plantationService
+      .getById(id)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (plantation) => this.patchForm(plantation),
+        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo cargar la plantacion.')),
+      });
+  }
+
+  private patchForm(plantation: Plantation): void {
+    this.form.patchValue({
+      name: plantation.name,
+      location: plantation.location,
+      totalHectares: plantation.totalHectares,
+      soilType: plantation.soilType,
+      cropAge: plantation.cropAge,
+      phenologicalPhase: plantation.phenologicalPhase,
+      latitude: plantation.latitude,
+      longitude: plantation.longitude,
+    });
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      return error.error?.message || fallback;
+    }
+    return fallback;
+  }
+}
