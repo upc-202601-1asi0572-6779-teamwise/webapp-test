@@ -135,6 +135,10 @@
     </div>
     }
 
+    } @else {
+    <div class="px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
+      {{ error || 'No se pudo cargar el perfil.' }}
+    </div>
     }
   </div>
 </div>
