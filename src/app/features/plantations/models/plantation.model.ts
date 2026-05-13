@@ -22,8 +22,8 @@ export interface CreatePlantationRequest {
   soilType: string;
   cropAge: string;
   phenologicalPhase: 'produccion' | 'establecimiento';
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 export type UpdatePlantationRequest = Partial<CreatePlantationRequest>;

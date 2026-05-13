@@ -52,6 +52,7 @@
             <p style="color: var(--color-text-muted)">Antiguedad del cultivo</p>
             <p class="mt-1" style="color: var(--color-text-primary)">{{ plantation.cropAge }}</p>
           </div>
+          @if (plantation.latitude || plantation.longitude) {
           <div>
             <p style="color: var(--color-text-muted)">Latitud</p>
             <p class="mt-1" style="color: var(--color-text-primary)">{{ plantation.latitude }}</p>
@@ -60,6 +61,7 @@
             <p style="color: var(--color-text-muted)">Longitud</p>
             <p class="mt-1" style="color: var(--color-text-primary)">{{ plantation.longitude }}</p>
           </div>
+          }
         </div>
 
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
