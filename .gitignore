@@ -49,3 +49,4 @@ AGENTS.md
 /.agents
 /plans
 skills-lock.json
+/commands
