@@ -1,17 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
-  private readonly router = inject(Router);
-
-  get isAuthRoute(): boolean {
-    return this.router.url.startsWith('/auth');
-  }
-}
+export class App {}
