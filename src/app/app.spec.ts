@@ -1,13 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 import { App } from './app';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([]), provideHttpClient()],
+      providers: [
+        provideRouter([
+          { path: 'auth/login', component: DummyComponent },
+          { path: 'subscription/plans', component: DummyComponent },
+        ]),
+        provideHttpClient(),
+      ],
     }).compileComponents();
   });
 
@@ -17,11 +28,22 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render navbar', async () => {
+  it('should render navbar on non-auth routes', async () => {
     const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigate(['/subscription/plans']);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-navbar')).toBeTruthy();
+  });
+
+  it('should hide navbar on auth routes', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigate(['/auth/login']);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-navbar')).toBeFalsy();
   });
 
   it('should render router outlet', () => {
