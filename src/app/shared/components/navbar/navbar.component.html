@@ -1,0 +1,23 @@
+<nav class="px-6 py-3 flex items-center justify-between" style="background: var(--color-brand-deep)">
+  <a routerLink="/subscription/plans" class="font-bold" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none; letter-spacing: var(--letter-spacing-tight)">
+    TempWise
+  </a>
+
+  @if (authService.isAuthenticated) {
+  <div class="flex items-center gap-3">
+    <a routerLink="/profile" routerLinkActive="opacity-100" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
+      Perfil
+    </a>
+    <a routerLink="/subscription/me" routerLinkActive="opacity-100" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
+      Mi plan
+    </a>
+    <button (click)="logout()" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-brand-mint); background: none; border: none; cursor: pointer">
+      Salir
+    </button>
+  </div>
+  } @else {
+  <a routerLink="/auth/login" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-brand-secondary); text-decoration: none">
+    Iniciar sesi&oacute;n
+  </a>
+  }
+</nav>
