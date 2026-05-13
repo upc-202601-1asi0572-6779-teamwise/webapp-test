@@ -44,8 +44,9 @@ export class PlantationFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadWriteAccess();
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!Number.isNaN(id)) {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      const id = Number(idParam);
       this.isEditMode.set(true);
       this.plantationId.set(id);
       this.loadPlantation(id);
