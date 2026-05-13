@@ -2,6 +2,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize, interval, startWith, Subscription, switchMap } from 'rxjs';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
 import { Notification } from '../../../core/models/notification.model';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -72,7 +73,8 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
             list.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
           );
         },
-        error: () => this.actionError.set('No se pudo marcar como leida.'),
+        error: (error: unknown) =>
+          this.actionError.set(getApiErrorMessage(error, 'No se pudo marcar como leida.')),
       });
   }
 
@@ -86,7 +88,8 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
         next: () => {
           this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
         },
-        error: () => this.actionError.set('No se pudo marcar todas como leidas.'),
+        error: (error: unknown) =>
+          this.actionError.set(getApiErrorMessage(error, 'No se pudo marcar todas como leidas.')),
       });
   }
 
@@ -111,7 +114,8 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.notifications.set(response.notifications),
-        error: () => this.actionError.set('No se pudieron cargar las notificaciones.'),
+        error: (error: unknown) =>
+          this.actionError.set(getApiErrorMessage(error, 'No se pudieron cargar las notificaciones.')),
       });
   }
 
