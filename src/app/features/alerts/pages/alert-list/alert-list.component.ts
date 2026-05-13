@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Alert, AlertCount } from '../../models/alert.model';
 import { AlertService } from '../../services/alert.service';
 
@@ -15,7 +16,10 @@ export class AlertListComponent implements OnInit {
 
   alerts = signal<Alert[]>([]);
   loading = signal(false);
+  saving = signal(0);
   error = signal('');
+  actionError = signal('');
+  activeTab = signal<'active' | 'resolved'>('active');
   badgeCount = signal<AlertCount | null>(null);
 
   ngOnInit(): void {
@@ -23,12 +27,55 @@ export class AlertListComponent implements OnInit {
     this.loadCount();
   }
 
+  setTab(tab: 'active' | 'resolved'): void {
+    this.activeTab.set(tab);
+    this.load();
+  }
+
+  acknowledge(alert: Alert, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.saving.set(alert.id);
+    this.actionError.set('');
+
+    this.alertService
+      .acknowledge(alert.id)
+      .pipe(finalize(() => this.saving.set(0)))
+      .subscribe({
+        next: () => this.load(),
+        error: (error: unknown) => {
+          const message =
+            error instanceof HttpErrorResponse ? error.error?.message : null;
+          this.actionError.set(message || 'No se pudo confirmar la alerta.');
+        },
+      });
+  }
+
+  severityColor(alert: Alert): string {
+    if (alert.alertLevel === 'critical') return 'var(--color-danger)';
+    if (alert.alertLevel === 'warning') return '#f59e0b';
+    return 'var(--color-border-subtle)';
+  }
+
+  severityBg(alert: Alert): string {
+    if (alert.alertLevel === 'critical') return 'var(--color-danger-10)';
+    if (alert.alertLevel === 'warning') return '#fef3c7';
+    return 'var(--color-bg-soft-cyan)';
+  }
+
+  severityFg(alert: Alert): string {
+    if (alert.alertLevel === 'critical') return 'var(--color-danger)';
+    if (alert.alertLevel === 'warning') return '#92400e';
+    return 'var(--color-accent-cyan)';
+  }
+
   private load(): void {
     this.loading.set(true);
     this.error.set('');
 
     this.alertService
-      .list()
+      .list({ status: this.activeTab() })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.alerts.set(response.alerts),
