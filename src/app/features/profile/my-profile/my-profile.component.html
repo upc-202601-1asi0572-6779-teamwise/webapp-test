@@ -1,0 +1,140 @@
+<div class="min-h-dvh px-6 py-8" style="background: var(--color-bg-page)">
+  <div class="mx-auto w-full" style="max-width: var(--mobile-content-max)">
+
+    @if (loading) {
+    <p style="font-family: var(--font-body); color: var(--color-text-muted); text-align: center; padding-top: 4rem">
+      Cargando perfil...
+    </p>
+    } @else if (user(); as u) {
+
+    <h1 class="mb-6" style="font-family: var(--font-heading); font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); color: var(--color-text-primary); line-height: var(--line-height-h2)">
+      Mi perfil
+    </h1>
+
+    @if (error) {
+    <div class="mb-4 px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
+      {{ error }}
+    </div>
+    }
+
+    @if (!editing) {
+    <div class="rounded-xl p-5 mb-6" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card)">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold" style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading)">
+          {{ u.fullName.charAt(0) }}
+        </div>
+        <div>
+          <p style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+            {{ u.fullName }}
+          </p>
+          <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">
+            {{ u.role === 'palm_grower' ? 'Productor' : 'Agr\u00f3nomo' }}
+          </p>
+        </div>
+      </div>
+
+      <dl class="flex flex-col gap-3">
+        <div>
+          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
+            Correo electr&oacute;nico
+          </dt>
+          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">{{ u.email }}</dd>
+        </div>
+        <div>
+          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
+            Tel&eacute;fono
+          </dt>
+          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">{{ u.phone }}</dd>
+        </div>
+        <div>
+          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
+            Ubicaci&oacute;n
+          </dt>
+          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">{{ u.city }}, {{ u.region }}</dd>
+        </div>
+        @if (u.subscription) {
+        <div>
+          <dt style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-muted); margin-bottom: 0.125rem">
+            Suscripci&oacute;n
+          </dt>
+          <dd style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-primary)">
+            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium" style="background: var(--color-emerald-15); color: var(--color-brand-primary)">
+              {{ u.subscription.planName }}
+            </span>
+            &middot; {{ u.subscription.status }}
+          </dd>
+        </div>
+        }
+      </dl>
+
+      <button (click)="startEdit()"
+        class="mt-5 w-full py-3 rounded-lg font-semibold text-base transition"
+        style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">
+        Editar perfil
+      </button>
+    </div>
+    }
+
+    @if (editing) {
+    <div class="rounded-xl p-5 mb-6" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card)">
+      <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4">
+        <div>
+          <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-secondary)">
+            Nombre completo
+          </label>
+          <input formControlName="fullName" type="text"
+            class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+            style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); font-family: var(--font-body); border-radius: var(--radius-md)" />
+        </div>
+
+        <div>
+          <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-secondary)">
+            Tel&eacute;fono
+          </label>
+          <input formControlName="phone" type="tel"
+            class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+            style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); font-family: var(--font-body); border-radius: var(--radius-md)"
+            placeholder="+51 961 234 567" />
+        </div>
+
+        <div>
+          <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-secondary)">
+            Regi&oacute;n
+          </label>
+          <select formControlName="region"
+            class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+            style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); font-family: var(--font-body); border-radius: var(--radius-md)">
+            @for (r of regions; track r) {
+            <option [value]="r">{{ r }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-secondary)">
+            Ciudad
+          </label>
+          <input formControlName="city" type="text"
+            class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+            style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); font-family: var(--font-body); border-radius: var(--radius-md)" />
+        </div>
+
+        <div class="flex gap-3">
+          <button type="submit" [disabled]="form.invalid || saving"
+            class="flex-1 py-3 rounded-lg font-semibold text-base transition disabled:opacity-50"
+            style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">
+            {{ saving ? 'Guardando...' : 'Guardar' }}
+          </button>
+          <button type="button" (click)="cancelEdit()"
+            class="flex-1 py-3 rounded-lg font-semibold text-base transition"
+            style="background: var(--color-bg-soft); color: var(--color-text-secondary); font-family: var(--font-heading); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle)">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+
+    }
+  </div>
+</div>
