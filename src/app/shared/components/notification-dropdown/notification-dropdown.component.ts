@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { finalize, Subscription } from 'rxjs';
+import { finalize, interval, startWith, Subscription, switchMap } from 'rxjs';
 import { Notification } from '../../../core/models/notification.model';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -32,10 +32,22 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadNotifications();
     this.loadCount();
+    this.startPolling();
   }
 
   ngOnDestroy(): void {
     this.pollSubscription?.unsubscribe();
+  }
+
+  private startPolling(): void {
+    this.pollSubscription = interval(30000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.notificationService.count()),
+      )
+      .subscribe({
+        next: (count) => this.unreadCount.set(count.unreadCount),
+      });
   }
 
   toggle(): void {
