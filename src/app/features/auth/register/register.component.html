@@ -1,0 +1,107 @@
+<div class="min-h-dvh flex flex-col justify-center px-6 py-12" style="background: var(--gradient-hero)">
+  <div class="mx-auto w-full" style="max-width: var(--mobile-content-max)">
+    <h1 class="text-white mb-2" style="font-family: var(--font-heading); font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); line-height: var(--line-height-h1); letter-spacing: var(--letter-spacing-tight)">
+      Crear cuenta
+    </h1>
+    <p class="mb-8" style="font-family: var(--font-body); font-size: var(--font-size-body); line-height: var(--line-height-body); color: var(--color-text-inverse); opacity: 0.8">
+      &Uacute;nete a TempWise y protege tus cultivos
+    </p>
+
+    @if (error) {
+    <div class="mb-4 px-4 py-3 rounded-lg text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">
+      {{ error }}
+    </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Nombre completo
+        </label>
+        <input formControlName="fullName" type="text" autocomplete="name"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)"
+          placeholder="Carlos M&eacute;ndez R&iacute;os" />
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Correo electr&oacute;nico
+        </label>
+        <input formControlName="email" type="email" autocomplete="email"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)"
+          placeholder="tu@email.com" />
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Contrase&ntilde;a
+        </label>
+        <input formControlName="password" type="password" autocomplete="new-password"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)"
+          placeholder="M&iacute;nimo 8 caracteres, una may&uacute;scula y un n&uacute;mero" />
+        @if (form.controls.password.touched && form.controls.password.errors?.['passwordStrength']) {
+        <p class="mt-1" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-warning-soft)">{{ form.controls.password.errors?.['passwordStrength'] }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Rol
+        </label>
+        <select formControlName="role"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)">
+          <option value="palm_grower" style="color: var(--color-text-primary)">Productor (Palm Grower)</option>
+          <option value="agronomist" style="color: var(--color-text-primary)">Agr&oacute;nomo</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Tel&eacute;fono
+        </label>
+        <input formControlName="phone" type="tel" autocomplete="tel"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)"
+          placeholder="+51 961 234 567" />
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Regi&oacute;n
+        </label>
+        <select formControlName="region"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)">
+          <option value="" disabled style="color: var(--color-text-muted)">Selecciona tu regi&oacute;n</option>
+          @for (r of regions; track r) {
+          <option [value]="r" style="color: var(--color-text-primary)">{{ r }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1" style="font-family: var(--font-body); font-size: var(--font-size-label); line-height: var(--line-height-label); letter-spacing: var(--letter-spacing-label); color: var(--color-text-inverse); opacity: 0.85">
+          Ciudad
+        </label>
+        <input formControlName="city" type="text" autocomplete="address-level2"
+          class="w-full px-4 py-3 rounded-lg border text-base outline-none transition focus:ring-2"
+          style="background: var(--color-white-12); border-color: var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-body); border-radius: var(--radius-md)"
+          placeholder="Pucallpa" />
+      </div>
+
+      <button type="submit" [disabled]="form.invalid || loading"
+        class="w-full py-3 rounded-lg font-semibold text-base transition disabled:opacity-50"
+        style="background: var(--color-brand-secondary); color: var(--color-brand-deep); font-family: var(--font-heading); border-radius: var(--radius-md)">
+        {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="text-center mt-6" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-white-60)">
+      ¿Ya tienes cuenta? <a routerLink="/auth/login" class="font-medium hover:underline" style="color: var(--color-brand-secondary)">Inicia sesi&oacute;n</a>
+    </p>
+  </div>
+</div>
