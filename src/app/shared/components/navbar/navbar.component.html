@@ -1,6 +1,7 @@
 <nav class="px-6 py-3 flex items-center justify-between" style="background: var(--color-brand-deep)">
-  <a routerLink="/subscription/plans" class="font-bold tracking-tight" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none">
-    Smart Palm
+  <a routerLink="/subscription/plans" class="flex items-center gap-3 font-bold tracking-tight" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none">
+    <img src="/images/logo/smartPalmLogo.png" alt="Smart Palm" class="h-10 w-auto object-contain" />
+    <span>Smart Palm</span>
   </a>
 
   @if (authService.isAuthenticated) {
