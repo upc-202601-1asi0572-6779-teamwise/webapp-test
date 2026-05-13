@@ -40,11 +40,8 @@ export const routes: Routes = [
       },
       {
         path: 'reportes',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Reportes' },
+        loadChildren: () =>
+          import('./features/reports/report.routes').then((m) => m.reportRoutes),
       },
       {
         path: 'profile',

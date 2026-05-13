@@ -1,0 +1,64 @@
+<section class="min-h-dvh px-6 py-8 sm:px-8 lg:px-10 lg:py-10" style="background: var(--color-bg-page)">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <div class="flex flex-col gap-3 rounded-[1.75rem] border px-6 py-6 sm:px-8" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 3vw, 3rem); font-weight: var(--font-weight-bold); line-height: 1.02; color: var(--color-text-primary)">
+            Reportes
+          </h1>
+          <p class="mt-2 max-w-3xl" style="font-family: var(--font-body); color: var(--color-text-secondary)">
+            Consulta los reportes tecnicos publicados por tu agronomo con el resumen del estado de tus cultivos.
+          </p>
+        </div>
+        <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
+          {{ reports().length }} publicados
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+    <div class="flex min-h-60 flex-col items-center justify-center gap-3 rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <div class="h-8 w-8 animate-spin rounded-full border-2" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+      <p style="color: var(--color-text-muted)">Cargando reportes...</p>
+    </div>
+    } @else if (error()) {
+    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+      {{ error() }}
+    </div>
+    } @else if (!reports().length) {
+    <div class="rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">Sin reportes publicados</h2>
+      <p class="mt-2" style="color: var(--color-text-secondary)">
+        Tu agronomo aun no ha publicado reportes tecnicos. Los reportes apareceran aqui cuando esten disponibles.
+      </p>
+    </div>
+    } @else {
+    <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+      @for (report of reports(); track report.id) {
+      <a class="block rounded-[1.75rem] border px-6 py-6 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)" [routerLink]="['/reportes', report.id]">
+        <div class="flex items-center justify-between gap-3">
+          <span class="rounded-full px-3 py-1 text-xs font-medium" style="background: var(--color-emerald-15); color: var(--color-success)">
+            Publicado
+          </span>
+          <span class="text-xs" style="color: var(--color-text-muted)">
+            {{ report.agronomistName }}
+          </span>
+        </div>
+
+        <h2 class="mt-4" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+          {{ report.title }}
+        </h2>
+        <p class="mt-2 text-sm line-clamp-2" style="color: var(--color-text-secondary)">
+          {{ report.summary }}
+        </p>
+
+        <div class="mt-5 flex items-center justify-between text-sm">
+          <span style="color: var(--color-text-muted)">{{ report.plantationName }}</span>
+          <span style="color: var(--color-text-muted)">{{ report.publishedAt | date:'mediumDate' }}</span>
+        </div>
+      </a>
+      }
+    </div>
+    }
+  </div>
+</section>
