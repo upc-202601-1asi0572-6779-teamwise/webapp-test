@@ -16,9 +16,9 @@ export class MyProfileComponent implements OnInit {
 
   user = signal<User | null>(null);
   editing = false;
-  loading = false;
-  saving = false;
-  error = '';
+  loading = signal(false);
+  saving = signal(false);
+  error = signal('');
 
   form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(3)]],
@@ -36,13 +36,14 @@ export class MyProfileComponent implements OnInit {
   }
 
   private loadProfile(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.error.set('');
     this.userService
       .getProfile()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (u) => this.user.set(u),
-        error: () => (this.error = 'Error al cargar el perfil.'),
+        error: () => this.error.set('Error al cargar el perfil.'),
       });
   }
 
@@ -56,27 +57,27 @@ export class MyProfileComponent implements OnInit {
       city: u.city,
     });
     this.editing = true;
-    this.error = '';
+    this.error.set('');
   }
 
   cancelEdit(): void {
     this.editing = false;
-    this.error = '';
+    this.error.set('');
   }
 
   save(): void {
     if (this.form.invalid) return;
-    this.saving = true;
-    this.error = '';
+    this.saving.set(true);
+    this.error.set('');
     this.userService
       .updateProfile(this.form.getRawValue())
-      .pipe(finalize(() => (this.saving = false)))
+      .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (u) => {
           this.user.set(u);
           this.editing = false;
         },
-        error: () => (this.error = 'Error al guardar los cambios.'),
+        error: () => this.error.set('Error al guardar los cambios.'),
       });
   }
 }

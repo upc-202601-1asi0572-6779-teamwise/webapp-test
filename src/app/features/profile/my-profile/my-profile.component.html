@@ -1,6 +1,6 @@
 <div class="min-h-dvh" style="background: var(--color-bg-page)">
 
-  @if (loading) {
+  @if (loading()) {
   <div class="flex flex-col items-center justify-center pt-32 gap-3">
     <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
     <p style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-muted)">Cargando perfil...</p>
@@ -36,8 +36,8 @@
     <div class="rounded-2xl p-6 mb-6" style="background: var(--color-bg-surface); box-shadow: var(--shadow-card)">
       <h2 class="mb-5" style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); color: var(--color-text-primary)">Editar informaci&oacute;n</h2>
 
-      @if (error) {
-      <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">{{ error }}</div>
+      @if (error()) {
+      <div class="mb-4 px-4 py-3 rounded-xl text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border: 1px solid var(--color-danger); font-family: var(--font-body)">{{ error() }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-4">
@@ -68,9 +68,9 @@
             style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); font-family: var(--font-body); border-radius: var(--radius-md); --tw-ring-color: var(--color-brand-primary)" />
         </div>
         <div class="flex gap-3 mt-1">
-          <button type="submit" [disabled]="form.invalid || saving"
+          <button type="submit" [disabled]="form.invalid || saving()"
             class="flex-1 py-3.5 rounded-xl font-semibold text-base transition disabled:opacity-50 active:scale-[0.98]"
-            style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">{{ saving ? 'Guardando...' : 'Guardar cambios' }}</button>
+            style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading); border-radius: var(--radius-md)">{{ saving() ? 'Guardando...' : 'Guardar cambios' }}</button>
           <button type="button" (click)="cancelEdit()"
             class="flex-1 py-3.5 rounded-xl font-semibold text-base transition active:scale-[0.98]"
             style="background: var(--color-bg-soft); color: var(--color-text-secondary); font-family: var(--font-heading); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle)">Cancelar</button>
@@ -150,7 +150,7 @@
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
     <p style="font-family: var(--font-body); font-size: var(--font-size-body); color: var(--color-text-secondary); text-align: center">
-      {{ error || 'No se pudo cargar el perfil.' }}
+      {{ error() || 'No se pudo cargar el perfil.' }}
     </p>
   </div>
   }
