@@ -30,6 +30,10 @@ export class PlantationFormComponent implements OnInit {
   readonly plantationId = signal<number | null>(null);
   readonly canWrite = signal(false);
   readonly accessMessage = signal('');
+  readonly hectareLimitReached = signal(false);
+  readonly planName = signal('');
+  readonly usedHectares = signal(0);
+  readonly maxHectares = signal(0);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
@@ -38,8 +42,8 @@ export class PlantationFormComponent implements OnInit {
     soilType: ['arcilloso_humedo', [Validators.required]],
     cropAge: ['', [Validators.required]],
     phenologicalPhase: ['produccion' as 'produccion' | 'establecimiento', [Validators.required]],
-    latitude: [0, [Validators.required]],
-    longitude: [0, [Validators.required]],
+    latitude: [0],
+    longitude: [0],
   });
 
   ngOnInit(): void {
@@ -62,6 +66,16 @@ export class PlantationFormComponent implements OnInit {
       return this.isEditMode() ? 'Guardando...' : 'Creando...';
     }
     return this.isEditMode() ? 'Guardar cambios' : 'Crear plantacion';
+  }
+
+  get formDisabled(): boolean {
+    if (!this.canWrite()) return true;
+    if (!this.isEditMode() && this.hectareLimitReached()) return true;
+    return false;
+  }
+
+  get hectareLimitMessage(): string {
+    return `Ya usaste todas las hectareas de tu plan ${this.planName()} (${this.usedHectares()}/${this.maxHectares()}). No puedes registrar mas plantaciones. Considera actualizar tu plan.`;
   }
 
   save(): void {
@@ -99,6 +113,10 @@ export class PlantationFormComponent implements OnInit {
       .subscribe((access) => {
         this.canWrite.set(access.canWrite);
         this.accessMessage.set(access.message);
+        this.hectareLimitReached.set(access.hectareLimitReached);
+        this.planName.set(access.planName);
+        this.usedHectares.set(access.usedHectares);
+        this.maxHectares.set(access.maxHectares);
       });
   }
 
@@ -123,8 +141,8 @@ export class PlantationFormComponent implements OnInit {
       soilType: plantation.soilType,
       cropAge: plantation.cropAge,
       phenologicalPhase: plantation.phenologicalPhase,
-      latitude: plantation.latitude,
-      longitude: plantation.longitude,
+      latitude: plantation.latitude ?? 0,
+      longitude: plantation.longitude ?? 0,
     });
   }
 

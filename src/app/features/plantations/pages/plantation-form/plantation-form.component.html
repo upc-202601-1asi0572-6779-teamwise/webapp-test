@@ -25,6 +25,12 @@
       </div>
       }
 
+      @if (!accessLoading() && canWrite() && !isEditMode() && hectareLimitReached()) {
+      <div class="mt-5 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-warning-10); color: var(--color-warning); border-color: var(--color-warning)">
+        {{ hectareLimitMessage }}
+      </div>
+      }
+
       @if (error()) {
       <div class="mt-5 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
         {{ error() }}
@@ -72,18 +78,18 @@
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">Latitud</label>
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">Latitud (opcional)</label>
             <input formControlName="latitude" type="number" step="any" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">Longitud</label>
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">Longitud (opcional)</label>
             <input formControlName="longitude" type="number" step="any" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" />
           </div>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
-          <button type="submit" [disabled]="form.invalid || saving() || accessLoading() || !canWrite()" class="flex-1 rounded-xl px-5 py-3.5 font-semibold transition disabled:opacity-50 active:scale-[0.98]" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <button type="submit" [disabled]="form.invalid || saving() || accessLoading() || formDisabled" class="flex-1 rounded-xl px-5 py-3.5 font-semibold transition disabled:opacity-50 active:scale-[0.98]" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ submitLabel }}
           </button>
           <a [routerLink]="isEditMode() && plantationId() ? ['/plantaciones', plantationId()] : ['/plantaciones']" class="flex-1 rounded-xl border px-5 py-3.5 text-center font-semibold" style="border-color: var(--color-border-subtle); color: var(--color-text-secondary)">

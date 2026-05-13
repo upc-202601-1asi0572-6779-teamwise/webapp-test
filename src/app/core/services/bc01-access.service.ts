@@ -8,6 +8,11 @@ export type Bc01WriteAccess = {
   subscription: Subscription | null;
   canWrite: boolean;
   message: string;
+  planName: string;
+  usedHectares: number;
+  maxHectares: number;
+  hectaresRemaining: number;
+  hectareLimitReached: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -16,20 +21,34 @@ export class Bc01AccessService {
 
   loadWriteAccess(): Observable<Bc01WriteAccess> {
     return this.subscriptionService.getMySubscription().pipe(
-      map((subscription) => ({
-        subscription,
-        canWrite: subscription.status === 'active',
-        message:
-          subscription.status === 'active'
+      map((subscription) => {
+        const isActive = subscription.status === 'active';
+        const limitReached = isActive && subscription.usedHectares >= subscription.maxHectares;
+
+        return {
+          subscription,
+          canWrite: isActive,
+          message: isActive
             ? ''
             : 'Necesitas una suscripcion activa para realizar cambios en plantaciones y dispositivos.',
-      })),
+          planName: subscription.planName,
+          usedHectares: subscription.usedHectares,
+          maxHectares: subscription.maxHectares,
+          hectaresRemaining: Math.max(0, subscription.maxHectares - subscription.usedHectares),
+          hectareLimitReached: limitReached,
+        };
+      }),
       catchError((error: unknown) => {
         if (error instanceof HttpErrorResponse && error.status === 404) {
           return of({
             subscription: null,
             canWrite: false,
             message: 'Necesitas una suscripcion activa para realizar cambios en plantaciones y dispositivos.',
+            planName: '',
+            usedHectares: 0,
+            maxHectares: 0,
+            hectaresRemaining: 0,
+            hectareLimitReached: false,
           });
         }
 
@@ -37,6 +56,11 @@ export class Bc01AccessService {
           subscription: null,
           canWrite: false,
           message: 'No se pudo validar el estado de tu suscripcion en este momento.',
+          planName: '',
+          usedHectares: 0,
+          maxHectares: 0,
+          hectaresRemaining: 0,
+          hectareLimitReached: false,
         });
       }),
     );
