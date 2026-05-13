@@ -13,8 +13,13 @@
             Esta vista ya consume el inventario real del mock API y muestra el estado operativo de cada nodo IoT asociado a tus zonas.
           </p>
         </div>
-        <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
-          {{ devices().length }} dispositivos cargados
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
+            {{ devices().length }} dispositivos cargados
+          </div>
+          <a routerLink="/dispositivos/new" class="rounded-xl px-4 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            Registrar dispositivo
+          </a>
         </div>
       </div>
     </div>
@@ -34,6 +39,9 @@
       <p class="mt-2" style="color: var(--color-text-secondary)">
         La API ya soporta el registro y gestion operativa. En el siguiente bloque habilitaremos estas acciones desde la interfaz.
       </p>
+      <a routerLink="/dispositivos/new" class="mt-5 inline-flex rounded-xl px-4 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+        Registrar mi primer dispositivo
+      </a>
     </div>
     } @else {
     <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
