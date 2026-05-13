@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { SubscriptionService } from '../../../core/services/subscription.service';
 import { SubscriptionPlan } from '../../../core/models/subscription-plan.model';
 import { finalize } from 'rxjs';
@@ -9,14 +9,16 @@ import { DecimalPipe } from '@angular/common';
   imports: [DecimalPipe],
   templateUrl: './plans.component.html',
 })
-export class PlansComponent {
+export class PlansComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
 
   plans = signal<SubscriptionPlan[]>([]);
   loading = false;
   error = '';
 
-  constructor() {
+  constructor() {}
+
+  ngOnInit(): void {
     this.load();
   }
 

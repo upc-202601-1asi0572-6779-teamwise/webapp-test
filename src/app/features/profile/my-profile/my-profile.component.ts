@@ -1,15 +1,16 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { finalize } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-my-profile',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DatePipe],
   templateUrl: './my-profile.component.html',
 })
-export class MyProfileComponent {
+export class MyProfileComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
 
@@ -28,7 +29,9 @@ export class MyProfileComponent {
 
   regions = ['Ucayali', 'San Mart\u00edn', 'Loreto'];
 
-  constructor() {
+  constructor() {}
+
+  ngOnInit(): void {
     this.loadProfile();
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { SubscriptionService } from '../../../core/services/subscription.service';
 import { Subscription } from '../../../core/models/subscription.model';
 import { finalize } from 'rxjs';
@@ -9,7 +9,7 @@ import { DatePipe } from '@angular/common';
   imports: [DatePipe],
   templateUrl: './my-subscription.component.html',
 })
-export class MySubscriptionComponent {
+export class MySubscriptionComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
 
   subscription = signal<Subscription | null>(null);
@@ -19,7 +19,9 @@ export class MySubscriptionComponent {
   actionError = '';
   actionSuccess = '';
 
-  constructor() {
+  constructor() {}
+
+  ngOnInit(): void {
     this.load();
   }
 
