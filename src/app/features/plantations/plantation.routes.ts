@@ -21,4 +21,12 @@ export const plantationRoutes: Routes = [
     loadComponent: () =>
       import('./pages/plantation-detail/plantation-detail.component').then((m) => m.PlantationDetailComponent),
   },
+  {
+    path: ':plantationId/zones/new',
+    loadComponent: () => import('./pages/zone-form/zone-form.component').then((m) => m.ZoneFormComponent),
+  },
+  {
+    path: ':plantationId/zones/:zoneId/edit',
+    loadComponent: () => import('./pages/zone-form/zone-form.component').then((m) => m.ZoneFormComponent),
+  },
 ];

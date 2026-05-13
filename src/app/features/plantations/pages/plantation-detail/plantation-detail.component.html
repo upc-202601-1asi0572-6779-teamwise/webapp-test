@@ -61,13 +61,22 @@
             <p class="mt-1" style="color: var(--color-text-primary)">{{ plantation.longitude }}</p>
           </div>
         </div>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          <a [routerLink]="['/plantaciones', plantation.id, 'edit']" class="rounded-xl px-4 py-3 text-center text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            Editar plantacion
+          </a>
+          <a [routerLink]="['/plantaciones', plantation.id, 'zones', 'new']" class="rounded-xl border px-4 py-3 text-center text-sm font-semibold" style="border-color: var(--color-border-subtle); color: var(--color-text-secondary)">
+            Agregar zona
+          </a>
+        </div>
       </div>
 
       <div class="rounded-[1.75rem] border px-6 py-6" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
         <p class="text-xs uppercase tracking-[0.18em]" style="color: var(--color-text-muted)">Checkpoint</p>
         <h2 class="mt-3" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--color-text-primary)">Backend BC-01 conectado</h2>
         <p class="mt-3" style="color: var(--color-text-secondary)">
-          Esta vista ya consume el detalle real de la plantacion y sus zonas. En el siguiente hito agregaremos formularios, edicion y flujo completo de creacion.
+          Esta vista ya consume el detalle real de la plantacion y sus zonas. Desde aqui ya puedes abrir el flujo de edicion y registro de nuevas zonas.
         </p>
         <div class="mt-5 rounded-2xl px-4 py-4 text-sm" style="background: var(--color-bg-soft-2); color: var(--color-text-secondary)">
           Ultima actualizacion: {{ plantation.updatedAt | date:'medium' }}
@@ -86,6 +95,22 @@
         </div>
       </div>
 
+      @if (zonesLoading()) {
+      <div class="mt-6 flex items-center gap-3 rounded-2xl border px-4 py-4 text-sm" style="border-color: var(--color-border-subtle); color: var(--color-text-muted)">
+        <div class="h-5 w-5 animate-spin rounded-full border-2" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+        Cargando zonas...
+      </div>
+      } @else if (!zones().length) {
+      <div class="mt-6 rounded-3xl border px-5 py-6" style="border-color: var(--color-border-subtle)">
+        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-text-primary)">Aun no hay zonas registradas</h3>
+        <p class="mt-2 text-sm" style="color: var(--color-text-secondary)">
+          Crea la primera zona de monitoreo para dividir la plantacion y preparar la asignacion de dispositivos.
+        </p>
+        <a [routerLink]="['/plantaciones', plantation.id, 'zones', 'new']" class="mt-4 inline-flex rounded-xl px-4 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          Crear primera zona
+        </a>
+      </div>
+      } @else {
       <div class="mt-6 grid gap-4 lg:grid-cols-2">
         @for (zone of zones(); track zone.id) {
         <article class="rounded-3xl border px-5 py-5" style="border-color: var(--color-border-subtle)">
@@ -105,9 +130,14 @@
             </span>
             }
           </div>
+
+          <a [routerLink]="['/plantaciones', plantation.id, 'zones', zone.id, 'edit']" class="mt-4 inline-flex text-sm font-semibold" style="color: var(--color-brand-primary)">
+            Editar zona
+          </a>
         </article>
         }
       </div>
+      }
     </div>
     }
   </div>

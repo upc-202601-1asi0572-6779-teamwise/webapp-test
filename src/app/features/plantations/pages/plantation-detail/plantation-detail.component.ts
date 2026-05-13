@@ -18,6 +18,7 @@ export class PlantationDetailComponent implements OnInit {
   plantation = signal<Plantation | null>(null);
   zones = signal<Zone[]>([]);
   loading = signal(false);
+  zonesLoading = signal(false);
   error = signal('');
 
   ngOnInit(): void {
@@ -46,9 +47,13 @@ export class PlantationDetailComponent implements OnInit {
   }
 
   private loadZones(id: number): void {
-    this.plantationService.listZones(id).subscribe({
-      next: (zones) => this.zones.set(zones),
-      error: () => this.error.set('No se pudieron cargar las zonas de la plantacion.'),
-    });
+    this.zonesLoading.set(true);
+    this.plantationService
+      .listZones(id)
+      .pipe(finalize(() => this.zonesLoading.set(false)))
+      .subscribe({
+        next: (zones) => this.zones.set(zones),
+        error: () => this.error.set('No se pudieron cargar las zonas de la plantacion.'),
+      });
   }
 }
