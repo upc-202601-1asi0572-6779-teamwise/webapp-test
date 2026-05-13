@@ -33,11 +33,8 @@ export const routes: Routes = [
       },
       {
         path: 'alertas',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Alertas' },
+        loadChildren: () =>
+          import('./features/alerts/alert.routes').then((m) => m.alertRoutes),
       },
       {
         path: 'recomendaciones',

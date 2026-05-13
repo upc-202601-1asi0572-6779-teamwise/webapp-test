@@ -1,0 +1,87 @@
+<section class="min-h-dvh px-6 py-8 sm:px-8 lg:px-10 lg:py-10" style="background: var(--color-bg-page)">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <div class="flex flex-col gap-3 rounded-[1.75rem] border px-6 py-6 sm:px-8" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <p style="font-family: var(--font-heading); font-size: 0.86rem; letter-spacing: 0.18em; color: var(--color-text-muted)">
+        BC-03 · ALERTAS
+      </p>
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 3vw, 3rem); font-weight: var(--font-weight-bold); line-height: 1.02; color: var(--color-text-primary)">
+            Alertas
+          </h1>
+          <p class="mt-2 max-w-3xl" style="font-family: var(--font-body); color: var(--color-text-secondary)">
+            Ya estamos leyendo alertas reales del mock API. En el siguiente bloque agregaremos tabs, filtros y confirmacion de recepcion.
+          </p>
+        </div>
+        @if (badgeCount(); as badge) {
+        <div class="flex flex-wrap gap-3">
+          <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-2); color: var(--color-brand-dark)">
+            {{ badge.total }} activas
+          </div>
+          @if (badge.critical > 0) {
+          <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger)">
+            {{ badge.critical }} criticas
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+    <div class="flex min-h-60 flex-col items-center justify-center gap-3 rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <div class="h-8 w-8 animate-spin rounded-full border-2" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+      <p style="color: var(--color-text-muted)">Cargando alertas...</p>
+    </div>
+    } @else if (error()) {
+    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+      {{ error() }}
+    </div>
+    } @else if (!alerts().length) {
+    <div class="rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">No hay alertas registradas</h2>
+      <p class="mt-2" style="color: var(--color-text-secondary)">
+        El backend ya responde correctamente. En el siguiente bloque completaremos la experiencia visual.
+      </p>
+    </div>
+    } @else {
+    <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+      @for (alert of alerts(); track alert.id) {
+      <a class="block rounded-[1.75rem] border px-6 py-6 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)" [routerLink]="['/alertas', alert.id]">
+        <div class="flex items-center justify-between gap-3">
+          <span class="rounded-full px-3 py-1 text-xs uppercase" [style.background]="alert.alertLevel === 'critical' ? 'var(--color-danger-10)' : alert.alertLevel === 'warning' ? '#fef3c7' : 'var(--color-bg-soft-cyan)'" [style.color]="alert.alertLevel === 'critical' ? 'var(--color-danger)' : alert.alertLevel === 'warning' ? '#92400e' : 'var(--color-accent-cyan)'">
+            {{ alert.alertLevel }}
+          </span>
+          <span class="rounded-full px-3 py-1 text-xs" style="background: var(--color-bg-soft-2); color: var(--color-brand-dark)">
+            {{ alert.status === 'active' ? 'Activa' : 'Resuelta' }}
+          </span>
+        </div>
+
+        <h2 class="mt-4" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+          {{ alert.title }}
+        </h2>
+        <p class="mt-2 text-sm" style="color: var(--color-text-secondary)">
+          {{ alert.zoneName }} · {{ alert.label }}
+        </p>
+
+        <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-2)">
+            <p style="color: var(--color-text-muted)">Valor</p>
+            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ alert.triggeredValue }}</p>
+          </div>
+          <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-cyan)">
+            <p style="color: var(--color-text-muted)">Rango</p>
+            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ alert.thresholdMin }} – {{ alert.thresholdMax }}</p>
+          </div>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between text-sm" style="color: var(--color-text-muted)">
+          <span>{{ alert.plantationName }}</span>
+          <span>{{ alert.createdAt | date:'short' }}</span>
+        </div>
+      </a>
+      }
+    </div>
+    }
+  </div>
+</section>
