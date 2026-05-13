@@ -1,4 +1,2 @@
-@if (showNavbar) {
-  <app-navbar />
-}
+<app-navbar [style.display]="isAuthRoute ? 'none' : null" />
 <router-outlet />

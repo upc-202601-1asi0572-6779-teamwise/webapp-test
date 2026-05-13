@@ -43,7 +43,9 @@ describe('App', () => {
     await router.navigate(['/auth/login']);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-navbar')).toBeFalsy();
+    const navbar = compiled.querySelector('app-navbar') as HTMLElement;
+    expect(navbar).toBeTruthy();
+    expect(navbar.style.display).toBe('none');
   });
 
   it('should render router outlet', () => {

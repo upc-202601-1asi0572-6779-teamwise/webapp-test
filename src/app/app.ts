@@ -11,7 +11,7 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
 export class App {
   private readonly router = inject(Router);
 
-  get showNavbar(): boolean {
-    return !this.router.url.startsWith('/auth');
+  get isAuthRoute(): boolean {
+    return this.router.url.startsWith('/auth');
   }
 }
