@@ -38,11 +38,8 @@ export const routes: Routes = [
       },
       {
         path: 'recomendaciones',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Recomendaciones' },
+        loadChildren: () =>
+          import('./features/recommendations/recommendation.routes').then((m) => m.recommendationRoutes),
       },
       {
         path: 'reportes',

@@ -1,0 +1,75 @@
+<section class="min-h-dvh px-6 py-8 sm:px-8 lg:px-10 lg:py-10" style="background: var(--color-bg-page)">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <div class="flex flex-col gap-3 rounded-[1.75rem] border px-6 py-6 sm:px-8" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 3vw, 3rem); font-weight: var(--font-weight-bold); line-height: 1.02; color: var(--color-text-primary)">
+            Recomendaciones
+          </h1>
+          <p class="mt-2 max-w-3xl" style="font-family: var(--font-body); color: var(--color-text-secondary)">
+            Consulta las recomendaciones agronomicas publicadas por tu agronomo para cada una de tus plantaciones.
+          </p>
+        </div>
+        <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
+          {{ recommendations().length }} publicadas
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+    <div class="flex min-h-60 flex-col items-center justify-center gap-3 rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <div class="h-8 w-8 animate-spin rounded-full border-2" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+      <p style="color: var(--color-text-muted)">Cargando recomendaciones...</p>
+    </div>
+    } @else if (error()) {
+    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+      {{ error() }}
+    </div>
+    } @else if (!recommendations().length) {
+    <div class="rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">Sin recomendaciones publicadas</h2>
+      <p class="mt-2" style="color: var(--color-text-secondary)">
+        Tu agronomo aun no ha publicado recomendaciones para tus plantaciones. Las recomendaciones apareceran aqui cuando esten disponibles.
+      </p>
+    </div>
+    } @else {
+    <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+      @for (rec of recommendations(); track rec.id) {
+      <a class="block rounded-[1.75rem] border px-6 py-6 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)" [routerLink]="['/recomendaciones', rec.id]">
+        <div class="flex items-center justify-between gap-3">
+          <span class="rounded-full px-3 py-1 text-xs font-medium" [style.background]="priorityColors[rec.priority] + '20'" [style.color]="priorityColors[rec.priority]">
+            {{ priorityLabels[rec.priority] }}
+          </span>
+          <span class="text-xs" style="color: var(--color-text-muted)">
+            {{ rec.generatedBy === 'ai' ? 'Generada por IA' : 'Redactada por agronomo' }}
+          </span>
+        </div>
+
+        <h2 class="mt-4" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+          {{ rec.title }}
+        </h2>
+        <p class="mt-2 text-sm line-clamp-2" style="color: var(--color-text-secondary)">
+          {{ rec.recommendedAction }}
+        </p>
+
+        <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-2)">
+            <p style="color: var(--color-text-muted)">Plantacion</p>
+            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ rec.plantationName }}</p>
+          </div>
+          <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-cyan)">
+            <p style="color: var(--color-text-muted)">Zona</p>
+            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ rec.zoneName }}</p>
+          </div>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between text-sm" style="color: var(--color-text-muted)">
+          <span>{{ rec.publishedAt ? 'Publicada ' + (rec.publishedAt | date:'mediumDate') : '' }}</span>
+          <span>Ver detalle</span>
+        </div>
+      </a>
+      }
+    </div>
+    }
+  </div>
+</section>

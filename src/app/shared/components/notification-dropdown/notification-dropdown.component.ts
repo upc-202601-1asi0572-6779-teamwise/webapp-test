@@ -97,7 +97,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     const baseRoute = DEEP_LINK_MAP[notification.relatedResourceType];
     if (!baseRoute) return;
 
-    const route = ['recommendation', 'report'].includes(notification.relatedResourceType)
+    const route = ['report'].includes(notification.relatedResourceType)
       ? baseRoute
       : `${baseRoute}/${notification.relatedResourceId}`;
 
