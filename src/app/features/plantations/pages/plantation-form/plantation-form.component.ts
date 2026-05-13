@@ -2,7 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Bc01AccessService } from '../../../../core/services/bc01-access.service';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { PlantationService } from '../../services/plantation.service';
 import { CreatePlantationRequest, Plantation } from '../../models/plantation.model';
 
@@ -16,15 +17,19 @@ export class PlantationFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly plantationService = inject(PlantationService);
+  private readonly accessService = inject(Bc01AccessService);
 
   readonly soilTypes = ['arcilloso_humedo', 'franco_arenoso', 'franco_arcilloso', 'arenoso'];
   readonly phenologicalPhases = ['produccion', 'establecimiento'] as const;
 
   readonly loading = signal(false);
+  readonly accessLoading = signal(false);
   readonly saving = signal(false);
   readonly error = signal('');
   readonly isEditMode = signal(false);
   readonly plantationId = signal<number | null>(null);
+  readonly canWrite = signal(false);
+  readonly accessMessage = signal('');
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
@@ -38,6 +43,7 @@ export class PlantationFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadWriteAccess();
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!Number.isNaN(id)) {
       this.isEditMode.set(true);
@@ -58,6 +64,11 @@ export class PlantationFormComponent implements OnInit {
   }
 
   save(): void {
+    if (!this.canWrite()) {
+      this.error.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -75,7 +86,18 @@ export class PlantationFormComponent implements OnInit {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (plantation) => this.router.navigate(['/plantaciones', plantation.id]),
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo guardar la plantacion.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo guardar la plantacion.')),
+      });
+  }
+
+  private loadWriteAccess(): void {
+    this.accessLoading.set(true);
+    this.accessService
+      .loadWriteAccess()
+      .pipe(finalize(() => this.accessLoading.set(false)))
+      .subscribe((access) => {
+        this.canWrite.set(access.canWrite);
+        this.accessMessage.set(access.message);
       });
   }
 
@@ -88,7 +110,7 @@ export class PlantationFormComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (plantation) => this.patchForm(plantation),
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo cargar la plantacion.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo cargar la plantacion.')),
       });
   }
 
@@ -105,10 +127,4 @@ export class PlantationFormComponent implements OnInit {
     });
   }
 
-  private getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse) {
-      return error.error?.message || fallback;
-    }
-    return fallback;
-  }
 }

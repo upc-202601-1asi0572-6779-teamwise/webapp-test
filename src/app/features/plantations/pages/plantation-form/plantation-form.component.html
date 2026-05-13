@@ -19,6 +19,12 @@
         Registra la informacion principal de la plantacion para habilitar el monitoreo por zonas y la asociacion de dispositivos.
       </p>
 
+      @if (!accessLoading() && !canWrite()) {
+      <div class="mt-5 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+        {{ accessMessage() }}
+      </div>
+      }
+
       @if (error()) {
       <div class="mt-5 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
         {{ error() }}
@@ -77,7 +83,7 @@
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
-          <button type="submit" [disabled]="form.invalid || saving()" class="flex-1 rounded-xl px-5 py-3.5 font-semibold transition disabled:opacity-50 active:scale-[0.98]" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <button type="submit" [disabled]="form.invalid || saving() || accessLoading() || !canWrite()" class="flex-1 rounded-xl px-5 py-3.5 font-semibold transition disabled:opacity-50 active:scale-[0.98]" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ submitLabel }}
           </button>
           <a [routerLink]="isEditMode() && plantationId() ? ['/plantaciones', plantationId()] : ['/plantaciones']" class="flex-1 rounded-xl border px-5 py-3.5 text-center font-semibold" style="border-color: var(--color-border-subtle); color: var(--color-text-secondary)">
