@@ -16,11 +16,8 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Dashboard' },
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
       },
       {
         path: 'plantaciones',
