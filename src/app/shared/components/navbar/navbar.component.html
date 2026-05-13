@@ -1,22 +1,23 @@
 <nav class="px-6 py-3 flex items-center justify-between" style="background: var(--color-brand-deep)">
-  <a routerLink="/subscription/plans" class="font-bold" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none; letter-spacing: var(--letter-spacing-tight)">
-    TempWise
+  <a routerLink="/subscription/plans" class="font-bold tracking-tight" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none">
+    Smart Palm
   </a>
 
   @if (authService.isAuthenticated) {
   <div class="flex items-center gap-3">
-    <a routerLink="/profile" routerLinkActive="opacity-100" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
+    <a routerLink="/profile" routerLinkActive="opacity-100" class="transition px-2 py-1 rounded-lg" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
       Perfil
     </a>
-    <a routerLink="/subscription/me" routerLinkActive="opacity-100" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
+    <a routerLink="/subscription/me" routerLinkActive="opacity-100" class="transition px-2 py-1 rounded-lg" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-text-inverse); text-decoration: none; opacity: 0.7">
       Mi plan
     </a>
-    <button (click)="logout()" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-brand-mint); background: none; border: none; cursor: pointer">
+    <button (click)="logout()" class="transition px-3 py-1.5 rounded-lg font-medium text-sm" style="font-family: var(--font-body); color: var(--color-brand-mint); background: var(--color-white-08); border: none; cursor: pointer">
       Salir
     </button>
   </div>
   } @else {
-  <a routerLink="/auth/login" class="transition" style="font-family: var(--font-body); font-size: var(--font-size-small); color: var(--color-brand-secondary); text-decoration: none">
+  <a routerLink="/auth/login" class="transition px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90"
+    style="background: var(--color-brand-secondary); color: var(--color-brand-deep); font-family: var(--font-heading); text-decoration: none; border-radius: var(--radius-md)">
     Iniciar sesi&oacute;n
   </a>
   }
