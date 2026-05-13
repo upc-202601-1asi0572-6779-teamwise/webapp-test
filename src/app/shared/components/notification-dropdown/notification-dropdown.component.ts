@@ -1,0 +1,111 @@
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
+import { finalize, Subscription } from 'rxjs';
+import { Notification } from '../../../core/models/notification.model';
+import { NotificationService } from '../../../core/services/notification.service';
+
+const DEEP_LINK_MAP: Record<string, string> = {
+  alert: '/alertas',
+  device: '/dispositivos',
+  recommendation: '/recomendaciones',
+  report: '/reportes',
+};
+
+@Component({
+  selector: 'app-notification-dropdown',
+  imports: [DatePipe],
+  templateUrl: './notification-dropdown.component.html',
+})
+export class NotificationDropdownComponent implements OnInit, OnDestroy {
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+
+  readonly notifications = signal<Notification[]>([]);
+  readonly unreadCount = signal(0);
+  readonly loading = signal(false);
+  readonly open = signal(false);
+  readonly actionError = signal('');
+
+  private pollSubscription: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadNotifications();
+    this.loadCount();
+  }
+
+  ngOnDestroy(): void {
+    this.pollSubscription?.unsubscribe();
+  }
+
+  toggle(): void {
+    this.open.set(!this.open());
+    if (this.open()) {
+      this.loadNotifications();
+    }
+  }
+
+  markAsRead(notification: Notification, event: Event): void {
+    event.stopPropagation();
+    if (notification.read) return;
+
+    this.actionError.set('');
+
+    this.notificationService
+      .markAsRead(notification.id)
+      .pipe(finalize(() => this.loadCount()))
+      .subscribe({
+        next: () => {
+          this.notifications.update((list) =>
+            list.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
+          );
+        },
+        error: () => this.actionError.set('No se pudo marcar como leida.'),
+      });
+  }
+
+  markAllAsRead(): void {
+    this.actionError.set('');
+
+    this.notificationService
+      .markAllAsRead()
+      .pipe(finalize(() => this.loadCount()))
+      .subscribe({
+        next: () => {
+          this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
+        },
+        error: () => this.actionError.set('No se pudo marcar todas como leidas.'),
+      });
+  }
+
+  navigateToResource(notification: Notification): void {
+    const baseRoute = DEEP_LINK_MAP[notification.relatedResourceType];
+    if (!baseRoute) return;
+
+    const route = ['recommendation', 'report'].includes(notification.relatedResourceType)
+      ? baseRoute
+      : `${baseRoute}/${notification.relatedResourceId}`;
+
+    this.router.navigate([route]);
+    this.open.set(false);
+  }
+
+  private loadNotifications(): void {
+    this.loading.set(true);
+    this.actionError.set('');
+
+    this.notificationService
+      .list({ size: 10 })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => this.notifications.set(response.notifications),
+        error: () => this.actionError.set('No se pudieron cargar las notificaciones.'),
+      });
+  }
+
+  private loadCount(): void {
+    this.notificationService.count().subscribe({
+      next: (count) => this.unreadCount.set(count.unreadCount),
+    });
+  }
+}
