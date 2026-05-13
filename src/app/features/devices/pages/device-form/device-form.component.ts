@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, startWith } from 'rxjs';
@@ -8,6 +8,11 @@ import { DeviceService } from '../../services/device.service';
 import { PlantationService } from '../../../plantations/services/plantation.service';
 import { Plantation } from '../../../plantations/models/plantation.model';
 import { Zone } from '../../../plantations/models/zone.model';
+
+interface ZoneOption {
+  zone: Zone;
+  occupied: boolean;
+}
 
 @Component({
   selector: 'app-device-form',
@@ -27,9 +32,20 @@ export class DeviceFormComponent implements OnInit {
   readonly zonesLoading = signal(false);
   readonly error = signal('');
   readonly plantations = signal<Plantation[]>([]);
-  readonly availableZones = signal<Zone[]>([]);
+  readonly zones = signal<Zone[]>([]);
   readonly canWrite = signal(false);
   readonly accessMessage = signal('');
+
+  readonly selectedPlantationId = computed(() => this.form.controls.plantationId.value);
+
+  readonly zoneOptions = computed<ZoneOption[]>(() =>
+    this.zones().map((zone) => ({
+      zone,
+      occupied: !!zone.device && zone.device !== null,
+    })),
+  );
+
+  readonly freeZonesCount = computed(() => this.zoneOptions().filter((z) => !z.occupied).length);
 
   readonly form = this.fb.nonNullable.group({
     serialNumber: ['', [Validators.required, Validators.pattern(/^SP-IOT-[A-Z0-9]{4}-[A-Z0-9]{5}$/)]],
@@ -44,7 +60,7 @@ export class DeviceFormComponent implements OnInit {
       if (plantationId > 0) {
         this.loadZones(plantationId);
       } else {
-        this.availableZones.set([]);
+        this.zones.set([]);
         this.form.controls.monitoringZoneId.setValue(0);
       }
     });
@@ -106,11 +122,11 @@ export class DeviceFormComponent implements OnInit {
       .pipe(finalize(() => this.zonesLoading.set(false)))
       .subscribe({
         next: (zones) => {
-          const availableZones = zones.filter((zone) => !zone.device);
-          this.availableZones.set(availableZones);
+          this.zones.set(zones);
           const currentZoneId = this.form.controls.monitoringZoneId.value;
-          if (!availableZones.some((zone) => zone.id === currentZoneId)) {
-            this.form.controls.monitoringZoneId.setValue(0);
+          const freeZones = zones.filter((zone) => !zone.device);
+          if (!freeZones.some((zone) => zone.id === currentZoneId)) {
+            this.form.controls.monitoringZoneId.setValue(freeZones.length > 0 ? freeZones[0].id : 0);
           }
         },
         error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudieron cargar las zonas.')),
