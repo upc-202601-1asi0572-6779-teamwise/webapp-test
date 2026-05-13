@@ -74,11 +74,11 @@
 
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
           @if (device.activationStatus === 'active') {
-          <button type="button" (click)="deactivate()" [disabled]="actionLoading() !== ''" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-danger); color: var(--color-text-inverse)">
+          <button type="button" (click)="deactivate()" [disabled]="actionLoading() !== '' || accessLoading() || !canWrite()" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-danger); color: var(--color-text-inverse)">
             {{ actionLoading() === 'deactivate' ? 'Desactivando...' : 'Desactivar dispositivo' }}
           </button>
           } @else {
-          <button type="button" (click)="activate()" [disabled]="actionLoading() !== ''" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <button type="button" (click)="activate()" [disabled]="actionLoading() !== '' || accessLoading() || !canWrite()" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ actionLoading() === 'activate' ? 'Activando...' : 'Activar dispositivo' }}
           </button>
           }
@@ -102,6 +102,12 @@
         <div class="mt-5 rounded-2xl px-4 py-4 text-sm" style="background: var(--color-bg-soft-2); color: var(--color-text-secondary)">
           Registrado el {{ device.createdAt | date:'mediumDate' }}
         </div>
+
+        @if (!accessLoading() && !canWrite()) {
+        <div class="mt-4 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+          {{ accessMessage() }}
+        </div>
+        }
 
         @if (actionError()) {
         <div class="mt-4 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
@@ -130,7 +136,7 @@
             </select>
           </div>
 
-          <button type="submit" [disabled]="configForm.invalid || actionLoading() !== ''" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <button type="submit" [disabled]="configForm.invalid || actionLoading() !== '' || accessLoading() || !canWrite()" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ actionLoading() === 'config' ? 'Guardando configuracion...' : 'Guardar configuracion' }}
           </button>
         </form>
@@ -148,7 +154,7 @@
             </select>
           </div>
 
-          <button type="submit" [disabled]="zoneForm.invalid || actionLoading() !== '' || zonesLoading()" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <button type="submit" [disabled]="zoneForm.invalid || actionLoading() !== '' || zonesLoading() || accessLoading() || !canWrite()" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ actionLoading() === 'zone' ? 'Reasignando...' : 'Guardar nueva zona' }}
           </button>
         </form>

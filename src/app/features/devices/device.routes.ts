@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { subscriptionActiveGuard } from '../../core/guards/subscription-active.guard';
 
 export const deviceRoutes: Routes = [
   {
@@ -7,6 +8,7 @@ export const deviceRoutes: Routes = [
   },
   {
     path: 'new',
+    canActivate: [subscriptionActiveGuard],
     loadComponent: () => import('./pages/device-form/device-form.component').then((m) => m.DeviceFormComponent),
   },
   {

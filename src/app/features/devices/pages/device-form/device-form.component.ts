@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, startWith } from 'rxjs';
+import { Bc01AccessService } from '../../../../core/services/bc01-access.service';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { DeviceService } from '../../services/device.service';
 import { PlantationService } from '../../../plantations/services/plantation.service';
 import { Plantation } from '../../../plantations/models/plantation.model';
@@ -18,13 +19,17 @@ export class DeviceFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly deviceService = inject(DeviceService);
   private readonly plantationService = inject(PlantationService);
+  private readonly accessService = inject(Bc01AccessService);
 
   readonly loading = signal(false);
+  readonly accessLoading = signal(false);
   readonly saving = signal(false);
   readonly zonesLoading = signal(false);
   readonly error = signal('');
   readonly plantations = signal<Plantation[]>([]);
   readonly availableZones = signal<Zone[]>([]);
+  readonly canWrite = signal(false);
+  readonly accessMessage = signal('');
 
   readonly form = this.fb.nonNullable.group({
     serialNumber: ['', [Validators.required, Validators.pattern(/^SP-IOT-[A-Z0-9]{4}-[A-Z0-9]{5}$/)]],
@@ -34,6 +39,7 @@ export class DeviceFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPlantations();
+    this.loadWriteAccess();
     this.form.controls.plantationId.valueChanges.pipe(startWith(this.form.controls.plantationId.value)).subscribe((plantationId) => {
       if (plantationId > 0) {
         this.loadZones(plantationId);
@@ -45,6 +51,11 @@ export class DeviceFormComponent implements OnInit {
   }
 
   save(): void {
+    if (!this.canWrite()) {
+      this.error.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -58,7 +69,18 @@ export class DeviceFormComponent implements OnInit {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (device) => this.router.navigate(['/dispositivos', device.id]),
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo registrar el dispositivo.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo registrar el dispositivo.')),
+      });
+  }
+
+  private loadWriteAccess(): void {
+    this.accessLoading.set(true);
+    this.accessService
+      .loadWriteAccess()
+      .pipe(finalize(() => this.accessLoading.set(false)))
+      .subscribe((access) => {
+        this.canWrite.set(access.canWrite);
+        this.accessMessage.set(access.message);
       });
   }
 
@@ -71,7 +93,7 @@ export class DeviceFormComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (plantations) => this.plantations.set(plantations),
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudieron cargar las plantaciones.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudieron cargar las plantaciones.')),
       });
   }
 
@@ -91,14 +113,7 @@ export class DeviceFormComponent implements OnInit {
             this.form.controls.monitoringZoneId.setValue(0);
           }
         },
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudieron cargar las zonas.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudieron cargar las zonas.')),
       });
-  }
-
-  private getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse) {
-      return error.error?.message || fallback;
-    }
-    return fallback;
   }
 }

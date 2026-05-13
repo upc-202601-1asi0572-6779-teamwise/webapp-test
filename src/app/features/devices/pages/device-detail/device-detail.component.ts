@@ -2,8 +2,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
+import { Bc01AccessService } from '../../../../core/services/bc01-access.service';
+import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { Device } from '../../models/device.model';
 import { DeviceService } from '../../services/device.service';
 import { PlantationService } from '../../../plantations/services/plantation.service';
@@ -19,10 +20,12 @@ export class DeviceDetailComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly deviceService = inject(DeviceService);
   private readonly plantationService = inject(PlantationService);
+  private readonly accessService = inject(Bc01AccessService);
 
   readonly device = signal<Device | null>(null);
   readonly availableZones = signal<Zone[]>([]);
   readonly loading = signal(false);
+  readonly accessLoading = signal(false);
   readonly zonesLoading = signal(false);
   readonly actionLoading = signal('');
   readonly error = signal('');
@@ -30,6 +33,8 @@ export class DeviceDetailComponent implements OnInit {
   readonly actionSuccess = signal('');
   readonly editingConfig = signal(false);
   readonly editingZone = signal(false);
+  readonly canWrite = signal(false);
+  readonly accessMessage = signal('');
 
   readonly configForm = this.fb.nonNullable.group({
     samplingIntervalMinutes: [15, [Validators.required, Validators.min(5), Validators.max(120)]],
@@ -41,6 +46,7 @@ export class DeviceDetailComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadWriteAccess();
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!Number.isNaN(id)) {
       this.load(id);
@@ -68,23 +74,38 @@ export class DeviceDetailComponent implements OnInit {
           this.zoneForm.patchValue({ monitoringZoneId: device.monitoringZoneId });
           this.loadZones(device.plantationId, device.monitoringZoneId);
         },
-        error: (error: unknown) => this.error.set(this.getErrorMessage(error, 'No se pudo cargar el dispositivo.')),
+        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo cargar el dispositivo.')),
       });
   }
 
   toggleConfig(): void {
+    if (!this.canWrite()) {
+      this.actionError.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     this.editingConfig.set(!this.editingConfig());
     this.actionError.set('');
     this.actionSuccess.set('');
   }
 
   toggleZone(): void {
+    if (!this.canWrite()) {
+      this.actionError.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     this.editingZone.set(!this.editingZone());
     this.actionError.set('');
     this.actionSuccess.set('');
   }
 
   saveConfiguration(): void {
+    if (!this.canWrite()) {
+      this.actionError.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     const device = this.device();
     if (!device || this.configForm.invalid) {
       this.configForm.markAllAsTouched();
@@ -104,11 +125,16 @@ export class DeviceDetailComponent implements OnInit {
           this.actionSuccess.set('Configuracion actualizada correctamente.');
           this.load(device.id);
         },
-        error: (error: unknown) => this.actionError.set(this.getErrorMessage(error, 'No se pudo actualizar la configuracion.')),
+        error: (error: unknown) => this.actionError.set(getApiErrorMessage(error, 'No se pudo actualizar la configuracion.')),
       });
   }
 
   saveZone(): void {
+    if (!this.canWrite()) {
+      this.actionError.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     const device = this.device();
     if (!device || this.zoneForm.invalid) {
       this.zoneForm.markAllAsTouched();
@@ -128,7 +154,7 @@ export class DeviceDetailComponent implements OnInit {
           this.actionSuccess.set('Zona reasignada correctamente.');
           this.load(device.id);
         },
-        error: (error: unknown) => this.actionError.set(this.getErrorMessage(error, 'No se pudo reasignar la zona.')),
+        error: (error: unknown) => this.actionError.set(getApiErrorMessage(error, 'No se pudo reasignar la zona.')),
       });
   }
 
@@ -141,6 +167,11 @@ export class DeviceDetailComponent implements OnInit {
   }
 
   private runToggleAction(action: 'activate' | 'deactivate'): void {
+    if (!this.canWrite()) {
+      this.actionError.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      return;
+    }
+
     const device = this.device();
     if (!device) return;
 
@@ -157,7 +188,7 @@ export class DeviceDetailComponent implements OnInit {
             this.actionSuccess.set('Estado del dispositivo actualizado.');
             this.load(device.id);
           },
-          error: (error: unknown) => this.actionError.set(this.getErrorMessage(error, 'No se pudo actualizar el estado del dispositivo.')),
+          error: (error: unknown) => this.actionError.set(getApiErrorMessage(error, 'No se pudo actualizar el estado del dispositivo.')),
         });
       return;
     }
@@ -170,7 +201,18 @@ export class DeviceDetailComponent implements OnInit {
           this.actionSuccess.set(response.message);
           this.load(device.id);
         },
-        error: (error: unknown) => this.actionError.set(this.getErrorMessage(error, 'No se pudo actualizar el estado del dispositivo.')),
+        error: (error: unknown) => this.actionError.set(getApiErrorMessage(error, 'No se pudo actualizar el estado del dispositivo.')),
+      });
+  }
+
+  private loadWriteAccess(): void {
+    this.accessLoading.set(true);
+    this.accessService
+      .loadWriteAccess()
+      .pipe(finalize(() => this.accessLoading.set(false)))
+      .subscribe((access) => {
+        this.canWrite.set(access.canWrite);
+        this.accessMessage.set(access.message);
       });
   }
 
@@ -186,14 +228,7 @@ export class DeviceDetailComponent implements OnInit {
           this.availableZones.set(availableZones);
           this.zoneForm.patchValue({ monitoringZoneId: currentZoneId });
         },
-        error: (error: unknown) => this.actionError.set(this.getErrorMessage(error, 'No se pudieron cargar las zonas disponibles.')),
+        error: (error: unknown) => this.actionError.set(getApiErrorMessage(error, 'No se pudieron cargar las zonas disponibles.')),
       });
-  }
-
-  private getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse) {
-      return error.error?.message || fallback;
-    }
-    return fallback;
   }
 }
