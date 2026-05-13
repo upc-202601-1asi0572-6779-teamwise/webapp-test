@@ -24,11 +24,8 @@ export const routes: Routes = [
       },
       {
         path: 'plantaciones',
-        loadComponent: () =>
-          import('./features/workspace/section-placeholder/section-placeholder.component').then(
-            (m) => m.SectionPlaceholderComponent,
-          ),
-        data: { title: 'Mis Plantaciones' },
+        loadChildren: () =>
+          import('./features/plantations/plantation.routes').then((m) => m.plantationRoutes),
       },
       {
         path: 'dispositivos',
