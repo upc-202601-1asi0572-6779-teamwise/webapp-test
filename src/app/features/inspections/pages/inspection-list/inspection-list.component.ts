@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { FieldInspection } from '../../models/inspection.model';
 import { InspectionService } from '../../services/inspection.service';
 
@@ -12,10 +13,13 @@ import { InspectionService } from '../../services/inspection.service';
 })
 export class InspectionListComponent implements OnInit {
   private readonly inspectionService = inject(InspectionService);
+  private readonly authService = inject(AuthService);
 
   readonly inspections = signal<FieldInspection[]>([]);
   readonly loading = signal(false);
   readonly error = signal('');
+
+  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
 
   ngOnInit(): void {
     this.load();
