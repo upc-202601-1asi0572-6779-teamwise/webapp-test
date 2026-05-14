@@ -25,7 +25,7 @@
         <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div class="rounded-2xl px-4 py-4" style="background: var(--color-bg-soft-2)">
             <p style="color: var(--color-text-muted)">Hectareas</p>
-            <p class="mt-1 text-xl font-semibold" style="color: var(--color-text-primary)">{{ plantation.totalHectares | number:'1.0-0' }} ha</p>
+            <p class="mt-1 text-xl font-semibold" style="color: var(--color-text-primary)">{{ plantation.totalHectares | number:'1.0-0' }} hect.</p>
           </div>
           <div class="rounded-2xl px-4 py-4" style="background: var(--color-bg-soft-cyan)">
             <p style="color: var(--color-text-muted)">Zonas</p>
@@ -121,7 +121,7 @@
               <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-text-primary)">{{ zone.name }}</h3>
               <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">{{ zone.description || 'Sin descripcion registrada.' }}</p>
             </div>
-            <span class="rounded-full px-3 py-1 text-xs" style="background: var(--color-bg-soft-2); color: var(--color-brand-dark)">{{ zone.hectares | number:'1.0-0' }} ha</span>
+            <span class="rounded-full px-3 py-1 text-xs" style="background: var(--color-bg-soft-2); color: var(--color-brand-dark)">{{ zone.hectares | number:'1.0-0' }} hect.</span>
           </div>
 
           <div class="mt-4 flex flex-wrap gap-2 text-xs">

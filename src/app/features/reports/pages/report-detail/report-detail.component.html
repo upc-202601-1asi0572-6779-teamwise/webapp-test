@@ -57,7 +57,7 @@
             <div class="flex items-center justify-between rounded-xl px-3.5 py-2.5" style="background: var(--color-bg-soft-2)">
               <span class="text-sm" style="color: var(--color-text-primary)">{{ zone.zoneName }}</span>
               <span class="text-xs rounded-full px-2.5 py-0.5 font-medium" [style.background]="zone.status === 'critical' ? 'var(--color-danger-10)' : zone.status === 'at_risk' ? 'var(--color-warning-10)' : 'var(--color-emerald-15)'" [style.color]="zone.status === 'critical' ? 'var(--color-danger)' : zone.status === 'at_risk' ? 'var(--color-warning)' : 'var(--color-success)'">
-                {{ zone.status === 'critical' ? 'Critico' : zone.status === 'at_risk' ? 'En riesgo' : 'Optimo' }} &middot; {{ zone.hectares }} ha
+                {{ zone.status === 'critical' ? 'Critico' : zone.status === 'at_risk' ? 'En riesgo' : 'Optimo' }} &middot; {{ zone.hectares }} hect.
               </span>
             </div>
             }

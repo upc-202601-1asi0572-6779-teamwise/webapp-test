@@ -41,7 +41,7 @@
             <select formControlName="monitoringZoneId" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
               <option [value]="0">{{ zonesLoading() ? 'Cargando zonas...' : 'Selecciona una zona' }}</option>
               @for (z of zones(); track z.id) {
-              <option [value]="z.id">{{ z.name }} &middot; {{ z.hectares }} ha</option>
+              <option [value]="z.id">{{ z.name }} &middot; {{ z.hectares }} hect.</option>
               }
             </select>
           </div>

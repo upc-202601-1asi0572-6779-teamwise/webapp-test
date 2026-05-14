@@ -85,7 +85,7 @@
               <span class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background]="healthColors[zone.cropHealthStatus]"></span>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ zone.name }}</p>
-                <p class="text-xs" style="color: var(--color-text-secondary)">{{ zone.hectares | number:'1.0-0' }} ha</p>
+                <p class="text-xs" style="color: var(--color-text-secondary)">{{ zone.hectares | number:'1.0-0' }} hect.</p>
               </div>
               <span class="text-xs rounded-full px-2.5 py-0.5 font-medium flex-shrink-0" [style.background]="healthColors[zone.cropHealthStatus] + '18'" [style.color]="healthColors[zone.cropHealthStatus]">{{ healthLabels[zone.cropHealthStatus] }}</span>
             </div>
@@ -177,7 +177,7 @@
                 }
                 <p class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ p.name }}</p>
               </div>
-              <p class="text-xs mt-1" style="color: var(--color-text-muted)">{{ p.totalHectares | number:'1.0-0' }} ha &middot; {{ p.phenologicalPhase === 'produccion' ? 'Produccion' : 'Establecimiento' }}</p>
+              <p class="text-xs mt-1" style="color: var(--color-text-muted)">{{ p.totalHectares | number:'1.0-0' }} hect. &middot; {{ p.phenologicalPhase === 'produccion' ? 'Produccion' : 'Establecimiento' }}</p>
             </div>
             }
           </div>

@@ -53,7 +53,7 @@
               <option [value]="0">{{ zonesLoading() ? 'Cargando zonas...' : freeZonesCount() > 0 ? 'Selecciona una zona' : 'Sin zonas disponibles' }}</option>
               @for (option of zoneOptions(); track option.zone.id) {
               <option [value]="option.zone.id" [disabled]="option.occupied">
-                {{ option.zone.name }} &middot; {{ option.zone.hectares }} ha{{ option.occupied ? ' (Ocupada &mdash; ' + (option.zone.device?.serialNumber ?? '') + ')' : '' }}
+                {{ option.zone.name }} &middot; {{ option.zone.hectares }} hect.{{ option.occupied ? ' (Ocupada &mdash; ' + (option.zone.device?.serialNumber ?? '') + ')' : '' }}
               </option>
               }
             </select>
