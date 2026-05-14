@@ -3,10 +3,10 @@
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <h1 style="font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.5rem); font-weight: var(--font-weight-bold); line-height: 1.1; color: var(--color-text-primary)">
-          Dashboard
+          {{ isAgronomist() ? 'Supervision de cultivos' : 'Dashboard' }}
         </h1>
         <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">
-          Estado general de tus cultivos y monitoreo en tiempo real.
+          {{ isAgronomist() ? 'Monitoreo de todas las plantaciones a tu cargo.' : 'Estado general de tus cultivos y monitoreo en tiempo real.' }}
         </p>
       </div>
       @if (plantations().length) {
@@ -171,8 +171,13 @@
           <div class="mt-2 flex flex-wrap gap-3">
             @for (p of plantations(); track p.id) {
             <div class="rounded-xl px-3 py-2" style="background: var(--color-bg-soft-2)">
-              <p class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ p.name }}</p>
-              <p class="text-xs" style="color: var(--color-text-muted)">{{ p.totalHectares | number:'1.0-0' }} ha &middot; {{ p.phenologicalPhase === 'produccion' ? 'Produccion' : 'Establecimiento' }}</p>
+              <div class="flex items-center gap-1.5">
+                @if (p.overallHealth) {
+                <span class="inline-block h-2 w-2 rounded-full flex-shrink-0" [style.background]="p.overallHealth === 'critical' ? 'var(--color-danger)' : p.overallHealth === 'at_risk' ? 'var(--color-warning)' : 'var(--color-success)'"></span>
+                }
+                <p class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ p.name }}</p>
+              </div>
+              <p class="text-xs mt-1" style="color: var(--color-text-muted)">{{ p.totalHectares | number:'1.0-0' }} ha &middot; {{ p.phenologicalPhase === 'produccion' ? 'Produccion' : 'Establecimiento' }}</p>
             </div>
             }
           </div>

@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PlantationService } from '../../../plantations/services/plantation.service';
 import { AlertService } from '../../../alerts/services/alert.service';
 import { RecommendationService } from '../../../recommendations/services/recommendation.service';
@@ -25,6 +26,9 @@ export class DashboardComponent implements OnInit {
   private readonly recommendationService = inject(RecommendationService);
   private readonly sensorReadingService = inject(SensorReadingService);
   private readonly deviceService = inject(DeviceService);
+  private readonly authService = inject(AuthService);
+
+  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
 
   readonly loading = signal(true);
   readonly error = signal('');
