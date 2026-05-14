@@ -35,4 +35,8 @@ export class SubscriptionService {
       {},
     );
   }
+
+  upgrade(planId: string): Observable<Subscription> {
+    return this.http.put<Subscription>(`${this.api}/me/upgrade`, { planId });
+  }
 }

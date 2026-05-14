@@ -113,6 +113,22 @@
               </span>
             </button>
 
+            <a
+              routerLink="/subscription/plans"
+              class="w-full rounded-2xl px-5 py-4 text-left transition hover:scale-[1.01] active:scale-[0.985] flex items-center justify-between"
+              style="background: linear-gradient(135deg, rgba(245,158,11,0.25) 0%, rgba(245,158,11,0.18) 100%); color: var(--color-warning); font-family: var(--font-heading); border: 1px solid rgba(245,158,11,0.35)"
+            >
+              <div>
+                <span class="block" style="font-size: 1.02rem; font-weight: var(--font-weight-bold)">
+                  Cambiar de plan
+                </span>
+                <span class="mt-1 block" style="font-family: var(--font-body); font-size: 0.92rem; color: rgba(245,158,11,0.8)">
+                  Explora otros planes disponibles para tu segmento.
+                </span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+
             <button
               (click)="cancel()"
               [disabled]="actionLoading() === 'cancel'"

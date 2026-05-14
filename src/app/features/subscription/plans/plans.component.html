@@ -30,6 +30,11 @@
           M&Aacute;S POPULAR
         </div>
         }
+        @if (plan.id === currentPlanId()) {
+        <div class="absolute top-0 right-0 px-4 py-1.5 rounded-bl-xl text-xs font-semibold tracking-wide" style="background: var(--color-emerald-15); color: var(--color-success); font-family: var(--font-heading); letter-spacing: var(--letter-spacing-badge)">
+          PLAN ACTUAL
+        </div>
+        }
 
         <h2 class="mb-1" style="font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); color: var(--color-text-primary); line-height: var(--line-height-h3)">
           {{ plan.name }}
@@ -72,11 +77,25 @@
           }
         </ul>
 
+        @if (plan.id === currentPlanId()) {
+        <button type="button" disabled
+          class="w-full py-3.5 rounded-xl font-semibold text-sm opacity-50"
+          style="background: var(--color-bg-soft-2); color: var(--color-text-muted); font-family: var(--font-heading)">
+          Plan actual
+        </button>
+        } @else if (currentPlanId()) {
+        <button type="button" (click)="upgrade(plan.id)" [disabled]="upgrading() !== ''"
+          class="w-full py-3.5 rounded-xl font-semibold text-sm transition disabled:opacity-50 active:scale-[0.98]"
+          style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading)">
+          {{ upgrading() === plan.id ? 'Cambiando...' : 'Cambiar a este plan' }}
+        </button>
+        } @else {
         <button type="button" (click)="subscribe(plan.id)" [disabled]="subscribing() !== ''"
           class="w-full py-3.5 rounded-xl font-semibold text-sm transition disabled:opacity-50 active:scale-[0.98]"
           style="background: var(--color-brand-primary); color: var(--color-text-inverse); font-family: var(--font-heading)">
           {{ subscribing() === plan.id ? 'Procesando...' : 'Suscribirse' }}
         </button>
+        }
       </div>
       }
     </div>
