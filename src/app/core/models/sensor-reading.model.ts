@@ -8,6 +8,8 @@ export interface SensorReading {
   label: string;
   value: number;
   unit: string;
+  deviceSerial?: string;
+  plantationName?: string;
   recordedAt: string;
 }
 

@@ -55,18 +55,6 @@ export class DashboardComponent implements OnInit {
     critical: 'Critico',
   };
 
-  readonly connectivityColors: Record<string, string> = {
-    connected: 'var(--color-success)',
-    offline_mode: 'var(--color-warning)',
-    disconnected: 'var(--color-danger)',
-  };
-
-  readonly connectivityLabels: Record<string, string> = {
-    connected: 'Conectado',
-    offline_mode: 'Modo offline',
-    disconnected: 'Desconectado',
-  };
-
   readonly connectedCount = computed(() => this.devices().filter((d) => d.connectivityStatus === 'connected').length);
   readonly offlineCount = computed(() => this.devices().filter((d) => d.connectivityStatus === 'offline_mode').length);
   readonly disconnectedCount = computed(() => this.devices().filter((d) => d.connectivityStatus === 'disconnected').length);
@@ -77,6 +65,11 @@ export class DashboardComponent implements OnInit {
 
   selectPlantation(id: number): void {
     this.selectedPlantationId.set(id);
+    if (id > 0) {
+      this.loadZones(id);
+    } else {
+      this.zones.set([]);
+    }
   }
 
   private loadAll(): void {
