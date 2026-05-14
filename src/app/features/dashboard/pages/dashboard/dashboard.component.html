@@ -9,14 +9,21 @@
           {{ isAgronomist() ? 'Monitoreo de todas las plantaciones a tu cargo.' : 'Estado general de tus cultivos y monitoreo en tiempo real.' }}
         </p>
       </div>
-      @if (plantations().length) {
-      <select (change)="selectPlantation(+($any($event.target).value))" class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:border-transparent lg:w-auto" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
-        <option [value]="0">Todas las plantaciones</option>
-        @for (p of plantations(); track p.id) {
-        <option [value]="p.id">{{ p.name }}</option>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        @if (isAgronomist()) {
+        <button type="button" (click)="navigateToReports()" class="rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition hover:opacity-90" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          + Nuevo reporte
+        </button>
         }
-      </select>
-      }
+        @if (plantations().length) {
+        <select (change)="selectPlantation(+($any($event.target).value))" class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:border-transparent lg:w-auto" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
+          <option [value]="0">Todas las plantaciones</option>
+          @for (p of plantations(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+        }
+      </div>
     </div>
 
     @if (loading()) {
@@ -67,6 +74,32 @@
         </div>
       </div>
     </div>
+
+    @if (sparklineItems().length) {
+    <div class="rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <h2 class="font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">Tendencias de parametros</h2>
+      <p class="text-xs mt-0.5" style="color: var(--color-text-muted)">Evolucion de variables clave en el tiempo</p>
+      <div class="mt-4 grid gap-4 sm:grid-cols-3">
+        @for (item of sparklineItems(); track item.label) {
+        <div class="rounded-xl px-4 py-3" style="background: var(--color-bg-soft-2)">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium uppercase tracking-wider" style="color: var(--color-text-muted)">{{ item.label }}</span>
+            <span class="text-sm font-bold" [style.color]="item.color">{{ item.currentValue | number:'1.1-1' }}{{ item.unit }}</span>
+          </div>
+          <div class="mt-2 relative">
+            <svg viewBox="0 0 200 48" class="w-full h-12" preserveAspectRatio="none">
+              <polyline [attr.points]="item.points" fill="none" [attr.stroke]="item.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="mt-1 flex justify-between text-xs" style="color: var(--color-text-muted)">
+            <span>{{ item.vMin | number:'1.1-1' }}{{ item.unit }}</span>
+            <span>{{ item.vMax | number:'1.1-1' }}{{ item.unit }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
 
     <div class="grid gap-5 xl:grid-cols-2">
       <div class="flex flex-col gap-5">
@@ -160,6 +193,26 @@
                 <p class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ rec.title }}</p>
                 <p class="text-xs truncate" style="color: var(--color-text-muted)">{{ rec.plantationName }} &middot; {{ rec.zoneName }}</p>
               </div>
+            </a>
+            }
+          </div>
+        </div>
+        }
+
+        @if (isAgronomist() && inspections().length) {
+        <div class="rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">Historial de intervenciones</h2>
+            <a routerLink="/inspecciones" class="text-xs font-semibold" style="color: var(--color-brand-primary)">Ver todas</a>
+          </div>
+          <div class="mt-3 flex flex-col gap-2">
+            @for (insp of inspections(); track insp.id) {
+            <a [routerLink]="['/inspecciones', insp.id]" class="rounded-xl border px-3.5 py-3 transition" style="border-color: var(--color-border-subtle)">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium rounded-full px-2.5 py-0.5 flex-shrink-0" style="background: var(--color-bg-soft-2); color: var(--color-text-muted)">{{ insp.inspectionDate | date:'dd/MM/yy' }}</span>
+                <span class="text-sm font-semibold truncate" style="color: var(--color-text-primary)">{{ insp.plantationName }}</span>
+              </div>
+              <p class="text-xs mt-1.5 line-clamp-2" style="color: var(--color-text-secondary)">{{ insp.findings || insp.observations }}</p>
             </a>
             }
           </div>

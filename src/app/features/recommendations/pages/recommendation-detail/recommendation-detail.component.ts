@@ -6,6 +6,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { Recommendation } from '../../models/recommendation.model';
 import { RecommendationService } from '../../services/recommendation.service';
+import { AlertService } from '../../../alerts/services/alert.service';
+import { Alert } from '../../../alerts/models/alert.model';
 
 @Component({
   selector: 'app-recommendation-detail',
@@ -16,8 +18,10 @@ export class RecommendationDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly recommendationService = inject(RecommendationService);
+  private readonly alertService = inject(AlertService);
 
   readonly recommendation = signal<Recommendation | null>(null);
+  readonly linkedAlert = signal<Alert | null>(null);
   readonly loading = signal(false);
   readonly error = signal('');
   readonly actionLoading = signal('');
@@ -103,6 +107,23 @@ export class RecommendationDetailComponent implements OnInit {
       });
   }
 
+  computeBarPosition(alert: Alert): { left: string; width: string; rangeStart: string; rangeWidth: string; color: string } | null {
+    const margin = (alert.thresholdMax - alert.thresholdMin) * 0.25 || 1;
+    const totalMin = alert.thresholdMin - margin;
+    const totalMax = alert.thresholdMax + margin;
+    const totalRange = totalMax - totalMin;
+    if (totalRange <= 0) return null;
+
+    const left = `${(((alert.triggeredValue - totalMin) / totalRange) * 98).toFixed(1)}%`;
+    const width = '2%';
+    const rangeStart = `${(((alert.thresholdMin - totalMin) / totalRange) * 100).toFixed(1)}%`;
+    const rangeWidth = `${(((alert.thresholdMax - alert.thresholdMin) / totalRange) * 100).toFixed(1)}%`;
+    const color =
+      alert.alertLevel === 'critical' ? 'var(--color-danger)' : 'var(--color-warning)';
+
+    return { left, width, rangeStart, rangeWidth, color };
+  }
+
   private load(id: number): void {
     this.loading.set(true);
     this.error.set('');
@@ -111,8 +132,20 @@ export class RecommendationDetailComponent implements OnInit {
       .getById(id)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (recommendation) => this.recommendation.set(recommendation),
+        next: (recommendation) => {
+          this.recommendation.set(recommendation);
+          this.linkedAlert.set(null);
+          if (recommendation.alertId) {
+            this.loadAlert(recommendation.alertId);
+          }
+        },
         error: () => this.error.set('No se pudo cargar la recomendacion.'),
       });
+  }
+
+  private loadAlert(alertId: number): void {
+    this.alertService.getById(alertId).subscribe({
+      next: (alert) => this.linkedAlert.set(alert),
+    });
   }
 }
