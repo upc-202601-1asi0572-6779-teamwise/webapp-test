@@ -1,25 +1,46 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { SubscriptionService } from '../../../core/services/subscription.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { SubscriptionPlan } from '../../../core/models/subscription-plan.model';
 import { finalize } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-plans',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, RouterLink],
   templateUrl: './plans.component.html',
 })
 export class PlansComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  plans = signal<SubscriptionPlan[]>([]);
-  loading = signal(false);
-  error = signal('');
+  readonly plans = signal<SubscriptionPlan[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal('');
+  readonly subscribing = signal('');
 
-  constructor() {}
+  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
 
   ngOnInit(): void {
     this.load();
+  }
+
+  subscribe(planId: string): void {
+    const method = prompt('Metodo de pago (visa, mastercard, etc.):', 'visa_ending_0000');
+    if (!method) return;
+
+    this.subscribing.set(planId);
+    this.error.set('');
+
+    this.subscriptionService
+      .subscribe(planId, method)
+      .pipe(finalize(() => this.subscribing.set('')))
+      .subscribe({
+        next: () => this.router.navigate(['/subscription/me']),
+        error: () => this.error.set('No se pudo completar la suscripcion.'),
+      });
   }
 
   private load(): void {

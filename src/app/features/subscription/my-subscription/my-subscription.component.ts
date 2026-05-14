@@ -1,23 +1,26 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, computed, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Subscription } from '../../../core/models/subscription.model';
 import { SubscriptionService } from '../../../core/services/subscription.service';
 
 @Component({
   selector: 'app-my-subscription',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   templateUrl: './my-subscription.component.html',
 })
 export class MySubscriptionComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
 
-  subscription = signal<Subscription | null>(null);
-  loading = signal(false);
-  error = signal('');
-  actionLoading = signal('');
-  actionError = signal('');
-  actionSuccess = signal('');
+  readonly subscription = signal<Subscription | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal('');
+  readonly actionLoading = signal('');
+  readonly actionError = signal('');
+  readonly actionSuccess = signal('');
+
+  readonly isGrower = computed(() => this.subscription()?.segment !== 'agronomist');
 
   ngOnInit(): void {
     this.load();

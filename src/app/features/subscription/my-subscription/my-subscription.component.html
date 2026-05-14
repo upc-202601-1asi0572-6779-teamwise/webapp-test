@@ -1,4 +1,7 @@
 <section class="min-h-dvh px-6 py-8 sm:px-8 lg:px-10 lg:py-10" style="background: var(--color-bg-page)">
+  <a routerLink="/dashboard" class="inline-flex text-sm mb-4" style="color: var(--color-brand-primary)">
+    &larr; Dashboard
+  </a>
   @if (loading()) {
   <div class="flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center gap-4">
     <div class="h-10 w-10 rounded-full border-2 animate-spin" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
@@ -16,6 +19,9 @@
       <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary)">
         {{ error() }}
       </p>
+      <a routerLink="/subscription/plans" class="mt-4 inline-flex rounded-xl px-5 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+        Ver planes disponibles
+      </a>
     </div>
   </div>
   } @else if (subscription(); as sub) {
@@ -32,7 +38,7 @@
                 {{ sub.planName }}
               </h1>
               <p class="mt-3 max-w-[38rem]" style="font-family: var(--font-body); font-size: 1.02rem; line-height: 1.75; color: var(--color-white-75)">
-                Controla el estado de tu plan, revisa tu capacidad disponible y gestiona la renovacion de manera centralizada.
+                {{ isGrower() ? 'Controla el estado de tu plan, revisa tu capacidad disponible y gestiona la renovacion de manera centralizada.' : 'Supervisa los productores a tu cargo, la capacidad de tu plan y la generacion de reportes tecnicos.' }}
               </p>
             </div>
 
@@ -131,6 +137,7 @@
                 <span>Estado</span>
                 <span>{{ sub.status === 'active' ? 'Activo' : sub.status }}</span>
               </div>
+              @if (isGrower()) {
               <div class="flex items-center justify-between gap-3">
                 <span>Hectareas maximas</span>
                 <span>{{ sub.maxHectares }} ha</span>
@@ -139,6 +146,16 @@
                 <span>Dispositivos maximos</span>
                 <span>{{ sub.maxDevices }}</span>
               </div>
+              } @else {
+              <div class="flex items-center justify-between gap-3">
+                <span>Productores maximos</span>
+                <span>{{ sub.maxGrowers === 999 ? 'Ilimitado' : sub.maxGrowers }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span>Reportes maximos</span>
+                <span>{{ sub.maxReports === 999 ? 'Ilimitados' : sub.maxReports }}/mes</span>
+              </div>
+              }
             </div>
           </div>
         </div>
@@ -162,6 +179,7 @@
         </div>
 
         <div class="mt-8 space-y-7">
+          @if (isGrower()) {
           <div>
             <div class="mb-3 flex items-end justify-between gap-3">
               <div>
@@ -178,7 +196,6 @@
               <div class="h-full rounded-full transition-all duration-500" style="width: {{ (sub.usedHectares / sub.maxHectares) * 100 }}%; background: linear-gradient(90deg, #1e7a47 0%, #4ccd82 100%)"></div>
             </div>
           </div>
-
           <div>
             <div class="mb-3 flex items-end justify-between gap-3">
               <div>
@@ -195,6 +212,40 @@
               <div class="h-full rounded-full transition-all duration-500" style="width: {{ (sub.usedDevices / sub.maxDevices) * 100 }}%; background: linear-gradient(90deg, #0ea5b8 0%, #22d3e8 100%)"></div>
             </div>
           </div>
+          } @else {
+          <div>
+            <div class="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <p style="font-family: var(--font-body); font-size: 0.92rem; color: var(--color-text-secondary)">Productores gestionados</p>
+                <p class="mt-1" style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+                  {{ sub.usedGrowers }} / {{ sub.maxGrowers === 999 ? 'IL' : sub.maxGrowers }}
+                </p>
+              </div>
+              <p style="font-family: var(--font-body); font-size: 0.92rem; color: var(--color-text-muted)">
+                {{ sub.maxGrowers === 999 ? '' : ((sub.usedGrowers! / sub.maxGrowers!) * 100).toFixed(0) + '%' }}
+              </p>
+            </div>
+            <div class="h-3 overflow-hidden rounded-full" style="background: var(--color-bg-soft)">
+              <div class="h-full rounded-full transition-all duration-500" style="width: {{ sub.maxGrowers === 999 ? '100' : (sub.usedGrowers! / sub.maxGrowers!) * 100 }}%; background: linear-gradient(90deg, #9333ea 0%, #c084fc 100%)"></div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <p style="font-family: var(--font-body); font-size: 0.92rem; color: var(--color-text-secondary)">Reportes generados</p>
+                <p class="mt-1" style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+                  {{ sub.usedReports }} / {{ sub.maxReports === 999 ? 'IL' : sub.maxReports }}
+                </p>
+              </div>
+              <p style="font-family: var(--font-body); font-size: 0.92rem; color: var(--color-text-muted)">
+                {{ sub.maxReports === 999 ? '' : ((sub.usedReports! / sub.maxReports!) * 100).toFixed(0) + '%' }}
+              </p>
+            </div>
+            <div class="h-3 overflow-hidden rounded-full" style="background: var(--color-bg-soft)">
+              <div class="h-full rounded-full transition-all duration-500" style="width: {{ sub.maxReports === 999 ? '100' : (sub.usedReports! / sub.maxReports!) * 100 }}%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)"></div>
+            </div>
+          </div>
+          }
         </div>
       </div>
 
