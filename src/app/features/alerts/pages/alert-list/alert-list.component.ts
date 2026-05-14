@@ -14,15 +14,44 @@ import { AlertService } from '../../services/alert.service';
 export class AlertListComponent implements OnInit, OnDestroy {
   private readonly alertService = inject(AlertService);
 
-  alerts = signal<Alert[]>([]);
-  loading = signal(false);
-  saving = signal(0);
-  error = signal('');
-  actionError = signal('');
-  activeTab = signal<'active' | 'resolved'>('active');
-  badgeCount = signal<AlertCount | null>(null);
+  readonly alerts = signal<Alert[]>([]);
+  readonly loading = signal(false);
+  readonly saving = signal(0);
+  readonly error = signal('');
+  readonly actionError = signal('');
+  readonly activeTab = signal<'active' | 'resolved'>('active');
+  readonly badgeCount = signal<AlertCount | null>(null);
 
   private pollSubscription: Subscription | null = null;
+
+  readonly severityLabel: Record<string, string> = {
+    critical: 'Critica',
+    warning: 'Advertencia',
+    informative: 'Informativa',
+  };
+
+  readonly severityColor: Record<string, string> = {
+    critical: 'var(--color-danger)',
+    warning: '#f59e0b',
+    informative: 'var(--color-accent-cyan)',
+  };
+
+  readonly severityBg: Record<string, string> = {
+    critical: 'var(--color-danger-10)',
+    warning: '#fef3c7',
+    informative: 'var(--color-bg-soft-cyan)',
+  };
+
+  readonly severityBorder: Record<string, string> = {
+    critical: 'var(--color-danger)',
+    warning: '#f59e0b',
+    informative: 'var(--color-border-subtle)',
+  };
+
+  readonly statusLabel: Record<string, string> = {
+    active: 'Activa',
+    resolved: 'Resuelta',
+  };
 
   ngOnInit(): void {
     this.load();
@@ -65,24 +94,6 @@ export class AlertListComponent implements OnInit, OnDestroy {
         error: (error: unknown) =>
           this.actionError.set(getApiErrorMessage(error, 'No se pudo confirmar la alerta.')),
       });
-  }
-
-  severityColor(alert: Alert): string {
-    if (alert.alertLevel === 'critical') return 'var(--color-danger)';
-    if (alert.alertLevel === 'warning') return '#f59e0b';
-    return 'var(--color-border-subtle)';
-  }
-
-  severityBg(alert: Alert): string {
-    if (alert.alertLevel === 'critical') return 'var(--color-danger-10)';
-    if (alert.alertLevel === 'warning') return '#fef3c7';
-    return 'var(--color-bg-soft-cyan)';
-  }
-
-  severityFg(alert: Alert): string {
-    if (alert.alertLevel === 'critical') return 'var(--color-danger)';
-    if (alert.alertLevel === 'warning') return '#92400e';
-    return 'var(--color-accent-cyan)';
   }
 
   private load(): void {
