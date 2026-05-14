@@ -13,4 +13,9 @@ export interface Subscription {
   autoRenew: boolean;
   paymentMethod: string;
   daysRemaining: number;
+  segment?: 'palm_grower' | 'agronomist';
+  maxGrowers?: number;
+  usedGrowers?: number;
+  maxReports?: number;
+  usedReports?: number;
 }

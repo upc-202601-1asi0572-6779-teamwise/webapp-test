@@ -11,6 +11,7 @@ export interface Plantation {
   longitude: number;
   zonesCount?: number;
   devicesCount?: number;
+  overallHealth?: 'optimal' | 'at_risk' | 'critical' | null;
   createdAt: string;
   updatedAt: string;
 }
