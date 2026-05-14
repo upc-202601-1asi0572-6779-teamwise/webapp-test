@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { growerGuard } from '../../core/guards/grower.guard';
 import { subscriptionActiveGuard } from '../../core/guards/subscription-active.guard';
 
 export const deviceRoutes: Routes = [
@@ -8,7 +9,7 @@ export const deviceRoutes: Routes = [
   },
   {
     path: 'new',
-    canActivate: [subscriptionActiveGuard],
+    canActivate: [growerGuard, subscriptionActiveGuard],
     loadComponent: () => import('./pages/device-form/device-form.component').then((m) => m.DeviceFormComponent),
   },
   {
