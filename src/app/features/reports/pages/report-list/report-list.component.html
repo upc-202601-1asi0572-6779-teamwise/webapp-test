@@ -7,14 +7,49 @@
             Reportes
           </h1>
           <p class="mt-2 max-w-3xl" style="font-family: var(--font-body); color: var(--color-text-secondary)">
-            Consulta los reportes tecnicos publicados por tu agronomo con el resumen del estado de tus cultivos.
+            @if (isAgronomist()) {
+            Genera, revisa y publica reportes tecnicos para tus productores.
+            } @else {
+            Consulta los reportes tecnicos publicados por tu agronomo.
+            }
           </p>
         </div>
         <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
-          {{ reports().length }} publicados
+          {{ reports().length }} reportes
         </div>
       </div>
+
+      @if (isAgronomist()) {
+      <div class="mt-4 flex gap-2">
+        <button (click)="selectTab('drafts')" class="rounded-xl px-4 py-2 text-sm font-semibold transition" [style.background]="activeTab() === 'drafts' ? 'var(--color-brand-primary)' : 'var(--color-bg-soft-2)'" [style.color]="activeTab() === 'drafts' ? 'var(--color-text-inverse)' : 'var(--color-text-primary)'">
+          Borradores
+        </button>
+        <button (click)="selectTab('published')" class="rounded-xl px-4 py-2 text-sm font-semibold transition" [style.background]="activeTab() === 'published' ? 'var(--color-brand-primary)' : 'var(--color-bg-soft-2)'" [style.color]="activeTab() === 'published' ? 'var(--color-text-inverse)' : 'var(--color-text-primary)'">
+          Publicados
+        </button>
+      </div>
+      }
     </div>
+
+    @if (isAgronomist() && activeTab() === 'drafts') {
+    <div class="rounded-[1.75rem] border px-6 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <h2 class="font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">Nuevo reporte</h2>
+      <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">Genera un borrador automatico consolidando datos de zonas, alertas, recomendaciones y sensores.</p>
+      <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+          <select #plantSelect class="w-full rounded-xl border px-4 py-3 outline-none transition focus:ring-2 focus:border-transparent text-sm" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
+            <option [value]="0">Selecciona una plantacion</option>
+            @for (p of plantations(); track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+        <button type="button" (click)="generateReport(+(plantSelect.value))" [disabled]="generatingPlantationId() > 0" class="rounded-xl px-5 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          {{ generatingPlantationId() > 0 ? 'Generando...' : 'Generar borrador' }}
+        </button>
+      </div>
+    </div>
+    }
 
     @if (loading()) {
     <div class="flex min-h-60 flex-col items-center justify-center gap-3 rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
@@ -27,9 +62,11 @@
     </div>
     } @else if (!reports().length) {
     <div class="rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
-      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">Sin reportes publicados</h2>
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">
+        @if (activeTab() === 'drafts') { Sin borradores } @else { Sin reportes publicados }
+      </h2>
       <p class="mt-2" style="color: var(--color-text-secondary)">
-        Tu agronomo aun no ha publicado reportes tecnicos. Los reportes apareceran aqui cuando esten disponibles.
+        @if (activeTab() === 'drafts') { Genera un nuevo borrador de reporte usando el formulario superior. } @else { Tu agronomo aun no ha publicado reportes tecnicos. }
       </p>
     </div>
     } @else {
@@ -37,15 +74,13 @@
       @for (report of reports(); track report.id) {
       <a class="block rounded-[1.75rem] border px-6 py-6 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)" [routerLink]="['/reportes', report.id]">
         <div class="flex items-center justify-between gap-3">
-          <span class="rounded-full px-3 py-1 text-xs font-medium" style="background: var(--color-emerald-15); color: var(--color-success)">
-            Publicado
+          <span class="rounded-full px-3 py-1 text-xs font-medium" [style.background]="report.status === 'published' ? 'var(--color-emerald-15)' : 'var(--color-warning-10)'" [style.color]="report.status === 'published' ? 'var(--color-success)' : 'var(--color-warning)'">
+            {{ report.status === 'published' ? 'Publicado' : 'Borrador' }}
           </span>
-          <span class="text-xs" style="color: var(--color-text-muted)">
-            {{ report.agronomistName }}
-          </span>
+          <span class="text-xs truncate max-w-36" style="color: var(--color-text-muted)">{{ report.agronomistName }}</span>
         </div>
 
-        <h2 class="mt-4" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
+        <h2 class="mt-4 line-clamp-2" style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: var(--font-weight-bold); color: var(--color-text-primary)">
           {{ report.title }}
         </h2>
         <p class="mt-2 text-sm line-clamp-2" style="color: var(--color-text-secondary)">
@@ -54,7 +89,7 @@
 
         <div class="mt-5 flex items-center justify-between text-sm">
           <span style="color: var(--color-text-muted)">{{ report.plantationName }}</span>
-          <span style="color: var(--color-text-muted)">{{ report.publishedAt | date:'mediumDate' }}</span>
+          <span style="color: var(--color-text-muted)">{{ report.publishedAt ? (report.publishedAt | date:'mediumDate') : (report.createdAt | date:'mediumDate') }}</span>
         </div>
       </a>
       }

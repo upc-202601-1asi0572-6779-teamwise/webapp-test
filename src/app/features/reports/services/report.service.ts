@@ -27,4 +27,12 @@ export class ReportService {
   getById(id: number): Observable<Report> {
     return this.http.get<Report>(`${this.api}/${id}`);
   }
+
+  generateDraft(plantationId: number): Observable<Report> {
+    return this.http.post<Report>(`${this.api}/generate-draft`, { plantationId });
+  }
+
+  publish(id: number): Observable<Report> {
+    return this.http.put<Report>(`${this.api}/${id}/publish`, {});
+  }
 }
