@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -7,7 +8,7 @@ import { RecommendationService } from '../../services/recommendation.service';
 
 @Component({
   selector: 'app-recommendation-list',
-  imports: [RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './recommendation-list.component.html',
 })
 export class RecommendationListComponent implements OnInit {
