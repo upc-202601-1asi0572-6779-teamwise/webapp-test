@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Plantation } from '../../models/plantation.model';
 import { Zone } from '../../models/zone.model';
 import { PlantationService } from '../../services/plantation.service';
@@ -14,6 +15,9 @@ import { PlantationService } from '../../services/plantation.service';
 export class PlantationDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly plantationService = inject(PlantationService);
+  private readonly authService = inject(AuthService);
+
+  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
 
   plantation = signal<Plantation | null>(null);
   zones = signal<Zone[]>([]);

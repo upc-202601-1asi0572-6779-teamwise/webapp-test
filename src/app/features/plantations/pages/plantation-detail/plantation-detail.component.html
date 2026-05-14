@@ -64,6 +64,7 @@
           }
         </div>
 
+        @if (!isAgronomist()) {
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
           <a [routerLink]="['/plantaciones', plantation.id, 'edit']" class="rounded-xl px-4 py-3 text-center text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             Editar plantacion
@@ -72,6 +73,7 @@
             Agregar zona
           </a>
         </div>
+        }
       </div>
 
       <div class="rounded-[1.75rem] border px-6 py-6" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
@@ -106,11 +108,13 @@
       <div class="mt-6 rounded-3xl border px-5 py-6" style="border-color: var(--color-border-subtle)">
         <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-text-primary)">Aun no hay zonas registradas</h3>
         <p class="mt-2 text-sm" style="color: var(--color-text-secondary)">
-          Crea la primera zona de monitoreo para dividir la plantacion y preparar la asignacion de dispositivos.
+          @if (isAgronomist()) { Esta plantacion aun no tiene zonas de monitoreo definidas. } @else { Crea la primera zona de monitoreo para dividir la plantacion y preparar la asignacion de dispositivos. }
         </p>
+        @if (!isAgronomist()) {
         <a [routerLink]="['/plantaciones', plantation.id, 'zones', 'new']" class="mt-4 inline-flex rounded-xl px-4 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
           Crear primera zona
         </a>
+        }
       </div>
       } @else {
       <div class="mt-6 grid gap-4 lg:grid-cols-2">
@@ -133,9 +137,11 @@
             }
           </div>
 
+          @if (!isAgronomist()) {
           <a [routerLink]="['/plantaciones', plantation.id, 'zones', zone.id, 'edit']" class="mt-4 inline-flex text-sm font-semibold" style="color: var(--color-brand-primary)">
             Editar zona
           </a>
+          }
         </article>
         }
       </div>
