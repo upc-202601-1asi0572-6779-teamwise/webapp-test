@@ -8,6 +8,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const token = authService.getToken();
+  const isAuthRequest = req.url.includes('/auth/login') || req.url.includes('/auth/register');
 
   if (token) {
     req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
@@ -15,7 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
+      if (error instanceof HttpErrorResponse && error.status === 401 && !isAuthRequest) {
         authService.logout();
         router.navigate(['/auth/login']);
       }

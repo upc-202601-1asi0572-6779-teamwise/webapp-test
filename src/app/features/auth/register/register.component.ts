@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 import { finalize } from 'rxjs';
+import { getApiErrorMessage } from '../../../core/utils/api-error-message';
+import { AuthService } from '../../../core/services/auth.service';
 
 function passwordStrength(control: AbstractControl<string>) {
   const value = control.value;
@@ -10,7 +11,7 @@ function passwordStrength(control: AbstractControl<string>) {
   const hasUpper = /[A-Z]/.test(value);
   const hasNumber = /[0-9]/.test(value);
   if (!hasUpper || !hasNumber) {
-    return { passwordStrength: 'La contraseña debe contener al menos una mayúscula y un número.' };
+    return { passwordStrength: 'La contrasena debe contener al menos una mayuscula y un numero.' };
   }
   return null;
 }
@@ -38,10 +39,56 @@ export class RegisterComponent {
   loading = false;
   error = '';
 
-  regions = ['Ucayali', 'San Mart\u00edn', 'Loreto'];
+  regions = ['Ucayali', 'San Martin', 'Loreto'];
+
+  hasError(controlName: 'email' | 'password' | 'fullName' | 'phone' | 'region' | 'city'): boolean {
+    const control = this.form.controls[controlName];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  getErrorMessage(controlName: 'email' | 'password' | 'fullName' | 'phone' | 'region' | 'city'): string {
+    const control = this.form.controls[controlName];
+
+    if (control.errors?.['required']) {
+      const messages = {
+        fullName: 'Ingresa tu nombre completo.',
+        email: 'Ingresa tu correo electronico.',
+        password: 'Ingresa una contrasena.',
+        phone: 'Ingresa tu numero de telefono.',
+        region: 'Selecciona una region.',
+        city: 'Ingresa tu ciudad.',
+      };
+
+      return messages[controlName];
+    }
+
+    if (control.errors?.['email']) {
+      return 'Ingresa un correo valido.';
+    }
+
+    if (control.errors?.['minlength']) {
+      if (controlName === 'password') return 'La contrasena debe tener al menos 8 caracteres.';
+      if (controlName === 'fullName') return 'El nombre debe tener al menos 3 caracteres.';
+    }
+
+    if (control.errors?.['passwordStrength']) {
+      return control.errors['passwordStrength'];
+    }
+
+    if (control.errors?.['pattern'] && controlName === 'phone') {
+      return 'Usa el formato +51 961 234 567.';
+    }
+
+    return '';
+  }
 
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.error = 'Revisa los campos marcados para continuar.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
     this.authService
@@ -49,8 +96,8 @@ export class RegisterComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => this.router.navigate(['/dashboard']),
-        error: (err) => {
-          this.error = err?.error?.message ?? 'Error al registrar. Intenta de nuevo.';
+        error: (error) => {
+          this.error = getApiErrorMessage(error, 'Error al registrar. Intenta de nuevo.');
         },
       });
   }

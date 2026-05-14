@@ -82,9 +82,14 @@
                   type="email"
                   autocomplete="email"
                   class="w-full rounded-2xl border px-5 py-4 text-[1rem] outline-none transition-all duration-300 focus:ring-2 focus:border-transparent sm:text-[1.05rem]"
-                  style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--color-text-inverse); font-family: var(--font-body); --tw-ring-color: var(--color-brand-secondary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04)"
-                  placeholder="tu@email.com"
+                 style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--color-text-inverse); font-family: var(--font-body); --tw-ring-color: var(--color-brand-secondary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04)"
+                 placeholder="tu@email.com"
                 />
+                @if (hasError('email')) {
+                <p class="mt-2 text-sm" style="font-family: var(--font-body); color: #ffd4d4">
+                  {{ getErrorMessage('email') }}
+                </p>
+                }
               </div>
 
               <div>
@@ -96,9 +101,14 @@
                   type="password"
                   autocomplete="current-password"
                   class="w-full rounded-2xl border px-5 py-4 text-[1rem] outline-none transition-all duration-300 focus:ring-2 focus:border-transparent sm:text-[1.05rem]"
-                  style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--color-text-inverse); font-family: var(--font-body); --tw-ring-color: var(--color-brand-secondary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04)"
-                  placeholder="Ingresa tu contrasena"
+                 style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--color-text-inverse); font-family: var(--font-body); --tw-ring-color: var(--color-brand-secondary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04)"
+                 placeholder="Ingresa tu contrasena"
                 />
+                @if (hasError('password')) {
+                <p class="mt-2 text-sm" style="font-family: var(--font-body); color: #ffd4d4">
+                  {{ getErrorMessage('password') }}
+                </p>
+                }
               </div>
 
               <button
