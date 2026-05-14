@@ -1,5 +1,4 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -9,7 +8,7 @@ import { ReportService } from '../../services/report.service';
 
 @Component({
   selector: 'app-report-detail',
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [RouterLink],
   templateUrl: './report-detail.component.html',
 })
 export class ReportDetailComponent implements OnInit {
