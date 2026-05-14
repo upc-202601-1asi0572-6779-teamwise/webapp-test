@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Bc01AccessService } from '../../../../core/services/bc01-access.service';
 import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { Plantation } from '../../models/plantation.model';
@@ -19,6 +20,7 @@ export class ZoneFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly plantationService = inject(PlantationService);
   private readonly accessService = inject(Bc01AccessService);
+  private readonly authService = inject(AuthService);
 
   readonly loading = signal(false);
   readonly accessLoading = signal(false);
@@ -53,6 +55,11 @@ export class ZoneFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.authService.currentUser?.role === 'agronomist') {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
     this.loadWriteAccess();
     const plantationId = Number(this.route.snapshot.paramMap.get('plantationId'));
     const zoneId = Number(this.route.snapshot.paramMap.get('zoneId'));

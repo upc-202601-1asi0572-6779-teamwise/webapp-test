@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, startWith } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Bc01AccessService } from '../../../../core/services/bc01-access.service';
 import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
 import { DeviceService } from '../../services/device.service';
@@ -25,6 +26,7 @@ export class DeviceFormComponent implements OnInit {
   private readonly deviceService = inject(DeviceService);
   private readonly plantationService = inject(PlantationService);
   private readonly accessService = inject(Bc01AccessService);
+  private readonly authService = inject(AuthService);
 
   readonly loading = signal(false);
   readonly accessLoading = signal(false);
@@ -54,6 +56,11 @@ export class DeviceFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.authService.currentUser?.role === 'agronomist') {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
     this.loadPlantations();
     this.loadWriteAccess();
     this.form.controls.plantationId.valueChanges.pipe(startWith(this.form.controls.plantationId.value)).subscribe((plantationId) => {
