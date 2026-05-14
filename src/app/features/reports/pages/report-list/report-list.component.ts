@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { getApiErrorMessage } from '../../../../core/utils/api-error-message';
@@ -18,6 +18,7 @@ export class ReportListComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly reportService = inject(ReportService);
   private readonly plantationService = inject(PlantationService);
+  private readonly router = inject(Router);
 
   readonly reports = signal<Report[]>([]);
   readonly plantations = signal<Plantation[]>([]);
@@ -50,6 +51,7 @@ export class ReportListComponent implements OnInit {
       .generateDraft(plantationId)
       .pipe(finalize(() => this.generatingPlantationId.set(0)))
       .subscribe({
+        next: (report) => this.router.navigate(['/reportes', report.id]),
         error: (err: unknown) => this.error.set(getApiErrorMessage(err, 'No se pudo generar el borrador.')),
       });
   }
