@@ -7,13 +7,35 @@
             Recomendaciones
           </h1>
           <p class="mt-2 max-w-3xl" style="font-family: var(--font-body); color: var(--color-text-secondary)">
-            Consulta las recomendaciones agronomicas publicadas por tu agronomo para cada una de tus plantaciones.
+            @if (isAgronomist()) {
+            Gestiona las recomendaciones agronomicas: revisa, aprueba y publica para tus productores.
+            } @else {
+            Consulta las recomendaciones agronomicas publicadas por tu agronomo.
+            }
           </p>
         </div>
-        <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
-          {{ recommendations().length }} publicadas
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          @if (isAgronomist()) {
+          <a routerLink="/recomendaciones/new" class="rounded-xl px-4 py-3 text-sm font-semibold" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            Nueva recomendacion
+          </a>
+          }
+          <div class="rounded-2xl px-4 py-3 text-sm" style="background: var(--color-bg-soft-cyan); color: var(--color-accent-cyan)">
+            {{ filteredRecommendations().length }} recomendaciones
+          </div>
         </div>
       </div>
+
+      @if (isAgronomist()) {
+      <div class="mt-4 flex gap-2">
+        <button (click)="selectTab('pending')" class="rounded-xl px-4 py-2 text-sm font-semibold transition" [style.background]="activeTab() === 'pending' ? 'var(--color-brand-primary)' : 'var(--color-bg-soft-2)'" [style.color]="activeTab() === 'pending' ? 'var(--color-text-inverse)' : 'var(--color-text-primary)'">
+          Pendientes
+        </button>
+        <button (click)="selectTab('published')" class="rounded-xl px-4 py-2 text-sm font-semibold transition" [style.background]="activeTab() === 'published' ? 'var(--color-brand-primary)' : 'var(--color-bg-soft-2)'" [style.color]="activeTab() === 'published' ? 'var(--color-text-inverse)' : 'var(--color-text-primary)'">
+          Publicadas
+        </button>
+      </div>
+      }
     </div>
 
     @if (loading()) {
@@ -25,23 +47,29 @@
     <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
       {{ error() }}
     </div>
-    } @else if (!recommendations().length) {
+    } @else if (!filteredRecommendations().length) {
     <div class="rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
-      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">Sin recomendaciones publicadas</h2>
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text-primary)">
+        @if (activeTab() === 'pending') { Sin recomendaciones pendientes } @else { Sin recomendaciones publicadas }
+      </h2>
       <p class="mt-2" style="color: var(--color-text-secondary)">
-        Tu agronomo aun no ha publicado recomendaciones para tus plantaciones. Las recomendaciones apareceran aqui cuando esten disponibles.
+        @if (activeTab() === 'pending') {
+        No hay recomendaciones que requieran revision en este momento.
+        } @else {
+        Aun no hay recomendaciones publicadas.
+        }
       </p>
     </div>
     } @else {
     <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-      @for (rec of recommendations(); track rec.id) {
+      @for (rec of filteredRecommendations(); track rec.id) {
       <a class="block rounded-[1.75rem] border px-6 py-6 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)" [routerLink]="['/recomendaciones', rec.id]">
         <div class="flex items-center justify-between gap-3">
           <span class="rounded-full px-3 py-1 text-xs font-medium" [style.background]="priorityColors[rec.priority] + '20'" [style.color]="priorityColors[rec.priority]">
             {{ priorityLabels[rec.priority] }}
           </span>
-          <span class="text-xs" style="color: var(--color-text-muted)">
-            {{ rec.generatedBy === 'ai' ? 'Generada por IA' : 'Redactada por agronomo' }}
+          <span class="rounded-full px-3 py-1 text-xs font-medium" [style.background]="statusColors[rec.status] + '18'" [style.color]="statusColors[rec.status]">
+            {{ statusLabels[rec.status] }}
           </span>
         </div>
 
@@ -55,16 +83,16 @@
         <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
           <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-2)">
             <p style="color: var(--color-text-muted)">Plantacion</p>
-            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ rec.plantationName }}</p>
+            <p class="mt-1 font-semibold truncate" style="color: var(--color-text-primary)">{{ rec.plantationName }}</p>
           </div>
           <div class="rounded-2xl px-4 py-3" style="background: var(--color-bg-soft-cyan)">
             <p style="color: var(--color-text-muted)">Zona</p>
-            <p class="mt-1 font-semibold" style="color: var(--color-text-primary)">{{ rec.zoneName }}</p>
+            <p class="mt-1 font-semibold truncate" style="color: var(--color-text-primary)">{{ rec.zoneName }}</p>
           </div>
         </div>
 
         <div class="mt-5 flex items-center justify-between text-sm" style="color: var(--color-text-muted)">
-          <span>{{ rec.publishedAt ? 'Publicada ' + (rec.publishedAt | date:'mediumDate') : '' }}</span>
+          <span>{{ rec.generatedBy === 'ai' ? 'IA' : 'Manual' }}</span>
           <span>Ver detalle</span>
         </div>
       </a>

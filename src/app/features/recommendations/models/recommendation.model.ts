@@ -26,3 +26,14 @@ export interface RecommendationListResponse {
   page: number;
   recommendations: Recommendation[];
 }
+
+export interface CreateRecommendationRequest {
+  plantationId: number;
+  monitoringZoneId: number;
+  alertId?: number | null;
+  title: string;
+  description: string;
+  recommendedAction: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  generatedBy: 'ai' | 'manual';
+}

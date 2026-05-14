@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Recommendation } from '../../models/recommendation.model';
 import { RecommendationService } from '../../services/recommendation.service';
 
@@ -12,10 +13,22 @@ import { RecommendationService } from '../../services/recommendation.service';
 })
 export class RecommendationListComponent implements OnInit {
   private readonly recommendationService = inject(RecommendationService);
+  private readonly authService = inject(AuthService);
 
-  readonly recommendations = signal<Recommendation[]>([]);
+  readonly allRecommendations = signal<Recommendation[]>([]);
   readonly loading = signal(false);
   readonly error = signal('');
+  readonly activeTab = signal<'pending' | 'published'>('published');
+
+  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+
+  readonly filteredRecommendations = computed(() => {
+    const recs = this.allRecommendations();
+    if (this.activeTab() === 'pending') {
+      return recs.filter((r) => r.status !== 'published');
+    }
+    return recs.filter((r) => r.status === 'published');
+  });
 
   readonly priorityColors: Record<string, string> = {
     critical: 'var(--color-danger)',
@@ -31,19 +44,39 @@ export class RecommendationListComponent implements OnInit {
     low: 'Baja',
   };
 
+  readonly statusColors: Record<string, string> = {
+    draft: 'var(--color-text-muted)',
+    pending_review: 'var(--color-warning)',
+    approved: 'var(--color-accent-cyan)',
+    published: 'var(--color-success)',
+  };
+
+  readonly statusLabels: Record<string, string> = {
+    draft: 'Borrador',
+    pending_review: 'Pendiente',
+    approved: 'Aprobada',
+    published: 'Publicada',
+  };
+
   ngOnInit(): void {
     this.load();
+  }
+
+  selectTab(tab: 'pending' | 'published'): void {
+    this.activeTab.set(tab);
   }
 
   private load(): void {
     this.loading.set(true);
     this.error.set('');
 
+    const params = this.isAgronomist() ? { size: 50 } : { status: 'published', size: 50 };
+
     this.recommendationService
-      .list({ status: 'published', size: 50 })
+      .list(params)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => this.recommendations.set(response.recommendations),
+        next: (response) => this.allRecommendations.set(response.recommendations),
         error: () => this.error.set('No se pudieron cargar las recomendaciones.'),
       });
   }

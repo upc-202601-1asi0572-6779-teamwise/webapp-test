@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { agronomistGuard } from '../../core/guards/agronomist.guard';
 
 export const recommendationRoutes: Routes = [
   {
@@ -6,6 +7,14 @@ export const recommendationRoutes: Routes = [
     loadComponent: () =>
       import('./pages/recommendation-list/recommendation-list.component').then(
         (m) => m.RecommendationListComponent,
+      ),
+  },
+  {
+    path: 'new',
+    canActivate: [agronomistGuard],
+    loadComponent: () =>
+      import('./pages/recommendation-form/recommendation-form.component').then(
+        (m) => m.RecommendationFormComponent,
       ),
   },
   {

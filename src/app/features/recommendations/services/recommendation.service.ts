@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Recommendation, RecommendationListResponse } from '../models/recommendation.model';
+import { CreateRecommendationRequest, Recommendation, RecommendationListResponse } from '../models/recommendation.model';
 
 @Injectable({ providedIn: 'root' })
 export class RecommendationService {
@@ -26,5 +26,17 @@ export class RecommendationService {
 
   getById(id: number): Observable<Recommendation> {
     return this.http.get<Recommendation>(`${this.api}/${id}`);
+  }
+
+  create(request: CreateRecommendationRequest): Observable<Recommendation> {
+    return this.http.post<Recommendation>(this.api, request);
+  }
+
+  approve(id: number): Observable<Recommendation> {
+    return this.http.put<Recommendation>(`${this.api}/${id}/approve`, {});
+  }
+
+  publish(id: number): Observable<Recommendation> {
+    return this.http.put<Recommendation>(`${this.api}/${id}/publish`, {});
   }
 }

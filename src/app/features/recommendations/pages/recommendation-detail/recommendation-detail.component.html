@@ -20,8 +20,8 @@
           <span class="rounded-full px-3 py-1 text-xs font-medium uppercase" [style.background]="priorityColors[rec.priority] + '20'" [style.color]="priorityColors[rec.priority]">
             {{ priorityLabels[rec.priority] }}
           </span>
-          <span class="rounded-full px-3 py-1 text-xs" style="background: var(--color-emerald-15); color: var(--color-success)">
-            Publicada
+          <span class="rounded-full px-3 py-1 text-xs font-medium" [style.background]="statusColors[rec.status] + '18'" [style.color]="statusColors[rec.status]">
+            {{ statusLabels[rec.status] }}
           </span>
           <span class="text-xs" style="color: var(--color-text-muted)">
             {{ rec.generatedBy === 'ai' ? 'Generada por IA' : 'Redactada por agronomo' }}
@@ -53,6 +53,33 @@
           <a [routerLink]="['/alertas', rec.alertId]" class="mt-2 inline-flex rounded-xl border px-4 py-3 text-sm font-semibold transition" style="border-color: var(--color-border-subtle); color: var(--color-text-secondary)">
             {{ rec.alertTitle }} &rarr;
           </a>
+        </div>
+        }
+
+        @if (isAgronomist()) {
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          @if (rec.status === 'pending_review') {
+          <button type="button" (click)="approve()" [disabled]="actionLoading() !== ''" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            {{ actionLoading() === 'approve' ? 'Aprobando...' : 'Aprobar recomendacion' }}
+          </button>
+          }
+          @if (rec.status === 'approved') {
+          <button type="button" (click)="publish()" [disabled]="actionLoading() !== ''" class="rounded-xl px-4 py-3 text-sm font-semibold disabled:opacity-50" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            {{ actionLoading() === 'publish' ? 'Publicando...' : 'Publicar recomendacion' }}
+          </button>
+          }
+        </div>
+        }
+
+        @if (actionError()) {
+        <div class="mt-4 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+          {{ actionError() }}
+        </div>
+        }
+
+        @if (actionSuccess()) {
+        <div class="mt-4 rounded-2xl border px-4 py-3 text-sm" style="background: var(--color-emerald-15); color: var(--color-success); border-color: var(--color-success)">
+          {{ actionSuccess() }}
         </div>
         }
       </div>
