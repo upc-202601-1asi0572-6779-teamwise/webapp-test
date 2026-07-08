@@ -1,0 +1,321 @@
+<section class="min-h-dvh overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10" style="background: var(--color-bg-page)">
+  <div class="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-6">
+    <div class="overflow-hidden rounded-[1.75rem] border px-5 py-5 sm:px-6 lg:px-7" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <div class="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="min-w-0">
+          <h1 class="break-words" style="font-family: var(--font-heading); font-size: clamp(1.8rem, 2.5vw, 2.5rem); font-weight: var(--font-weight-bold); line-height: 1.1; color: var(--color-text-primary)">
+            {{ headingText }}
+          </h1>
+          <p class="mt-2 max-w-3xl text-sm leading-6" style="color: var(--color-text-secondary)">
+            {{ subtitleText }}
+          </p>
+        </div>
+        <div class="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          @if (store.isAgronomist()) {
+          <button type="button" (click)="navigateToReports()" class="w-full rounded-xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition hover:opacity-90 sm:w-auto" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+            {{ newReportLabel }}
+          </button>
+          }
+          @if (store.plantations().length) {
+          <select (change)="selectPlantation(+($any($event.target).value))" class="w-full max-w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:border-transparent sm:min-w-64 lg:w-72" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
+            <option [value]="0">{{ allPlantationsLabel }}</option>
+            @for (p of store.plantations(); track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (!store.isAgronomist() && store.topRecommendation(); as topRec) {
+    <a [routerLink]="['/recomendaciones', topRec.id]" class="block overflow-hidden rounded-2xl border px-5 py-4 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-brand-primary); box-shadow: var(--shadow-card)">
+      <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-xs font-semibold uppercase tracking-wider" style="color: var(--color-brand-primary)">{{ topRecommendationEyebrow }}</p>
+          <p class="mt-0.5 truncate text-sm font-bold" style="color: var(--color-text-primary)">{{ topRec.recommendedAction }}</p>
+        </div>
+        <span class="text-sm font-semibold flex-shrink-0" style="color: var(--color-brand-primary)">{{ viewDetailLabel }} &rarr;</span>
+      </div>
+    </a>
+    }
+
+    @if (store.loading()) {
+    <div class="flex min-h-60 flex-col items-center justify-center gap-3 rounded-[1.75rem] border px-6 py-10" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle)">
+      <div class="h-8 w-8 animate-spin rounded-full border-2" style="border-color: var(--color-border-subtle); border-top-color: var(--color-brand-primary)"></div>
+      <p class="text-sm" style="color: var(--color-text-muted)">{{ loadingText }}</p>
+    </div>
+    } @else if (store.error()) {
+    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">
+      {{ store.error() }}
+    </div>
+    } @else {
+
+    <div class="grid min-w-0 gap-4 lg:grid-cols-3">
+      <div class="overflow-hidden rounded-2xl border px-5 py-4 lg:col-span-2" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+        <p class="truncate text-xs font-medium uppercase tracking-wider" style="color: var(--color-text-muted)">{{ alertSectionLabel }}</p>
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="min-w-0 rounded-xl px-4 py-3" style="background: var(--color-danger-10)">
+            <p class="text-2xl font-bold" style="color: var(--color-danger)">{{ store.alertCount().critical }}</p>
+            <p class="truncate text-xs font-medium" style="color: var(--color-danger)">{{ criticalLabel }}</p>
+          </div>
+          <div class="min-w-0 rounded-xl px-4 py-3" style="background: var(--color-warning-10)">
+            <p class="text-2xl font-bold" style="color: var(--color-warning)">{{ store.alertCount().warning }}</p>
+            <p class="truncate text-xs font-medium" style="color: var(--color-warning)">{{ warningLabel }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border px-5 py-4" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+        <p class="truncate text-xs font-medium uppercase tracking-wider" style="color: var(--color-text-muted)">{{ deviceSectionLabel }}</p>
+        <div class="mt-3 grid gap-2">
+          <div class="min-w-0 rounded-xl px-4 py-3" style="background: rgba(76,205,130,0.1)">
+            <p class="text-xl font-bold" style="color: var(--color-success)">{{ store.connectedCount() }}</p>
+            <p class="truncate text-xs font-medium" style="color: var(--color-success)">{{ connectedLabel }}</p>
+          </div>
+          @if (store.offlineCount()) {
+          <div class="min-w-0 rounded-xl px-4 py-3" style="background: var(--color-warning-10)">
+            <p class="text-xl font-bold" style="color: var(--color-warning)">{{ store.offlineCount() }}</p>
+            <p class="truncate text-xs font-medium" style="color: var(--color-warning)">{{ offlineLabel }}</p>
+          </div>
+          }
+          @if (store.disconnectedCount()) {
+          <div class="min-w-0 rounded-xl px-4 py-3" style="background: var(--color-danger-10)">
+            <p class="text-xl font-bold" style="color: var(--color-danger)">{{ store.disconnectedCount() }}</p>
+            <p class="truncate text-xs font-medium" style="color: var(--color-danger)">{{ disconnectedLabel }}</p>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (store.isAgronomist() && store.sparklineItems().length) {
+    <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <div class="min-w-0">
+        <h2 class="break-words font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ trendsHeading }}</h2>
+        <p class="mt-0.5 text-xs leading-5" style="color: var(--color-text-muted)">{{ trendsSubtitle }}</p>
+      </div>
+      <div class="mt-4 grid min-w-0 gap-4 md:grid-cols-3">
+        @for (item of store.sparklineItems(); track item.label) {
+        <div class="min-w-0 overflow-hidden rounded-xl px-4 py-4" style="background: var(--color-bg-soft-2)">
+          <div class="flex min-w-0 items-start justify-between gap-3">
+            <span class="min-w-0 truncate text-xs font-medium uppercase tracking-wider" style="color: var(--color-text-muted)">{{ item.label }}</span>
+            <span class="flex-shrink-0 text-sm font-bold" [style.color]="item.color">{{ item.currentValue | number:'1.1-1' }}{{ item.unit }}</span>
+          </div>
+          <div class="mt-3 min-w-0 overflow-hidden rounded-lg" style="background: var(--color-bg-surface)">
+            <svg viewBox="0 0 200 48" class="h-12 w-full" preserveAspectRatio="none">
+              <polyline [attr.points]="item.points" fill="none" [attr.stroke]="item.color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="mt-2 flex min-w-0 justify-between gap-3 text-xs" style="color: var(--color-text-muted)">
+            <span class="truncate">{{ item.vMin | number:'1.1-1' }}{{ item.unit }}</span>
+            <span class="truncate text-right">{{ item.vMax | number:'1.1-1' }}{{ item.unit }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (!store.isAgronomist() && store.trendCards().length) {
+    <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+      <div class="min-w-0">
+        <h2 class="break-words font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ growerTrendsHeading }}</h2>
+        <p class="mt-0.5 text-xs leading-5" style="color: var(--color-text-muted)">{{ growerTrendsSubtitle }}</p>
+      </div>
+      <div class="mt-4 grid min-w-0 gap-4 md:grid-cols-3">
+        @for (card of store.trendCards(); track card.label) {
+        <div class="min-w-0 overflow-hidden rounded-xl px-4 py-4 text-center" style="background: var(--color-bg-soft-2)">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full" [style.background]="card.color + '18'">
+            <svg class="h-6 w-6" [style.color]="card.color" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="card.icon"/></svg>
+          </div>
+          <p class="mt-3 break-words text-2xl font-bold" [style.color]="card.color">{{ card.currentValue | number:'1.1-1' }}<span class="text-sm font-normal">{{ card.unit }}</span></p>
+          <p class="mt-1 truncate text-xs font-medium" style="color: var(--color-text-muted)">{{ card.label }}</p>
+          <p class="mt-2 flex min-w-0 items-center justify-center gap-1 text-xs font-semibold"
+            [style.color]="card.direction === 'up' ? 'var(--color-warning)' : card.direction === 'down' ? 'var(--color-accent-cyan)' : 'var(--color-text-muted)'">
+            @if (card.direction === 'up') {
+            <svg class="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+            <span class="min-w-0 truncate">{{ trendUpLabel }} {{ card.delta | number:'1.1-1' }}{{ card.unit }}</span>
+            } @else if (card.direction === 'down') {
+            <svg class="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+            <span class="min-w-0 truncate">{{ trendDownLabel }} {{ card.delta | number:'1.1-1' }}{{ card.unit }}</span>
+            } @else {
+            <span class="truncate">{{ trendStableLabel }}</span>
+            }
+          </p>
+          @if (card.alertLevel) {
+          <p class="mt-2 truncate text-xs font-bold" [style.color]="card.alertLevel === 'critical' ? 'var(--color-danger)' : 'var(--color-warning)'">
+            {{ card.alertLevel === 'critical' ? urgentLabel : attentionLabel }}
+          </p>
+          }
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="grid min-w-0 gap-5 xl:grid-cols-2">
+      <div class="flex min-w-0 flex-col gap-5">
+        <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="break-words font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">
+              {{ healthSectionLabel }}
+            </h2>
+            @if (store.selectedPlantation()) {
+            <span class="truncate text-xs" style="color: var(--color-text-muted)">{{ store.selectedPlantation()?.name }}</span>
+            }
+          </div>
+
+          @if (store.zones().length) {
+          <div class="mt-3 flex min-w-0 flex-col gap-2">
+            @if (store.isAgronomist()) {
+              @for (zone of store.zones(); track zone.id) {
+              <div class="flex min-w-0 items-center gap-3 rounded-xl border px-3.5 py-3" style="border-color: var(--color-border-subtle)">
+                <span class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background]="store.healthColors[zone.cropHealthStatus]"></span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ zone.name }}</p>
+                  <p class="truncate text-xs" style="color: var(--color-text-secondary)">{{ zone.hectares | number:'1.0-0' }} {{ hectaresShortLabel }}</p>
+                </div>
+                <span class="max-w-[45%] truncate rounded-full px-2.5 py-0.5 text-xs font-medium flex-shrink-0" [style.background]="store.healthColors[zone.cropHealthStatus] + '18'" [style.color]="store.healthColors[zone.cropHealthStatus]">{{ store.healthLabels[zone.cropHealthStatus] }}</span>
+              </div>
+              }
+            } @else {
+              @for (zone of store.zoneHealthItems(); track zone.id) {
+              <div class="flex min-w-0 items-start gap-3 rounded-xl border px-3.5 py-3" style="border-color: var(--color-border-subtle)">
+                <span class="mt-1 inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background]="zone.statusColor"></span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ zone.name }}</p>
+                  <p class="break-words text-xs leading-5" style="color: var(--color-text-secondary)">
+                    {{ zone.hectares | number:'1.0-0' }} {{ hectaresShortLabel }}
+                    @if (zone.criticalParam) {
+                    &middot; <span [style.color]="zone.criticalParamColor">{{ zone.criticalParam }}</span>
+                    }
+                  </p>
+                </div>
+                <span class="max-w-[40%] truncate rounded-full px-2.5 py-0.5 text-xs font-medium flex-shrink-0" [style.background]="zone.statusColor + '18'" [style.color]="zone.statusColor">{{ zone.statusLabel }}</span>
+              </div>
+              }
+            }
+          </div>
+          } @else {
+          <p class="mt-3 text-sm" style="color: var(--color-text-secondary)">{{ selectPlantationHint }}</p>
+          }
+        </div>
+
+        @if (store.latestReadings().length) {
+        <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <h2 class="break-words font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ readingsHeading }}</h2>
+          <div class="mt-3 max-w-full overflow-x-auto">
+            <table class="min-w-[640px] text-sm">
+              <thead>
+                <tr style="color: var(--color-text-muted)">
+                  <th class="pb-2 pr-3 text-left text-xs font-medium">{{ tableHeaderVariable }}</th>
+                  <th class="pb-2 pr-3 text-left text-xs font-medium">{{ tableHeaderValue }}</th>
+                  <th class="pb-2 pr-3 text-left text-xs font-medium">{{ tableHeaderDevice }}</th>
+                  <th class="pb-2 text-left text-xs font-medium">{{ tableHeaderTime }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of store.latestReadings(); track r.id) {
+                <tr style="border-top: 1px solid var(--color-border-subtle)">
+                  <td class="py-2 pr-3 font-medium" style="color: var(--color-text-primary)">{{ r.label }}</td>
+                  <td class="py-2 pr-3" style="color: var(--color-text-primary)">{{ r.value }} {{ r.unit }}</td>
+                  <td class="py-2 pr-3" style="color: var(--color-text-muted)">{{ r.deviceSerial || r.deviceId }}</td>
+                  <td class="py-2 whitespace-nowrap" style="color: var(--color-text-muted)">{{ r.recordedAt | date:'shortTime' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="flex min-w-0 flex-col gap-5">
+        @if (store.activeAlerts().length) {
+        <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <div class="flex min-w-0 items-center justify-between gap-4">
+            <h2 class="truncate font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ recentAlertsHeading }}</h2>
+            <a routerLink="/alertas" class="flex-shrink-0 text-xs font-semibold" style="color: var(--color-brand-primary)">{{ viewAllLabel }}</a>
+          </div>
+          <div class="mt-3 flex min-w-0 flex-col gap-2">
+            @for (alert of store.activeAlerts(); track alert.id) {
+            <a [routerLink]="['/alertas', alert.id]" class="flex min-w-0 items-center gap-3 rounded-xl border px-3.5 py-3 transition" style="border-color: var(--color-border-subtle)">
+              <span class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background]="alert.alertLevel === 'critical' ? 'var(--color-danger)' : alert.alertLevel === 'warning' ? 'var(--color-warning)' : 'var(--color-accent-cyan)'"></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ alert.title }}</p>
+                <p class="truncate text-xs" style="color: var(--color-text-muted)">{{ alert.zoneName }} &middot; {{ alert.createdAt | date:'short' }}</p>
+              </div>
+            </a>
+            }
+          </div>
+        </div>
+        }
+
+        @if (store.recommendations().length) {
+        <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <div class="flex min-w-0 items-center justify-between gap-4">
+            <h2 class="truncate font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ recommendationsHeading }}</h2>
+            <a routerLink="/recomendaciones" class="flex-shrink-0 text-xs font-semibold" style="color: var(--color-brand-primary)">{{ viewAllLabel }}</a>
+          </div>
+          <div class="mt-3 flex min-w-0 flex-col gap-2">
+            @for (rec of store.recommendations(); track rec.id) {
+            <a [routerLink]="['/recomendaciones', rec.id]" class="flex min-w-0 items-center gap-3 rounded-xl border px-3.5 py-3 transition" style="border-color: var(--color-border-subtle)">
+              <span class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" [style.background]="rec.priority === 'critical' ? 'var(--color-danger)' : rec.priority === 'high' ? 'var(--color-warning)' : 'var(--color-success)'"></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ rec.title }}</p>
+                <p class="truncate text-xs" style="color: var(--color-text-muted)">{{ rec.plantationName }} &middot; {{ rec.zoneName }}</p>
+              </div>
+            </a>
+            }
+          </div>
+        </div>
+        }
+
+        @if (store.isAgronomist() && store.inspections().length) {
+        <div class="overflow-hidden rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <div class="flex min-w-0 items-center justify-between gap-4">
+            <h2 class="truncate font-semibold" style="font-size: 1.1rem; color: var(--color-text-primary)">{{ inspectionsHeading }}</h2>
+            <a routerLink="/inspecciones" class="flex-shrink-0 text-xs font-semibold" style="color: var(--color-brand-primary)">{{ viewAllLabel }}</a>
+          </div>
+          <div class="mt-3 flex min-w-0 flex-col gap-2">
+            @for (insp of store.inspections(); track insp.id) {
+            <a [routerLink]="['/inspecciones', insp.id]" class="min-w-0 rounded-xl border px-3.5 py-3 transition" style="border-color: var(--color-border-subtle)">
+              <div class="flex min-w-0 items-center gap-2">
+                <span class="text-xs font-medium rounded-full px-2.5 py-0.5 flex-shrink-0" style="background: var(--color-bg-soft-2); color: var(--color-text-muted)">{{ insp.inspectionDate | date:'shortDate' }}</span>
+                <span class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ insp.plantationName }}</span>
+              </div>
+              <p class="mt-1.5 line-clamp-2 text-xs" style="color: var(--color-text-secondary)">{{ insp.findings || insp.observations }}</p>
+            </a>
+            }
+          </div>
+        </div>
+        }
+
+        <a routerLink="/plantaciones" class="block overflow-hidden rounded-2xl border px-5 py-4 transition hover:-translate-y-0.5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
+          <p class="truncate text-xs font-medium uppercase tracking-wider" style="color: var(--color-text-muted)">
+            {{ plantationsLabel }}
+          </p>
+          <div class="mt-3 flex min-w-0 flex-wrap gap-3">
+            @for (p of store.plantations(); track p.id) {
+            <div class="max-w-full min-w-0 rounded-xl px-3 py-2" style="background: var(--color-bg-soft-2)">
+              <div class="flex min-w-0 items-center gap-1.5">
+                @if (p.overallHealth) {
+                <span class="inline-block h-2 w-2 rounded-full flex-shrink-0" [style.background]="p.overallHealth === 'critical' ? 'var(--color-danger)' : p.overallHealth === 'at_risk' ? 'var(--color-warning)' : 'var(--color-success)'"></span>
+                }
+                <p class="min-w-0 truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ p.name }}</p>
+              </div>
+              <p class="mt-1 truncate text-xs" style="color: var(--color-text-muted)">{{ p.totalHectares | number:'1.0-0' }} {{ hectaresShortLabel }} &middot; {{ phaseLabel(p.phenologicalPhase) }}</p>
+            </div>
+            }
+          </div>
+        </a>
+      </div>
+    </div>
+
+    }
+  </div>
+</section>
