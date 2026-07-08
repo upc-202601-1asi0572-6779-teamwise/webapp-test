@@ -50,3 +50,7 @@ AGENTS.md
 /plans
 skills-lock.json
 /commands
+
+# System / tooling artifacts
+/.atl
+/openspec
