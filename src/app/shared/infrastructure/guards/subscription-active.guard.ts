@@ -1,7 +1,7 @@
 ﻿import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { SubscriptionService } from '../../../features/subscription-and-user-management/infrastructure/subscription-api.service';
+import { SubscriptionService } from '../../../subscription-and-user-management/infrastructure/subscription-and-user-management-api';
 
 export const subscriptionActiveGuard: CanActivateFn = () => {
   const router = inject(Router);
