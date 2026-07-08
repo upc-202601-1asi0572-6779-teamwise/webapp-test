@@ -1,0 +1,655 @@
+{
+  "navbar": {
+    "profile": "Perfil",
+    "myPlan": "Mi plan",
+    "loginCTA": "Iniciar sesión",
+    "role": {
+      "agronomist": "Agrónomo",
+      "grower": "Productor"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Panel de control",
+    "plantationPortfolio": "Cartera de plantaciones",
+    "alerts": "Alertas",
+    "recommendations": "Recomendaciones",
+    "reports": "Reportes",
+    "inspections": "Inspecciones",
+    "operationsCenter": "Centro de operaciones",
+    "devices": "Dispositivos",
+    "mySubscription": "Mi suscripción",
+    "myProfile": "Mi perfil",
+    "logout": "Cerrar sesión",
+    "role": {
+      "agronomist": "Agrónomo",
+      "grower": "Productor"
+    }
+  },
+  "login": {
+    "heroBadge": "Centro de monitoreo y decisión agronómica",
+    "heroEyebrow": "SMART PALM / AGRONOMY DESK",
+    "heroTitle": "Supervisa alertas, lotes y decisiones técnicas.",
+    "heroDescription": "Ingresa a una consola pensada para el trabajo agronómico: seguimiento de plantaciones, inspecciones, recomendaciones y reportes con foco en decisiones rápidas y bien sustentadas.",
+    "featureAlerts": "Alertas priorizadas",
+    "featureRecommendations": "Recomendaciones publicables",
+    "featureReports": "Reportes técnicos",
+    "cardAlertsTitle": "Alertas",
+    "cardAlertsDesc": "Detecta zonas críticas y prioriza intervenciones sin perder contexto.",
+    "cardInspectionsTitle": "Inspecciones",
+    "cardInspectionsDesc": "Documenta hallazgos de campo y convierte observaciones en acciones claras.",
+    "cardReportsTitle": "Reportes",
+    "cardReportsDesc": "Presenta recomendaciones y estado técnico en un flujo listo para seguimiento.",
+    "formEyebrow": "ACCESO SEGURO",
+    "heroHeadline": "Inicia sesión en tu centro de control.",
+    "formSubtitle": "Continúa con tu seguimiento de campo, alertas y estado de suscripción.",
+    "emailLabel": "CORREO ELECTRÓNICO",
+    "emailPlaceholder": "tu@email.com",
+    "passwordLabel": "CONTRASEÑA",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "submitButton": "Iniciar sesión",
+    "loading": "Ingresando...",
+    "emailRequired": "Ingresa tu correo electrónico.",
+    "passwordRequired": "Ingresa tu contraseña.",
+    "emailInvalid": "Ingresa un correo válido.",
+    "invalidCredentials": "Credenciales incorrectas. Intenta de nuevo.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccountPrompt": "¿No tienes cuenta?",
+    "registerLink": "Regístrate"
+  },
+  "alert": {
+    "section": {
+      "management": "Gestion de alertas"
+    },
+    "list": {
+      "heading": {
+        "subtitle": "Monitoreo de condiciones criticas, alertas activas e historial de eventos por zona."
+      },
+      "badge": {
+        "active": "activas",
+        "critical": "criticas",
+        "unacknowledged": "sin confirmar"
+      },
+      "tab": {
+        "active": "Activas",
+        "resolved": "Historial"
+      },
+      "loading": "Cargando alertas...",
+      "emptyActive": "Sin alertas activas",
+      "emptyActiveDesc": "Todas las condiciones monitoreadas estan dentro de los rangos normales.",
+      "emptyResolved": "Sin historial",
+      "emptyResolvedDesc": "Aun no se han registrado alertas resueltas.",
+      "status": {
+        "confirmed": "Confirmada",
+        "pending": "Pendiente",
+        "resolved": "Resuelta"
+      },
+      "button": {
+        "acknowledge": "Confirmar recepcion",
+        "acknowledging": "Confirmando..."
+      },
+      "value": {
+        "label": "valor"
+      },
+      "range": {
+        "label": "Rango:"
+      }
+    },
+    "severity": {
+      "critical": "Critica",
+      "warning": "Advertencia",
+      "informative": "Informativa"
+    },
+    "variable": {
+      "temperature": "Temperatura",
+      "soilHumidity": "Humedad del suelo",
+      "soilPh": "pH del suelo"
+    },
+    "detail": {
+      "back": "← Volver a alertas",
+      "loading": "Cargando detalle...",
+      "measurement": "Medicion",
+      "expectedRange": "Rango esperado",
+      "current": "Actual:",
+      "plantation": "Plantacion",
+      "zone": "Zona",
+      "variable": "Variable",
+      "device": "Dispositivo",
+      "registered": "Registrada",
+      "confirmedOn": "Confirmada el",
+      "status": {
+        "active": "Activa"
+      }
+    },
+    "error": {
+      "noAlerts": "No se pudieron cargar las alertas.",
+      "acknowledge": "No se pudo confirmar la alerta.",
+      "noAlertDetail": "No se pudo cargar la alerta."
+    }
+  },
+  "dashboard": {
+    "heading": {
+      "agronomist": "Supervisión de cultivos",
+      "grower": "Mi cultivo"
+    },
+    "subtitle": {
+      "agronomist": "Monitoreo de todas las plantaciones a tu cargo.",
+      "grower": "Resumen del estado de tus plantaciones"
+    },
+    "newReport": "+ Nuevo reporte",
+    "allPlantations": "Todas las plantaciones",
+    "loading": "Cargando dashboard...",
+    "alerts": {
+      "agronomist": "Alertas activas",
+      "grower": "Alertas",
+      "criticalAgronomist": "Críticas",
+      "criticalGrower": "Urgentes",
+      "warningAgronomist": "Advertencias",
+      "warningGrower": "Atención",
+      "urgent": "Urgente",
+      "attention": "Atención"
+    },
+    "devices": {
+      "agronomist": "Dispositivos",
+      "grower": "Tus dispositivos",
+      "connected": "Conectados",
+      "offline": "Modo offline",
+      "disconnected": "Desconectados"
+    },
+    "trends": {
+      "heading": "Tendencias de parámetros",
+      "subtitle": "Evolución de variables clave en el tiempo"
+    },
+    "sparkline": {
+      "temperature": "Temperatura",
+      "soilHumidity": "Humedad del suelo",
+      "soilPh": "pH del suelo"
+    },
+    "trend": {
+      "up": "Subiendo",
+      "down": "Bajando",
+      "stable": "Estable",
+      "humidity": "Humedad del suelo",
+      "ph": "pH del suelo"
+    },
+    "growerTrends": {
+      "heading": "Cómo va tu cultivo",
+      "subtitle": "Mediciones más recientes de tus sensores"
+    },
+    "health": {
+      "agronomist": "Salud del cultivo",
+      "grower": "Estado de tus zonas",
+      "optimal": "Óptimo",
+      "atRisk": "En riesgo",
+      "critical": "Crítico"
+    },
+    "zones": {
+      "selectPlantation": "Selecciona una plantación para ver sus zonas."
+    },
+    "readings": {
+      "agronomist": "Últimas lecturas",
+      "grower": "Lecturas recientes"
+    },
+    "recentAlerts": "Alertas recientes",
+    "viewAll": "Ver todas",
+    "viewDetail": "Ver detalle",
+    "recommendations": "Recomendaciones",
+    "inspections": "Historial de intervenciones",
+    "topRecommendation": {
+      "eyebrow": "Tu agrónomo recomienda"
+    },
+    "units": {
+      "hectaresShort": "hect."
+    },
+    "phase": {
+      "production": "Producción",
+      "establishment": "Establecimiento"
+    },
+    "plantations": {
+      "agronomist": "Plantaciones",
+      "grower": "Tus plantaciones"
+    },
+    "table": {
+      "variable": "Variable",
+      "value": "Valor",
+      "device": "Dispositivo",
+      "time": "Hora"
+    }
+  },
+  "report": {
+    "list": {
+      "badge": {
+        "agronomist": "Segmento agronomo",
+        "grower": "Segmento productor"
+      },
+      "backDashboard": "Dashboard",
+      "heading": "Reportes",
+      "subtitle": {
+        "agronomist": "Genera, revisa y publica reportes tecnicos para tus productores.",
+        "grower": "Consulta los reportes tecnicos publicados por tu agronomo."
+      },
+      "counter": "reportes",
+      "tab": {
+        "drafts": "Borradores",
+        "published": "Publicados"
+      },
+      "newReport": "Nuevo reporte",
+      "draftHelp": "Genera un borrador automático consolidando zonas, alertas, lecturas y recomendaciones.",
+      "generateBtn": "Generar borrador",
+      "generating": "Generando...",
+      "selectPlantation": "Selecciona una plantacion",
+      "loading": "Cargando reportes...",
+      "emptyDrafts": "Sin borradores",
+      "emptyDraftsDesc": "Usa el formulario superior para generar un nuevo borrador.",
+      "emptyPublished": "Sin publicados",
+      "emptyPublishedDesc": "Aun no se han publicado reportes tecnicos.",
+      "goToDrafts": "Ir a borradores",
+      "agronomistFallback": "Agrónomo",
+      "reportDate": "Fecha del reporte",
+      "status": {
+        "published": "Publicado",
+        "draft": "Borrador"
+      }
+    },
+    "error": {
+      "load": "No se pudieron cargar los reportes.",
+      "loadDetail": "No se pudo cargar el reporte."
+    }
+  },
+  "rec": {
+    "list": {
+      "backDashboard": "Dashboard",
+      "badge": {
+        "agronomist": "Segmento agrónomo",
+        "grower": "Segmento productor"
+      },
+      "heading": "Recomendaciones",
+      "subtitle": {
+        "agronomist": "Gestiona las recomendaciones agronómicas: revisa, aprueba y publica para tus productores.",
+        "grower": "Consulta las recomendaciones agronómicas publicadas por tu agrónomo."
+      },
+      "counter": "recomendaciones",
+      "tab": {
+        "pending": "Pendientes",
+        "published": "Publicadas"
+      },
+      "newButton": "+ Nueva",
+      "loading": "Cargando recomendaciones...",
+      "emptyPending": "Sin pendientes",
+      "emptyPendingDesc": "No hay recomendaciones que requieran revisión.",
+      "emptyPublished": "Sin publicadas",
+      "emptyPublishedDesc": "Aún no se han publicado recomendaciones.",
+      "createFirst": "Crear primera recomendación",
+      "recommendedAction": "Acción recomendada",
+      "createdAt": "Fecha de creación",
+      "generatedBy": {
+        "ai": "Generada con IA",
+        "manual": "Creada manualmente"
+      },
+      "priority": {
+        "critical": "Crítica",
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      },
+      "status": {
+        "draft": "Borrador",
+        "pendingReview": "Pendiente",
+        "approved": "Aprobada",
+        "published": "Publicada"
+      }
+    },
+    "error": {
+      "load": "No se pudieron cargar las recomendaciones.",
+      "loadDetail": "No se pudo cargar la recomendacion."
+    }
+  },
+  "subscription": {
+    "plans": {
+      "backDashboard": "Dashboard",
+      "eyebrow": "Planes",
+      "heading": "Planes de suscripción",
+      "subtitleAgronomist": "Elige el plan ideal para tu cartera de productores.",
+      "subtitleGrower": "Elige el plan ideal para tus hectáreas.",
+      "loading": "Cargando planes...",
+      "badge": {
+        "mostPopular": "MÁS POPULAR",
+        "current": "PLAN ACTUAL"
+      },
+      "billing": {
+        "monthly": "Facturación mensual",
+        "yearly": "Facturación anual"
+      },
+      "perMonth": "/ mes",
+      "perMonthShort": "/mes",
+      "limits": {
+        "unlimited": "Ilimitado",
+        "unlimitedPlural": "Ilimitados",
+        "growers": "productores",
+        "reportsPerMonth": "reportes/mes",
+        "hectaresShort": "hect.",
+        "devices": "dispositivos",
+        "max": "máx.",
+        "period": "/mes"
+      },
+      "actions": {
+        "current": "Plan actual",
+        "subscribe": "Suscribirse",
+        "processing": "Procesando...",
+        "change": "Cambiar a este plan",
+        "changing": "Cambiando...",
+        "selectPayment": "Método de pago (visa, mastercard, etc.):",
+        "defaultPayment": "visa_ending_0000",
+        "paymentMethods": {
+          "visa": "Visa",
+          "mastercard": "Mastercard",
+          "amex": "American Express",
+          "yape": "Yape",
+          "plin": "Plin",
+          "transfer": "Transferencia"
+        }
+      },
+      "error": {
+        "load": "No se pudieron cargar los planes.",
+        "noActive": "No tienes una suscripción activa.",
+        "subscribe": "No se pudo completar la suscripción.",
+        "change": "No se pudo cambiar de plan.",
+        "missingPayment": "Indica un método de pago para continuar."
+      }
+    },
+    "mySubscription": {
+      "backDashboard": "Dashboard",
+      "eyebrow": "MI SUSCRIPCIÓN",
+      "loading": "Cargando información de tu suscripción...",
+      "errorTitle": "Mi suscripción",
+      "viewPlans": "Ver planes disponibles",
+      "summaryEyebrow": "RESUMEN RÁPIDO",
+      "actionsEyebrow": "ACCIONES DEL PLAN",
+      "capacityEyebrow": "CAPACIDAD DEL PLAN",
+      "capacityHeading": "Uso actual de recursos",
+      "statusEyebrow": "ESTADO DEL PLAN",
+      "cycleEyebrow": "CICLO ACTUAL",
+      "validity": "VIGENCIA",
+      "daysRemaining": "TIEMPO RESTANTE",
+      "daysRemainingHint": "días disponibles en tu ciclo actual",
+      "renewal": "RENOVACIÓN",
+      "renewalAuto": "Automática",
+      "renewalManual": "Manual",
+      "renewalAutoDesc": "Se renueva al finalizar el periodo.",
+      "renewalManualDesc": "Requiere acción manual.",
+      "autoRenewEnabled": "Renovación automática activada",
+      "autoRenewDisabled": "Renovación automática desactivada",
+      "autoRenewEnabledDesc": "Tu cuenta se mantendrá activa automáticamente al finalizar el periodo actual.",
+      "autoRenewDisabledDesc": "Tu acceso continuará hasta la fecha de vencimiento y no se renovará automáticamente.",
+      "validityFromTo": "hasta",
+      "cycleStart": "Inicio",
+      "cycleEnd": "Fin",
+      "status": {
+        "active": "Plan activo",
+        "inactive": "Plan inactivo",
+        "expired": "Plan vencido",
+        "cancelled": "Plan cancelado",
+        "renewing": "Renovando...",
+        "cancelling": "Cancelando..."
+      },
+      "statusShort": {
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "expired": "Vencido",
+        "cancelled": "Cancelado"
+      },
+      "summaryLabels": {
+        "status": "Estado",
+        "hectaresMax": "Hectáreas máximas",
+        "devicesMax": "Dispositivos máximos",
+        "growersMax": "Productores máximos",
+        "reportsMax": "Reportes máximos"
+      },
+      "usageLabels": {
+        "hectaresMonitored": "Hectáreas monitoreadas",
+        "devicesConnected": "Dispositivos conectados",
+        "growersManaged": "Productores gestionados",
+        "reportsGenerated": "Reportes generados"
+      },
+      "actions": {
+        "renew": "Renovar suscripción",
+        "renewing": "Renovando...",
+        "renewHelp": "Extiende tu acceso por un periodo adicional.",
+        "change": "Cambiar de plan",
+        "changing": "Cambiando...",
+        "changeHelp": "Explora otros planes disponibles para tu segmento.",
+        "cancel": "Desactivar renovación",
+        "cancelling": "Cancelando...",
+        "cancelHelp": "Mantendrás el acceso hasta la fecha de vencimiento."
+      },
+      "subtitles": {
+        "grower": "Controla el estado de tu plan, revisa tu capacidad disponible y gestiona la renovación de manera centralizada.",
+        "agronomist": "Supervisa los productores a tu cargo, la capacidad de tu plan y la generación de reportes técnicos."
+      },
+      "error": {
+        "load": "No se pudo cargar la suscripción.",
+        "renew": "Error al renovar la suscripción.",
+        "cancel": "Error al cancelar la renovación."
+      }
+    },
+    "profile": {
+      "backDashboard": "Dashboard",
+      "loading": "Cargando perfil...",
+      "editBtn": "Editar perfil",
+      "editing": {
+        "heading": "Editar información",
+        "fullName": "Nombre completo",
+        "phone": "Teléfono",
+        "region": "Región",
+        "city": "Ciudad",
+        "save": "Guardar cambios",
+        "saving": "Guardando...",
+        "cancel": "Cancelar"
+      },
+      "fields": {
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "location": "Ubicación",
+        "subscription": "Suscripción",
+        "planStatus": "Estado del plan"
+      },
+      "statusShort": {
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "expired": "Vencido"
+      },
+      "noActivePlan": "Sin plan activo",
+      "until": "hasta",
+      "role": {
+        "palm_grower": "Productor",
+        "agronomist": "Agrónomo"
+      },
+      "error": {
+        "load": "No se pudo cargar el perfil.",
+        "save": "Error al guardar los cambios."
+      }
+    }
+  },
+  "ftm": {
+    "error": {
+      "loadPlantations": "No se pudieron cargar las plantaciones.",
+      "loadPlantation": "No se pudo cargar la plantacion.",
+      "loadZones": "No se pudieron cargar las zonas.",
+      "loadInspections": "No se pudieron cargar las inspecciones."
+    }
+  },
+  "notifications": {
+    "markError": "No se pudo marcar como leída.",
+    "markAllError": "No se pudo marcar todas como leídas.",
+    "loadError": "No se pudieron cargar las notificaciones."
+  },
+  "device": {
+    "list": {
+      "backDashboard": "Dashboard",
+      "heading": "Mis dispositivos",
+      "subtitle": "Gestiona los sensores IoT asignados a tus plantaciones. Monitorea su estado operativo y conectividad en tiempo real.",
+      "allPlantations": "Todas las plantaciones",
+      "counter": "dispositivos",
+      "register": "Registrar dispositivo",
+      "loading": "Cargando dispositivos...",
+      "emptyTitle": "Todavía no hay dispositivos registrados",
+      "emptyDescription": "Registra tu primer sensor IoT para comenzar a recibir lecturas de suelo y clima en tiempo real.",
+      "registerFirst": "Registrar mi primer dispositivo",
+      "sampling": "Muestreo",
+      "mode": "Modo",
+      "viewDetail": "Ver detalle",
+      "units": {
+        "minutes": "min"
+      },
+      "connectivity": {
+        "connected": "Conectado",
+        "offlineMode": "Modo offline",
+        "disconnected": "Desconectado"
+      },
+      "health": {
+        "healthy": "Saludable",
+        "warning": "Atención",
+        "critical": "Crítico"
+      },
+      "transmission": {
+        "realtime": "Tiempo real",
+        "batch": "Por lotes"
+      },
+      "activation": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      }
+    }
+  },
+  "plant": {
+    "list": {
+      "backDashboard": "Dashboard",
+      "badge": {
+        "agronomist": "Segmento agrónomo",
+        "grower": "Segmento productor"
+      },
+      "heading": {
+        "agronomist": "Cartera de plantaciones",
+        "grower": "Mis plantaciones"
+      },
+      "subtitle": {
+        "agronomist": "Supervisión técnica de todas las plantaciones a tu cargo.",
+        "grower": "Gestiona tus cultivos, zonas de monitoreo y dispositivos asociados."
+      },
+      "counter": "plantaciones",
+      "loading": "Cargando plantaciones...",
+      "empty": "Sin plantaciones registradas",
+      "emptyDesc": "Registra tu primera plantación para comenzar el monitoreo por zonas y dispositivos.",
+      "createFirst": "Crear mi primera plantación",
+      "createNew": "+ Nueva plantación",
+      "hectaresShort": "hect.",
+      "zones": "Zonas",
+      "devices": "Dispositivos",
+      "soil": "Suelo",
+      "phase": {
+        "produccion": "Producción",
+        "establecimiento": "Establecimiento"
+      },
+      "health": {
+        "critical": "Crítico",
+        "atRisk": "En riesgo",
+        "optimal": "Óptimo"
+      },
+      "soilTypes": {
+        "arcilloso_humedo": "Arcilloso húmedo",
+        "franco_arenoso": "Franco arenoso",
+        "franco_arcilloso": "Franco arcilloso",
+        "arcilloso": "Arcilloso",
+        "franco": "Franco",
+        "arenoso": "Arenoso"
+      },
+      "error": {
+        "load": "No se pudieron cargar las plantaciones."
+      }
+    },
+    "detail": {
+      "back": {
+        "agronomist": "Volver a cartera",
+        "grower": "Volver a plantaciones"
+      },
+      "loading": "Cargando detalle...",
+      "health": {
+        "critical": "Crítico",
+        "atRisk": "En riesgo",
+        "optimal": "Óptimo",
+        "zone": {
+          "critical": "Crítico",
+          "atRisk": "Atención"
+        }
+      },
+      "phase": {
+        "produccion": "En producción",
+        "establecimiento": "En establecimiento"
+      },
+      "zones": "Zonas",
+      "devices": "Dispositivos",
+      "alerts": "Alertas",
+      "soil": "Suelo:",
+      "age": "Antigüedad:",
+      "updated": "Actualizado:",
+      "editBtn": "Editar plantación",
+      "addZoneBtn": "Agregar zona",
+      "monitoringZones": "Zonas de monitoreo",
+      "zonesRegistered": "zonas registradas",
+      "loadingZones": "Cargando zonas...",
+      "noZones": "Sin zonas registradas",
+      "noZonesDescAgronomist": "Esta plantación aún no tiene zonas de monitoreo definidas.",
+      "noZonesDescGrower": "Crea la primera zona para preparar la asignación de dispositivos.",
+      "createFirstZone": "Crear primera zona",
+      "soilTypes": {
+        "arcillosoHumedo": "Arcilloso húmedo",
+        "francoArenoso": "Franco arenoso",
+        "francoArcilloso": "Franco arcilloso",
+        "arenoso": "Arenoso"
+      },
+      "noDescription": "Sin descripción.",
+      "error": {
+        "invalid": "Plantación no válida.",
+        "load": "No se pudo cargar la plantación."
+      }
+    }
+  },
+  "insp": {
+    "list": {
+      "backDashboard": "Dashboard",
+      "badge": {
+        "agronomist": "Segmento agrónomo",
+        "grower": "Segmento productor"
+      },
+      "heading": "Inspecciones de campo",
+      "subtitle": "Historial de inspecciones técnicas realizadas en las plantaciones a tu cargo.",
+      "counter": "inspecciones",
+      "loading": "Cargando inspecciones...",
+      "empty": "Sin inspecciones",
+      "emptyDesc": "No hay inspecciones de campo registradas en el sistema.",
+      "findingsLabel": "Hallazgos",
+      "observationsLabel": "Observaciones",
+      "inspectionDateLabel": "Fecha de inspección",
+      "agronomistFallback": "Agrónomo",
+      "error": {
+        "load": "No se pudieron cargar las inspecciones."
+      }
+    },
+    "detail": {
+      "back": "Volver a inspecciones",
+      "badge": "Inspección de campo",
+      "loading": "Cargando inspección...",
+      "observations": "Observaciones",
+      "findings": "Hallazgos",
+      "summary": "Resumen",
+      "interventions": "Intervenciones",
+      "noInterventions": "No se registraron intervenciones asociadas a esta inspección.",
+      "executedBy": "Ejecutado por",
+      "on": "el",
+      "result": "Resultado",
+      "error": {
+        "invalid": "Inspección no válida.",
+        "load": "No se pudo cargar la inspección."
+      }
+    }
+  }
+}
