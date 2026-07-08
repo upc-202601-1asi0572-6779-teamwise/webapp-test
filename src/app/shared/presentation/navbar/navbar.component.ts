@@ -1,42 +1,38 @@
 ﻿import { Component, HostListener, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../shared/infrastructure/auth.service';
 import { User } from '../../../shared/domain/user.model';
+import { LocaleService } from '../../../i18n/locale.service';
+import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [NotificationDropdownComponent],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  menuOpen = false;
+  readonly localeService = inject(LocaleService);
 
   get currentUser(): User | null {
     return this.authService.currentUser;
   }
 
-  get userRoleImage(): string {
-    return this.currentUser?.role === 'agronomist'
-      ? '/images/segment/agronomist.png'
-      : '/images/segment/palm_grower.png';
+  get toggleLabel(): string {
+    return this.localeService.locale() === 'es' ? 'English' : 'Español';
   }
 
-  toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
+  switchLanguage(): void {
+    this.localeService.toggle();
   }
 
-  closeMenu(): void {
-    this.menuOpen = false;
-  }
+  toggleMenu(): void {}
+
+  closeMenu(): void {}
 
   @HostListener('window:resize')
-  onResize(): void {
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      this.menuOpen = false;
-    }
-  }
+  onResize(): void {}
 
   logout(): void {
     this.authService.logout();

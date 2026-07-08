@@ -2,9 +2,9 @@
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize, interval, startWith, Subscription, switchMap } from 'rxjs';
-import { getApiErrorMessage } from '../../../shared/infrastructure/api-error-message';
-import { Notification } from '../../../features/alert-and-notification/domain/notification.model';
-import { NotificationService } from '../../../shared/infrastructure/notification.service';
+import { getApiErrorMessage } from '../../infrastructure/api-error-message';
+import { Notification } from '../../../alert-and-notification/domain/model/notification.entity';
+import { NotificationService } from '../../infrastructure/notification.service';
 
 const DEEP_LINK_MAP: Record<string, string> = {
   alert: '/alertas',
@@ -74,7 +74,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
           );
         },
         error: (error: unknown) =>
-          this.actionError.set(getApiErrorMessage(error, 'No se pudo marcar como leida.')),
+          this.actionError.set(getApiErrorMessage(error, $localize`:@@notifications.markError:No se pudo marcar como leída.`)),
       });
   }
 
@@ -89,7 +89,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
           this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
         },
         error: (error: unknown) =>
-          this.actionError.set(getApiErrorMessage(error, 'No se pudo marcar todas como leidas.')),
+          this.actionError.set(getApiErrorMessage(error, $localize`:@@notifications.markAllError:No se pudo marcar todas como leídas.`)),
       });
   }
 
@@ -115,7 +115,7 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => this.notifications.set(response.notifications),
         error: (error: unknown) =>
-          this.actionError.set(getApiErrorMessage(error, 'No se pudieron cargar las notificaciones.')),
+          this.actionError.set(getApiErrorMessage(error, $localize`:@@notifications.loadError:No se pudieron cargar las notificaciones.`)),
       });
   }
 
