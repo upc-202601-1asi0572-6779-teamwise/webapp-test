@@ -1,93 +1,25 @@
-<nav class="px-6 py-3 flex items-center justify-between" style="background: var(--color-brand-deep)">
-  <a routerLink="/subscription/plans" class="flex items-center gap-3 font-bold tracking-tight" style="font-family: var(--font-heading); font-size: var(--font-size-h3); color: var(--color-brand-secondary); text-decoration: none">
-    <img src="/images/logo/smartPalmLogo.png" alt="Smart Palm" class="h-10 w-auto object-contain" />
-    <span>Smart Palm</span>
-  </a>
-
-  @if (currentUser; as user) {
-  <div class="flex items-center gap-3 sm:gap-4">
-    <button type="button" class="relative flex h-11 w-11 items-center justify-center rounded-full transition hover:scale-[1.03]" style="background: var(--color-white-08); border: 1px solid var(--color-white-12); color: var(--color-text-inverse); backdrop-filter: var(--blur-glass)">
-      <span class="absolute right-3 top-3 h-2.5 w-2.5 rounded-full" style="background: var(--color-brand-secondary); box-shadow: 0 0 0 4px rgba(76, 205, 130, 0.18)"></span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"/>
-        <path d="M9 17a3 3 0 0 0 6 0"/>
-      </svg>
+<nav class="px-6 py-3 flex items-center justify-end" style="background: var(--color-brand-deep)">
+  <div class="flex items-center gap-3">
+    <button
+      type="button"
+      data-testid="locale-toggle"
+      (click)="switchLanguage()"
+      [attr.aria-label]="toggleLabel"
+      class="relative inline-flex h-11 w-[88px] items-center rounded-full px-1 transition hover:opacity-90"
+      style="background: var(--color-white-08); border: 1px solid var(--color-white-12); color: var(--color-text-inverse); font-family: var(--font-heading)">
+      <span
+        class="absolute top-1 h-8 w-10 rounded-full transition-all duration-200"
+        [style.left]="localeService.locale() === 'es' ? '4px' : '42px'"
+        style="background: var(--color-brand-secondary); box-shadow: 0 8px 18px rgba(76, 205, 130, 0.28)"
+      ></span>
+      <span class="relative z-10 flex w-full items-center justify-between px-2 text-xs font-bold tracking-wide">
+        <span [style.color]="localeService.locale() === 'es' ? 'var(--color-brand-deep)' : 'var(--color-white-60)'">ES</span>
+        <span [style.color]="localeService.locale() === 'en' ? 'var(--color-brand-deep)' : 'var(--color-white-60)'">EN</span>
+      </span>
     </button>
-
-    <div class="group relative" (mouseleave)="closeMenu()">
-      <button
-        type="button"
-        (click)="toggleMenu()"
-        class="flex items-center gap-3 rounded-full pl-1 pr-4 py-1.5 text-left transition hover:scale-[1.01]"
-        style="background: var(--color-white-08); border: 1px solid var(--color-white-12); backdrop-filter: var(--blur-glass)"
-      >
-        <span class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border" style="background: rgba(255,255,255,0.1); border-color: var(--color-white-12)">
-          <img [src]="userRoleImage" [alt]="user.role" class="h-full w-full object-cover" />
-        </span>
-        <span class="hidden min-w-0 sm:block">
-          <span class="block truncate" style="font-family: var(--font-heading); font-size: 0.98rem; color: var(--color-text-inverse)">
-            {{ user.fullName }}
-          </span>
-          <span class="block" style="font-family: var(--font-body); font-size: 0.78rem; color: var(--color-white-60)">
-            {{ user.role === 'agronomist' ? 'Agronomo' : 'Productor' }}
-          </span>
-        </span>
-        <span class="hidden lg:flex h-9 w-9 items-center justify-center rounded-full transition" style="background: rgba(255,255,255,0.08); color: var(--color-white-75)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="4" y1="7" x2="20" y2="7"/>
-            <line x1="7" y1="12" x2="20" y2="12"/>
-            <line x1="10" y1="17" x2="20" y2="17"/>
-          </svg>
-        </span>
-      </button>
-
-      <div
-        class="invisible absolute right-0 top-[calc(100%+0.75rem)] z-20 w-[13rem] translate-y-2 rounded-[1.35rem] p-2 opacity-0 shadow-[0_22px_50px_rgba(3,14,9,0.28)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:pointer-events-auto"
-        [class.visible]="menuOpen"
-        [class.opacity-100]="menuOpen"
-        [class.translate-y-0]="menuOpen"
-        [class.pointer-events-none]="!menuOpen"
-        [class.pointer-events-auto]="menuOpen"
-        style="background: rgba(11, 38, 24, 0.95); border: 1px solid var(--color-white-12); backdrop-filter: blur(18px)"
-      >
-        <a
-          routerLink="/profile"
-          routerLinkActive="opacity-100"
-          (click)="closeMenu()"
-          class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:translate-x-0.5"
-          style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-text-inverse); text-decoration: none"
-        >
-          <span class="flex h-9 w-9 items-center justify-center rounded-full" style="background: rgba(255,255,255,0.08)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 21a8 8 0 0 0-16 0"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </span>
-          <span>Perfil</span>
-        </a>
-        <a
-          routerLink="/subscription/me"
-          routerLinkActive="opacity-100"
-          (click)="closeMenu()"
-          class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:translate-x-0.5"
-          style="font-family: var(--font-body); font-size: 0.95rem; color: var(--color-text-inverse); text-decoration: none"
-        >
-          <span class="flex h-9 w-9 items-center justify-center rounded-full" style="background: rgba(255,255,255,0.08)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="5" width="18" height="14" rx="2"/>
-              <path d="M8 9h8"/>
-              <path d="M8 13h5"/>
-            </svg>
-          </span>
-          <span>Mi plan</span>
-        </a>
-      </div>
-    </div>
+ 
+    @if (currentUser) {
+      <app-notification-dropdown />
+    }
   </div>
-  } @else {
-  <a routerLink="/auth/login" class="transition px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90"
-    style="background: var(--color-brand-secondary); color: var(--color-brand-deep); font-family: var(--font-heading); text-decoration: none; border-radius: var(--radius-md)">
-    Iniciar sesi&oacute;n
-  </a>
-  }
 </nav>

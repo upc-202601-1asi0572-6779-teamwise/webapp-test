@@ -2,7 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { NotificationCount, NotificationListResponse } from '../../features/alert-and-notification/domain/notification.model';
+import { NotificationCount, NotificationListResponse } from '../../alert-and-notification/domain/model/notification.entity';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
