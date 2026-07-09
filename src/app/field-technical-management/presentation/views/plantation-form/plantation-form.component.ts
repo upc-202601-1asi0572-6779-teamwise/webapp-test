@@ -6,6 +6,7 @@ import { Bc01AccessService } from '../../../infrastructure/bc01-access.service';
 import { getApiErrorMessage } from '../../../../shared/infrastructure/api-error-message';
 import { PlantationService } from '../../../infrastructure/plantation-api.service';
 import { CreatePlantationRequest, Plantation } from '../../../domain/model/plantation.entity';
+import { TranslationService } from '../../../../i18n/translation.service';
 
 @Component({
   selector: 'app-plantation-form',
@@ -18,6 +19,7 @@ export class PlantationFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly plantationService = inject(PlantationService);
   private readonly accessService = inject(Bc01AccessService);
+  private readonly t = inject(TranslationService);
 
   readonly soilTypes = ['arcilloso_humedo', 'franco_arenoso', 'franco_arcilloso', 'arenoso'];
   readonly phenologicalPhases = ['produccion', 'establecimiento'] as const;
@@ -57,15 +59,41 @@ export class PlantationFormComponent implements OnInit {
     }
   }
 
-  get title(): string {
-    return this.isEditMode() ? 'Editar plantacion' : 'Nueva plantacion';
+  get backLabel(): string {
+    return this.isEditMode()
+      ? this.t.translate('plant.form.backDetail')
+      : this.t.translate('plant.form.backList');
   }
+
+  get loadingText(): string { return this.t.translate('plant.form.loading'); }
+
+  get title(): string {
+    return this.isEditMode()
+      ? this.t.translate('plant.form.titleEdit')
+      : this.t.translate('plant.form.titleNew');
+  }
+
+  get subtitleText(): string { return this.t.translate('plant.form.subtitle'); }
+  get nameLabel(): string { return this.t.translate('plant.form.name'); }
+  get locationLabel(): string { return this.t.translate('plant.form.location'); }
+  get totalHectaresLabel(): string { return this.t.translate('plant.form.totalHectares'); }
+  get soilTypeLabel(): string { return this.t.translate('plant.form.soilType'); }
+  get cropAgeLabel(): string { return this.t.translate('plant.form.cropAge'); }
+  get cropAgePlaceholder(): string { return this.t.translate('plant.form.cropAgePlaceholder'); }
+  get phenologicalPhaseLabel(): string { return this.t.translate('plant.form.phenologicalPhase'); }
+  get latitudeLabel(): string { return this.t.translate('plant.form.latitude'); }
+  get longitudeLabel(): string { return this.t.translate('plant.form.longitude'); }
+  get cancelLabel(): string { return this.t.translate('plant.form.cancel'); }
 
   get submitLabel(): string {
     if (this.saving()) {
-      return this.isEditMode() ? 'Guardando...' : 'Creando...';
+      return this.isEditMode()
+        ? this.t.translate('plant.form.saving')
+        : this.t.translate('plant.form.creating');
     }
-    return this.isEditMode() ? 'Guardar cambios' : 'Crear plantacion';
+    return this.isEditMode()
+      ? this.t.translate('plant.form.submitSave')
+      : this.t.translate('plant.form.submitCreate');
   }
 
   get formDisabled(): boolean {
@@ -75,12 +103,28 @@ export class PlantationFormComponent implements OnInit {
   }
 
   get hectareLimitMessage(): string {
-    return `Ya usaste todas las hectareas de tu plan ${this.planName()} (${this.usedHectares()}/${this.maxHectares()}). No puedes registrar mas plantaciones. Considera actualizar tu plan.`;
+    return this.t
+      .translate('plant.form.hectareLimit')
+      .replace('{plan}', this.planName())
+      .replace('{used}', String(this.usedHectares()))
+      .replace('{max}', String(this.maxHectares()));
+  }
+
+  soilTypeLabelFor(value: string): string {
+    const key = `plant.form.soilTypes.${value}`;
+    const translated = this.t.translate(key);
+    return translated === key ? value : translated;
+  }
+
+  phaseLabelFor(value: string): string {
+    const key = `plant.form.phase.${value}`;
+    const translated = this.t.translate(key);
+    return translated === key ? value : translated;
   }
 
   save(): void {
     if (!this.canWrite()) {
-      this.error.set(this.accessMessage() || 'Necesitas una suscripcion activa para continuar.');
+      this.error.set(this.accessMessage() || this.t.translate('plant.form.needSubscription'));
       return;
     }
 
@@ -101,7 +145,8 @@ export class PlantationFormComponent implements OnInit {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (plantation) => this.router.navigate(['/plantaciones', plantation.id]),
-        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo guardar la plantacion.')),
+        error: (error: unknown) =>
+          this.error.set(getApiErrorMessage(error, this.t.translate('plant.form.errorSave'))),
       });
   }
 
@@ -129,7 +174,8 @@ export class PlantationFormComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (plantation) => this.patchForm(plantation),
-        error: (error: unknown) => this.error.set(getApiErrorMessage(error, 'No se pudo cargar la plantacion.')),
+        error: (error: unknown) =>
+          this.error.set(getApiErrorMessage(error, this.t.translate('plant.form.errorLoad'))),
       });
   }
 
@@ -145,5 +191,4 @@ export class PlantationFormComponent implements OnInit {
       longitude: plantation.longitude ?? 0,
     });
   }
-
 }

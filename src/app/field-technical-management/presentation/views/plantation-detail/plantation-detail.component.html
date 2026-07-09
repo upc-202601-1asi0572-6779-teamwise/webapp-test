@@ -53,9 +53,18 @@
 
       <div class="px-6 py-5 sm:px-8" style="background: var(--color-bg-surface); border-top: 1px solid var(--color-border-subtle)">
         <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+          @if (p.soilType && p.soilType !== '—' && p.soilType !== '-') {
           <span style="color: var(--color-text-muted)">{{ soilLabel }} <span style="color: var(--color-text-primary); font-weight: 500">{{ soilTypeLabel(p.soilType) }}</span></span>
+          }
+          @if (p.cropAge && p.cropAge !== '—') {
           <span style="color: var(--color-text-muted)">{{ ageLabel }} <span style="color: var(--color-text-primary); font-weight: 500">{{ p.cropAge }}</span></span>
+          }
+          @if (p.updatedAt) {
           <span style="color: var(--color-text-muted)">{{ updatedLabel }} <span style="color: var(--color-text-primary); font-weight: 500">{{ p.updatedAt | date:'mediumDate' }}</span></span>
+          }
+          @if (isAgronomist() && (!p.soilType || p.soilType === '—')) {
+          <span style="color: var(--color-text-muted)">{{ supervisionNote }}</span>
+          }
         </div>
       </div>
     </div>

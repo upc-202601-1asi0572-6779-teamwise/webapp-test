@@ -1,13 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../shared/infrastructure/auth.service';
-import { AlertService } from '../../../../alert-and-notification/infrastructure/alert-and-notification-api';
-import { Plantation } from '../../../domain/model/plantation.entity';
-import { Zone } from '../../../domain/model/zone.entity';
 import { Alert } from '../../../../alert-and-notification/domain/model/alert.entity';
-import { PlantationService } from '../../../infrastructure/plantation-api.service';
+import { FieldTechnicalManagementStore } from '../../../application/field-technical-management.store';
+import { TranslationService } from '../../../../i18n/translation.service';
 
 @Component({
   selector: 'app-plantation-detail',
@@ -16,18 +14,19 @@ import { PlantationService } from '../../../infrastructure/plantation-api.servic
 })
 export class PlantationDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly plantationService = inject(PlantationService);
-  private readonly alertService = inject(AlertService);
+  private readonly store = inject(FieldTechnicalManagementStore);
   private readonly authService = inject(AuthService);
+  private readonly t = inject(TranslationService);
 
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
+  readonly features = environment.features;
 
-  readonly plantation = signal<Plantation | null>(null);
-  readonly zones = signal<Zone[]>([]);
+  readonly plantation = this.store.plantation;
+  readonly zones = this.store.zones;
   readonly activeAlerts = signal<Alert[]>([]);
-  readonly loading = signal(false);
-  readonly zonesLoading = signal(false);
-  readonly error = signal('');
+  readonly loading = this.store.plantationLoading;
+  readonly zonesLoading = this.store.zonesLoading;
+  readonly error = this.store.plantationError;
 
   readonly healthColor: Record<string, string> = {
     optimal: 'var(--color-success)',
@@ -52,154 +51,76 @@ export class PlantationDetailComponent implements OnInit {
     return map;
   });
 
-  // ── i18n getters/methods ──
-
   get backLabel(): string {
     return this.isAgronomist()
-      ? $localize`:@@plant.detail.back.agronomist:Volver a cartera`
-      : $localize`:@@plant.detail.back.grower:Volver a plantaciones`;
+      ? this.t.translate('plant.detail.back.agronomist')
+      : this.t.translate('plant.detail.back.grower');
   }
 
-  get loadingText(): string {
-    return $localize`:@@plant.detail.loading:Cargando detalle...`;
-  }
+  get loadingText(): string { return this.t.translate('plant.detail.loading'); }
 
   healthLabel(status: string): string {
-    if (status === 'critical') return $localize`:@@plant.detail.health.critical:Critico`;
-    if (status === 'at_risk') return $localize`:@@plant.detail.health.atRisk:En riesgo`;
-    return $localize`:@@plant.detail.health.optimal:Optimo`;
+    if (status === 'critical') return this.t.translate('plant.detail.health.critical');
+    if (status === 'at_risk') return this.t.translate('plant.detail.health.atRisk');
+    return this.t.translate('plant.detail.health.optimal');
   }
 
   phaseLabel(phase: string): string {
     return phase === 'produccion'
-      ? $localize`:@@plant.detail.phase.produccion:En produccion`
-      : $localize`:@@plant.detail.phase.establecimiento:En establecimiento`;
+      ? this.t.translate('plant.detail.phase.produccion')
+      : this.t.translate('plant.detail.phase.establecimiento');
   }
 
-  get zonesLabel(): string {
-    return $localize`:@@plant.detail.zones:Zonas`;
-  }
-
-  get devicesLabel(): string {
-    return $localize`:@@plant.detail.devices:Dispositivos`;
-  }
-
-  get alertsLabel(): string {
-    return $localize`:@@plant.detail.alerts:Alertas`;
-  }
-
-  get soilLabel(): string {
-    return $localize`:@@plant.detail.soil:Suelo:`;
-  }
-
-  get ageLabel(): string {
-    return $localize`:@@plant.detail.age:Antiguedad:`;
-  }
-
-  get updatedLabel(): string {
-    return $localize`:@@plant.detail.updated:Actualizado:`;
-  }
-
-  get editBtnLabel(): string {
-    return $localize`:@@plant.detail.editBtn:Editar plantacion`;
-  }
-
-  get addZoneBtnLabel(): string {
-    return $localize`:@@plant.detail.addZoneBtn:Agregar zona`;
-  }
-
-  get monitoringZonesLabel(): string {
-    return $localize`:@@plant.detail.monitoringZones:Zonas de monitoreo`;
-  }
-
-  get zonesRegisteredLabel(): string {
-    return $localize`:@@plant.detail.zonesRegistered:zonas registradas`;
-  }
-
-  get loadingZonesText(): string {
-    return $localize`:@@plant.detail.loadingZones:Cargando zonas...`;
-  }
-
-  get noZonesTitle(): string {
-    return $localize`:@@plant.detail.noZones:Sin zonas registradas`;
-  }
+  get zonesLabel(): string { return this.t.translate('plant.detail.zones'); }
+  get devicesLabel(): string { return this.t.translate('plant.detail.devices'); }
+  get alertsLabel(): string { return this.t.translate('plant.detail.alerts'); }
+  get soilLabel(): string { return this.t.translate('plant.detail.soil'); }
+  get ageLabel(): string { return this.t.translate('plant.detail.age'); }
+  get updatedLabel(): string { return this.t.translate('plant.detail.updated'); }
+  get editBtnLabel(): string { return this.t.translate('plant.detail.editBtn'); }
+  get addZoneBtnLabel(): string { return this.t.translate('plant.detail.addZoneBtn'); }
+  get monitoringZonesLabel(): string { return this.t.translate('plant.detail.monitoringZones'); }
+  get zonesRegisteredLabel(): string { return this.t.translate('plant.detail.zonesRegistered'); }
+  get loadingZonesText(): string { return this.t.translate('plant.detail.loadingZones'); }
+  get noZonesTitle(): string { return this.t.translate('plant.detail.noZones'); }
 
   get noZonesDesc(): string {
     return this.isAgronomist()
-      ? $localize`:@@plant.detail.noZonesDescAgronomist:Esta plantacion aun no tiene zonas de monitoreo definidas.`
-      : $localize`:@@plant.detail.noZonesDescGrower:Crea la primera zona para preparar la asignacion de dispositivos.`;
+      ? this.t.translate('plant.detail.noZonesDescAgronomist')
+      : this.t.translate('plant.detail.noZonesDescGrower');
   }
 
-  get createFirstZoneLabel(): string {
-    return $localize`:@@plant.detail.createFirstZone:Crear primera zona`;
-  }
+  get createFirstZoneLabel(): string { return this.t.translate('plant.detail.createFirstZone'); }
+  get supervisionNote(): string { return this.t.translate('plant.detail.supervisionNote'); }
 
   soilTypeLabel(key: string): string {
-    const labels: Record<string, string> = {};
-    labels['arcilloso_humedo'] = $localize`:@@plant.detail.soil.arcillosoHumedo:Arcilloso humedo`;
-    labels['franco_arenoso'] = $localize`:@@plant.detail.soil.francoArenoso:Franco arenoso`;
-    labels['franco_arcilloso'] = $localize`:@@plant.detail.soil.francoArcilloso:Franco arcilloso`;
-    labels['arenoso'] = $localize`:@@plant.detail.soil.arenoso:Arenoso`;
-    return labels[key] ?? key;
+    const map: Record<string, string> = {
+      arcilloso_humedo: this.t.translate('plant.detail.soilTypes.arcillosoHumedo'),
+      franco_arenoso: this.t.translate('plant.detail.soilTypes.francoArenoso'),
+      franco_arcilloso: this.t.translate('plant.detail.soilTypes.francoArcilloso'),
+      arenoso: this.t.translate('plant.detail.soilTypes.arenoso'),
+    };
+    return map[key] ?? key;
   }
 
   zoneAlertLevelLabel(level: string): string {
     return level === 'critical'
-      ? $localize`:@@plant.detail.health.zone.critical:Critico`
-      : $localize`:@@plant.detail.health.zone.atRisk:Atencion`;
+      ? this.t.translate('plant.detail.health.zone.critical')
+      : this.t.translate('plant.detail.health.zone.atRisk');
   }
 
-  get noDescriptionLabel(): string {
-    return $localize`:@@plant.detail.noDescription:Sin descripcion.`;
-  }
-
-  get invalidPlantationError(): string {
-    return $localize`:@@plant.detail.error.invalid:Plantacion no valida.`;
-  }
-
-  get loadErrorLabel(): string {
-    return $localize`:@@plant.detail.error.load:No se pudo cargar la plantacion.`;
-  }
+  get noDescriptionLabel(): string { return this.t.translate('plant.detail.noDescription'); }
+  get invalidPlantationError(): string { return this.t.translate('plant.detail.error.invalid'); }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!Number.isNaN(id)) {
-      this.load(id);
+    if (!Number.isNaN(id) && id > 0) {
+      this.store.loadPlantation(id);
+      this.store.loadPlantationZones(id);
+      // Alerts API not available for agronomist on real backend
+      this.activeAlerts.set([]);
     } else {
-      this.error.set(this.invalidPlantationError);
+      this.store.plantationError.set(this.invalidPlantationError);
     }
-  }
-
-  private load(id: number): void {
-    this.loading.set(true);
-    this.error.set('');
-
-    this.plantationService
-      .getById(id)
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (plantation) => {
-          this.plantation.set(plantation);
-          this.loadZones(id);
-          this.loadAlerts(id);
-        },
-        error: () => this.error.set(this.loadErrorLabel),
-      });
-  }
-
-  private loadZones(id: number): void {
-    this.zonesLoading.set(true);
-    this.plantationService
-      .listZones(id)
-      .pipe(finalize(() => this.zonesLoading.set(false)))
-      .subscribe({
-        next: (zones) => this.zones.set(zones),
-      });
-  }
-
-  private loadAlerts(plantationId: number): void {
-    this.alertService.list({ status: 'active', plantationId, size: 50 }).subscribe({
-      next: (response) => this.activeAlerts.set(response.alerts),
-    });
   }
 }
