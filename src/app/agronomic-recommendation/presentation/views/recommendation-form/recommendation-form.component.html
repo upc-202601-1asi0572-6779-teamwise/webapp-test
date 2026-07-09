@@ -26,32 +26,12 @@
 
       <form [formGroup]="form" (ngSubmit)="save()" class="mt-6 flex flex-col gap-5">
         <div class="grid gap-5 sm:grid-cols-2">
-          <div>
+          <div class="sm:col-span-2">
             <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ plantationLabel }}</label>
             <select formControlName="plantationId" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
               <option [value]="0">{{ plantationPlaceholder }}</option>
               @for (p of store.recommendationFormPlants(); track p.id) {
               <option [value]="p.id">{{ p.name }}</option>
-              }
-            </select>
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ zoneLabel }}</label>
-            <select formControlName="monitoringZoneId" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
-              <option [value]="0">{{ store.recommendationFormZonesLoading() ? zoneLoadingText : zonePlaceholder }}</option>
-              @for (z of store.recommendationFormZones(); track z.id) {
-              <option [value]="z.id">{{ z.name }} &middot; {{ z.hectares }} hect.</option>
-              }
-            </select>
-          </div>
-
-          <div class="sm:col-span-2">
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ alertLabel }}</label>
-            <select formControlName="alertId" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
-              <option [value]="0">{{ alertNoneLabel }}</option>
-              @for (a of store.recommendationFormAlerts(); track a.id) {
-              <option [value]="a.id">{{ a.alertLevel }} — {{ a.title }}</option>
               }
             </select>
           </div>
@@ -63,16 +43,16 @@
 
           <div class="sm:col-span-2">
             <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ descriptionLabel }}</label>
-            <textarea formControlName="description" rows="4" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent resize-none" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" [placeholder]="descriptionPlaceholder"></textarea>
+            <textarea formControlName="description" rows="5" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent resize-none" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" [placeholder]="descriptionPlaceholder"></textarea>
           </div>
 
           <div class="sm:col-span-2">
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ actionLabel }}</label>
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ actionLabel }} <span class="font-normal" style="color: var(--color-text-muted)">{{ actionOptionalLabel }}</span></label>
             <input formControlName="recommendedAction" type="text" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" [placeholder]="actionPlaceholder" />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ priorityLabel }}</label>
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ priorityLabel }} <span class="font-normal" style="color: var(--color-text-muted)">{{ priorityInTextLabel }}</span></label>
             <select formControlName="priority" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
               <option value="low">{{ priorityOptionLabel('low') }}</option>
               <option value="medium">{{ priorityOptionLabel('medium') }}</option>
@@ -83,9 +63,6 @@
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
-          <button type="button" (click)="generateWithAI()" [disabled]="store.recommendationFormSaving()" class="flex-1 rounded-xl border px-5 py-3.5 font-semibold transition disabled:opacity-50" style="border-color: var(--color-accent-cyan); color: var(--color-accent-cyan)">
-            {{ generateAiLabel }}
-          </button>
           <button type="submit" [disabled]="form.invalid || store.recommendationFormSaving()" class="flex-1 rounded-xl px-5 py-3.5 font-semibold transition disabled:opacity-50 active:scale-[0.98]" style="background: var(--color-brand-primary); color: var(--color-text-inverse)">
             {{ store.recommendationFormSaving() ? savingLabel : saveDraftLabel }}
           </button>

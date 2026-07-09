@@ -13,7 +13,8 @@ export class RecommendationListComponent implements OnInit {
   readonly store = inject(AgronomicRecommendationStore);
   private readonly t = inject(TranslationService);
 
-  readonly activeTab = signal<'pending' | 'published'>('published');
+  /** Agronomist starts on pending (review queue). */
+  readonly activeTab = signal<'pending' | 'published'>('pending');
 
   readonly filteredRecommendations = computed(() => {
     const recs = this.store.recommendations();
@@ -95,12 +96,13 @@ export class RecommendationListComponent implements OnInit {
     return this.t.translate('rec.list.createFirst');
   }
 
+  get noIdHint(): string {
+    return this.t.translate('rec.list.noIdHint');
+  }
+
   get backDashboardLabel(): string { return this.t.translate('rec.list.backDashboard'); }
   get recommendedActionLabel(): string { return this.t.translate('rec.list.recommendedAction'); }
   get createdAtLabel(): string { return this.t.translate('rec.list.createdAt'); }
-  get generatedByAiLabel(): string { return this.t.translate('rec.list.generatedBy.ai'); }
-  get generatedByManualLabel(): string { return this.t.translate('rec.list.generatedBy.manual'); }
-
   priorityLabel(key: string): string {
     const labels: Record<string, string> = {
       critical: this.t.translate('rec.list.priority.critical'),
@@ -119,10 +121,6 @@ export class RecommendationListComponent implements OnInit {
       published: this.t.translate('rec.list.status.published'),
     };
     return labels[key] ?? key;
-  }
-
-  generatedByLabel(generatedBy: 'ai' | 'manual' | undefined | null): string {
-    return generatedBy === 'ai' ? this.generatedByAiLabel : this.generatedByManualLabel;
   }
 
   ngOnInit(): void {
