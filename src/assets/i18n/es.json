@@ -123,7 +123,8 @@
     "error": {
       "noAlerts": "No se pudieron cargar las alertas.",
       "acknowledge": "No se pudo confirmar la alerta.",
-      "noAlertDetail": "No se pudo cargar la alerta."
+      "noAlertDetail": "No se pudo cargar la alerta.",
+      "unavailable": "Las alertas no están disponibles en el backend real todavía."
     }
   },
   "dashboard": {
@@ -212,7 +213,16 @@
       "variable": "Variable",
       "value": "Valor",
       "device": "Dispositivo",
-      "time": "Hora"
+      "time": "Hora",
+      "iotMac": "IoT MAC"
+    },
+    "alertsUnavailable": "Alertas no disponibles en el backend actual.",
+    "edgeGateways": "Edge gateways",
+    "noGateways": "Sin gateways registrados.",
+    "zonesUnavailable": "Zonas no disponibles: el backend aún no expone sectores de plantación en este deploy.",
+    "noRecentReadings": "Sin lecturas recientes para el device demo.",
+    "error": {
+      "load": "No se pudieron cargar los datos del dashboard."
     }
   },
   "report": {
@@ -252,7 +262,8 @@
     },
     "error": {
       "load": "No se pudieron cargar los reportes.",
-      "loadDetail": "No se pudo cargar el reporte."
+      "loadDetail": "No se pudo cargar el reporte.",
+      "unavailable": "Los reportes no están disponibles en el backend real todavía."
     }
   },
   "rec": {
@@ -296,11 +307,89 @@
         "pendingReview": "Pendiente",
         "approved": "Aprobada",
         "published": "Publicada"
-      }
+      },
+      "noIdHint": "Sin id en el API — crea una nueva para abrir detalle y aprobar/publicar."
     },
     "error": {
       "load": "No se pudieron cargar las recomendaciones.",
-      "loadDetail": "No se pudo cargar la recomendacion."
+      "loadDetail": "No se pudo cargar la recomendacion.",
+      "noId": "Esta recomendación no tiene id conocido en el backend.",
+      "create": "No se pudo crear la recomendación.",
+      "approve": "No se pudo aprobar.",
+      "publish": "No se pudo publicar."
+    },
+    "detail": {
+      "back": "Volver a recomendaciones",
+      "loading": "Cargando detalle...",
+      "description": "Descripción",
+      "recommendedAction": "Acción recomendada",
+      "relatedAlert": "Alerta relacionada",
+      "sensorData": "Datos del sensor",
+      "expectedRange": "Rango esperado",
+      "summary": "Resumen",
+      "publicationInfo": "Información de publicación",
+      "plantation": "Plantación",
+      "zone": "Zona",
+      "reviewedBy": "Revisada por",
+      "publishedOn": "Publicada el",
+      "pendingReview": "Pendiente de revisión",
+      "notPublished": "No publicada",
+      "approveBtn": "Aprobar recomendación",
+      "approving": "Aprobando...",
+      "publishBtn": "Publicar recomendación",
+      "publishing": "Publicando...",
+      "created": "Creada",
+      "agronomistFallback": "Agrónomo",
+      "generatedByAI": "Generada por IA",
+      "generatedByAgronomist": "Redactada por agrónomo",
+      "priority": {
+        "critical": "Crítica",
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      },
+      "status": {
+        "draft": "Borrador",
+        "pendingReview": "Pendiente de revisión",
+        "approved": "Aprobada",
+        "published": "Publicada"
+      },
+      "error": {
+        "invalid": "Recomendación no válida."
+      }
+    },
+    "form": {
+      "back": "Volver a recomendaciones",
+      "loading": "Cargando formulario...",
+      "title": "Nueva recomendación",
+      "subtitle": "Redacta la recomendación. Se envía como content al backend.",
+      "plantation": "Plantación",
+      "plantationPlaceholder": "Selecciona una plantación",
+      "titleInput": "Título",
+      "titlePlaceholder": "Ej. Aplicar enmienda cálcica en zona Sur",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Describe el contexto y la justificación de la recomendación...",
+      "recommendedAction": "Acción recomendada",
+      "actionOptional": "(opcional)",
+      "actionPlaceholder": "Ej. Aplicar cal dolomítica (2 ton/ha)",
+      "priority": "Prioridad",
+      "priorityInText": "(en texto)",
+      "priorityLow": "Baja",
+      "priorityMedium": "Media",
+      "priorityHigh": "Alta",
+      "priorityCritical": "Crítica",
+      "save": "Crear recomendación",
+      "saving": "Guardando...",
+      "cancel": "Cancelar"
+    },
+    "action": {
+      "approved": "Recomendación aprobada correctamente.",
+      "published": "Recomendación publicada correctamente."
+    },
+    "assembler": {
+      "plantation": "Plantación",
+      "recommendation": "Recomendación",
+      "agronomist": "Agrónomo"
     }
   },
   "subscription": {
@@ -428,7 +517,8 @@
       "error": {
         "load": "No se pudo cargar la suscripción.",
         "renew": "Error al renovar la suscripción.",
-        "cancel": "Error al cancelar la renovación."
+        "cancel": "Error al cancelar la renovación.",
+        "unavailable": "La suscripción no está disponible en el backend real todavía."
       }
     },
     "profile": {
@@ -472,9 +562,10 @@
   "ftm": {
     "error": {
       "loadPlantations": "No se pudieron cargar las plantaciones.",
-      "loadPlantation": "No se pudo cargar la plantacion.",
+      "loadPlantation": "No se pudo cargar la plantación.",
       "loadZones": "No se pudieron cargar las zonas.",
-      "loadInspections": "No se pudieron cargar las inspecciones."
+      "loadInspections": "No se pudieron cargar las inspecciones.",
+      "inspectionsUnavailable": "Las inspecciones no están disponibles en el backend real todavía."
     }
   },
   "notifications": {
@@ -517,7 +608,21 @@
       "activation": {
         "active": "Activo",
         "inactive": "Inactivo"
+      },
+      "error": {
+        "load": "No se pudieron cargar los dispositivos."
       }
+    },
+    "error": {
+      "loadDevice": "No se pudo cargar el dispositivo.",
+      "loadPlantations": "No se pudieron cargar las plantaciones.",
+      "loadZones": "No se pudieron cargar las zonas.",
+      "validateSubscription": "No se pudo validar la suscripción.",
+      "register": "No se pudo registrar el dispositivo.",
+      "updateConfig": "No se pudo actualizar la configuración.",
+      "updateStatus": "No se pudo actualizar el estado del dispositivo.",
+      "reassignZone": "No se pudo reasignar la zona.",
+      "invalid": "Dispositivo no válido."
     }
   },
   "plant": {
@@ -564,7 +669,8 @@
       },
       "error": {
         "load": "No se pudieron cargar las plantaciones."
-      }
+      },
+      "demoNote": "Datos de suelo/fase no expuestos por el API actual · plantación de supervisión demo"
     },
     "detail": {
       "back": {
@@ -610,6 +716,43 @@
       "error": {
         "invalid": "Plantación no válida.",
         "load": "No se pudo cargar la plantación."
+      },
+      "supervisionNote": "Vista de supervisión · datos extendidos pendientes del BC CropMonitoring"
+    },
+    "form": {
+      "backDetail": "Volver al detalle",
+      "backList": "Volver a plantaciones",
+      "loading": "Cargando formulario...",
+      "titleNew": "Nueva plantación",
+      "titleEdit": "Editar plantación",
+      "subtitle": "Registra la información principal de la plantación para habilitar el monitoreo por zonas y la asociación de dispositivos.",
+      "name": "Nombre de la plantación",
+      "location": "Ubicación",
+      "totalHectares": "Hectáreas totales",
+      "soilType": "Tipo de suelo",
+      "cropAge": "Antigüedad del cultivo",
+      "cropAgePlaceholder": "Ej. 5 años",
+      "phenologicalPhase": "Fase fenológica",
+      "latitude": "Latitud (opcional)",
+      "longitude": "Longitud (opcional)",
+      "submitCreate": "Crear plantación",
+      "submitSave": "Guardar cambios",
+      "creating": "Creando...",
+      "saving": "Guardando...",
+      "cancel": "Cancelar",
+      "hectareLimit": "Ya usaste todas las hectáreas de tu plan {plan} ({used}/{max}). No puedes registrar más plantaciones. Considera actualizar tu plan.",
+      "needSubscription": "Necesitas una suscripción activa para continuar.",
+      "errorSave": "No se pudo guardar la plantación.",
+      "errorLoad": "No se pudo cargar la plantación.",
+      "phase": {
+        "produccion": "Producción",
+        "establecimiento": "Establecimiento"
+      },
+      "soilTypes": {
+        "arcilloso_humedo": "Arcilloso húmedo",
+        "franco_arenoso": "Franco arenoso",
+        "franco_arcilloso": "Franco arcilloso",
+        "arenoso": "Arenoso"
       }
     }
   },
@@ -651,5 +794,60 @@
         "load": "No se pudo cargar la inspección."
       }
     }
+  },
+  "register": {
+    "backLogin": "Volver a iniciar sesión",
+    "heading": "Crear cuenta",
+    "subtitle": "Únete a Smart Palm y protege tus cultivos",
+    "fullName": "Nombre completo",
+    "fullNamePlaceholder": "Carlos Méndez Ríos",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "tu@email.com",
+    "password": "Contraseña",
+    "passwordHint": "Formato esperado: mínimo 8 caracteres, una mayúscula y un número.",
+    "passwordPlaceholder": "Mínimo 8 caracteres, una mayúscula y un número",
+    "role": "Rol",
+    "roleAgronomist": "Agrónomo",
+    "roleGrower": "Productor (Palm Grower)",
+    "phone": "Teléfono",
+    "phoneHint": "Usa exactamente este formato: +51 961 234 567.",
+    "phonePlaceholder": "+51 961 234 567",
+    "region": "Región",
+    "regionPlaceholder": "Selecciona tu región",
+    "city": "Ciudad",
+    "cityPlaceholder": "Pucallpa",
+    "submit": "Crear cuenta",
+    "submitting": "Creando cuenta...",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "loginLink": "Inicia sesión",
+    "errors": {
+      "reviewFields": "Revisa los campos marcados para continuar.",
+      "registerFailed": "Error al registrar. Intenta de nuevo.",
+      "fullNameRequired": "Ingresa tu nombre completo.",
+      "emailRequired": "Ingresa tu correo electrónico.",
+      "passwordRequired": "Ingresa una contraseña.",
+      "phoneRequired": "Ingresa tu número de teléfono.",
+      "regionRequired": "Selecciona una región.",
+      "cityRequired": "Ingresa tu ciudad.",
+      "emailInvalid": "Ingresa un correo válido.",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
+      "fullNameMin": "El nombre debe tener al menos 3 caracteres.",
+      "passwordStrength": "La contraseña debe contener al menos una mayúscula y un número.",
+      "phonePattern": "Usa el formato +51 961 234 567."
+    }
+  },
+  "common": {
+    "emDash": "—",
+    "notAvailable": "Sin dato"
+  },
+  "recover": {
+    "title": "Recuperar contraseña",
+    "subtitle": "Ingresa tu correo y te enviaremos instrucciones",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@email.com",
+    "submit": "Enviar instrucciones",
+    "submitting": "Enviando...",
+    "success": "Se envió un enlace de recuperación al correo registrado.",
+    "backLogin": "Volver al inicio de sesión"
   }
 }

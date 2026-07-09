@@ -22,7 +22,8 @@
     "role": {
       "agronomist": "Agronomist",
       "grower": "Grower"
-    }
+    },
+    "devices": "Devices"
   },
   "login": {
     "heroBadge": "Monitoring and agronomic decision center",
@@ -122,7 +123,8 @@
     "error": {
       "noAlerts": "Alerts could not be loaded.",
       "acknowledge": "Alert could not be acknowledged.",
-      "noAlertDetail": "Alert detail could not be loaded."
+      "noAlertDetail": "Alert detail could not be loaded.",
+      "unavailable": "Alerts are not available on the real backend yet."
     }
   },
   "dashboard": {
@@ -211,7 +213,16 @@
       "variable": "Variable",
       "value": "Value",
       "device": "Device",
-      "time": "Time"
+      "time": "Time",
+      "iotMac": "IoT MAC"
+    },
+    "alertsUnavailable": "Alerts are not available on the current backend.",
+    "edgeGateways": "Edge gateways",
+    "noGateways": "No gateways registered.",
+    "zonesUnavailable": "Zones unavailable: plantation sectors are not exposed by the backend on this deploy yet.",
+    "noRecentReadings": "No recent readings for the demo device.",
+    "error": {
+      "load": "Could not load dashboard data."
     }
   },
   "report": {
@@ -251,7 +262,8 @@
     },
     "error": {
       "load": "Reports could not be loaded.",
-      "loadDetail": "Report could not be loaded."
+      "loadDetail": "Report could not be loaded.",
+      "unavailable": "Reports are not available on the real backend yet."
     }
   },
   "rec": {
@@ -295,11 +307,89 @@
         "pendingReview": "Pending review",
         "approved": "Approved",
         "published": "Published"
-      }
+      },
+      "noIdHint": "No id from the API — create a new one to open detail and approve/publish."
     },
     "error": {
       "load": "Recommendations could not be loaded.",
-      "loadDetail": "Recommendation could not be loaded."
+      "loadDetail": "Recommendation could not be loaded.",
+      "noId": "This recommendation has no known id on the backend.",
+      "create": "Could not create the recommendation.",
+      "approve": "Could not approve.",
+      "publish": "Could not publish."
+    },
+    "detail": {
+      "back": "Back to recommendations",
+      "loading": "Loading detail...",
+      "description": "Description",
+      "recommendedAction": "Recommended action",
+      "relatedAlert": "Related alert",
+      "sensorData": "Sensor data",
+      "expectedRange": "Expected range",
+      "summary": "Summary",
+      "publicationInfo": "Publication info",
+      "plantation": "Plantation",
+      "zone": "Zone",
+      "reviewedBy": "Reviewed by",
+      "publishedOn": "Published on",
+      "pendingReview": "Pending review",
+      "notPublished": "Not published",
+      "approveBtn": "Approve recommendation",
+      "approving": "Approving...",
+      "publishBtn": "Publish recommendation",
+      "publishing": "Publishing...",
+      "created": "Created",
+      "agronomistFallback": "Agronomist",
+      "generatedByAI": "AI generated",
+      "generatedByAgronomist": "Written by agronomist",
+      "priority": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "status": {
+        "draft": "Draft",
+        "pendingReview": "Pending review",
+        "approved": "Approved",
+        "published": "Published"
+      },
+      "error": {
+        "invalid": "Invalid recommendation."
+      }
+    },
+    "form": {
+      "back": "Back to recommendations",
+      "loading": "Loading form...",
+      "title": "New recommendation",
+      "subtitle": "Write the recommendation. It is sent as content to the backend.",
+      "plantation": "Plantation",
+      "plantationPlaceholder": "Select a plantation",
+      "titleInput": "Title",
+      "titlePlaceholder": "E.g. Apply lime amendment in South zone",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the context and rationale for the recommendation...",
+      "recommendedAction": "Recommended action",
+      "actionOptional": "(optional)",
+      "actionPlaceholder": "E.g. Apply dolomitic lime (2 ton/ha)",
+      "priority": "Priority",
+      "priorityInText": "(in text)",
+      "priorityLow": "Low",
+      "priorityMedium": "Medium",
+      "priorityHigh": "High",
+      "priorityCritical": "Critical",
+      "save": "Create recommendation",
+      "saving": "Saving...",
+      "cancel": "Cancel"
+    },
+    "action": {
+      "approved": "Recommendation approved successfully.",
+      "published": "Recommendation published successfully."
+    },
+    "assembler": {
+      "plantation": "Plantation",
+      "recommendation": "Recommendation",
+      "agronomist": "Agronomist"
     }
   },
   "subscription": {
@@ -427,7 +517,8 @@
       "error": {
         "load": "The subscription could not be loaded.",
         "renew": "The subscription could not be renewed.",
-        "cancel": "The renewal could not be cancelled."
+        "cancel": "The renewal could not be cancelled.",
+        "unavailable": "Subscription is not available on the real backend yet."
       }
     },
     "profile": {
@@ -473,7 +564,8 @@
       "loadPlantations": "Plantations could not be loaded.",
       "loadPlantation": "Plantation could not be loaded.",
       "loadZones": "Zones could not be loaded.",
-      "loadInspections": "Inspections could not be loaded."
+      "loadInspections": "Inspections could not be loaded.",
+      "inspectionsUnavailable": "Inspections are not available on the real backend yet."
     }
   },
   "notifications": {
@@ -516,7 +608,21 @@
       "activation": {
         "active": "Active",
         "inactive": "Inactive"
+      },
+      "error": {
+        "load": "Could not load devices."
       }
+    },
+    "error": {
+      "loadDevice": "Could not load the device.",
+      "loadPlantations": "Could not load plantations.",
+      "loadZones": "Could not load zones.",
+      "validateSubscription": "Could not validate the subscription.",
+      "register": "Could not register the device.",
+      "updateConfig": "Could not update the configuration.",
+      "updateStatus": "Could not update the device status.",
+      "reassignZone": "Could not reassign the zone.",
+      "invalid": "Invalid device."
     }
   },
   "plant": {
@@ -563,7 +669,8 @@
       },
       "error": {
         "load": "Plantations could not be loaded."
-      }
+      },
+      "demoNote": "Soil/phase data not exposed by the current API · demo supervision plantation"
     },
     "detail": {
       "back": {
@@ -609,6 +716,43 @@
       "error": {
         "invalid": "Invalid plantation.",
         "load": "Could not load the plantation."
+      },
+      "supervisionNote": "Supervision view · extended data pending CropMonitoring BC"
+    },
+    "form": {
+      "backDetail": "Back to detail",
+      "backList": "Back to plantations",
+      "loading": "Loading form...",
+      "titleNew": "New plantation",
+      "titleEdit": "Edit plantation",
+      "subtitle": "Register the main plantation information to enable zone monitoring and device association.",
+      "name": "Plantation name",
+      "location": "Location",
+      "totalHectares": "Total hectares",
+      "soilType": "Soil type",
+      "cropAge": "Crop age",
+      "cropAgePlaceholder": "E.g. 5 years",
+      "phenologicalPhase": "Phenological phase",
+      "latitude": "Latitude (optional)",
+      "longitude": "Longitude (optional)",
+      "submitCreate": "Create plantation",
+      "submitSave": "Save changes",
+      "creating": "Creating...",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "hectareLimit": "You already used all hectares of your {plan} plan ({used}/{max}). You cannot register more plantations. Consider upgrading your plan.",
+      "needSubscription": "You need an active subscription to continue.",
+      "errorSave": "Could not save the plantation.",
+      "errorLoad": "Could not load the plantation.",
+      "phase": {
+        "produccion": "Production",
+        "establecimiento": "Establishment"
+      },
+      "soilTypes": {
+        "arcilloso_humedo": "Clay loam moist",
+        "franco_arenoso": "Sandy loam",
+        "franco_arcilloso": "Clay loam",
+        "arenoso": "Sandy"
       }
     }
   },
@@ -650,5 +794,60 @@
         "load": "Could not load the inspection."
       }
     }
+  },
+  "register": {
+    "backLogin": "Back to sign in",
+    "heading": "Create account",
+    "subtitle": "Join Smart Palm and protect your crops",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Carlos Mendez Rios",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password",
+    "passwordHint": "Expected format: at least 8 characters, one uppercase letter and one number.",
+    "passwordPlaceholder": "At least 8 characters, one uppercase and one number",
+    "role": "Role",
+    "roleAgronomist": "Agronomist",
+    "roleGrower": "Grower (Palm Grower)",
+    "phone": "Phone",
+    "phoneHint": "Use exactly this format: +51 961 234 567.",
+    "phonePlaceholder": "+51 961 234 567",
+    "region": "Region",
+    "regionPlaceholder": "Select your region",
+    "city": "City",
+    "cityPlaceholder": "Pucallpa",
+    "submit": "Create account",
+    "submitting": "Creating account...",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "errors": {
+      "reviewFields": "Please review the highlighted fields to continue.",
+      "registerFailed": "Registration failed. Please try again.",
+      "fullNameRequired": "Enter your full name.",
+      "emailRequired": "Enter your email.",
+      "passwordRequired": "Enter a password.",
+      "phoneRequired": "Enter your phone number.",
+      "regionRequired": "Select a region.",
+      "cityRequired": "Enter your city.",
+      "emailInvalid": "Enter a valid email.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "fullNameMin": "Name must be at least 3 characters.",
+      "passwordStrength": "Password must include at least one uppercase letter and one number.",
+      "phonePattern": "Use the format +51 961 234 567."
+    }
+  },
+  "common": {
+    "emDash": "—",
+    "notAvailable": "N/A"
+  },
+  "recover": {
+    "title": "Recover password",
+    "subtitle": "Enter your email and we will send you instructions",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@email.com",
+    "submit": "Send instructions",
+    "submitting": "Sending...",
+    "success": "A recovery link was sent to the registered email.",
+    "backLogin": "Back to sign in"
   }
 }
