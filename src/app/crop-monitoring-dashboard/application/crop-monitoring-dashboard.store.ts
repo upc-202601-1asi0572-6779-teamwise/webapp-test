@@ -1,11 +1,12 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../shared/infrastructure/auth.service';
 import { PlantationService } from '../../field-technical-management/infrastructure/field-technical-management-api';
 import { AlertService } from '../../alert-and-notification/infrastructure/alert-and-notification-api';
 import { RecommendationService } from '../../agronomic-recommendation/infrastructure/agronomic-recommendation-api';
 import { SensorReadingService } from '../../shared/infrastructure/sensor-reading.service';
-import { DeviceService } from '../../iot-device-management/infrastructure/iot-device-management-api';
+import { EdgeGatewayService } from '../../iot-device-management/infrastructure/iot-device-management-api';
 import { InspectionService } from '../../field-technical-management/infrastructure/field-technical-management-api';
 import { Plantation } from '../../field-technical-management/domain/model/plantation.entity';
 import { Zone } from '../../field-technical-management/domain/model/zone.entity';
@@ -31,7 +32,7 @@ export class CropMonitoringDashboardStore {
   private readonly alertService = inject(AlertService);
   private readonly recommendationService = inject(RecommendationService);
   private readonly sensorReadingService = inject(SensorReadingService);
-  private readonly deviceService = inject(DeviceService);
+  private readonly edgeGatewayService = inject(EdgeGatewayService);
   private readonly authService = inject(AuthService);
   private readonly inspectionService = inject(InspectionService);
   private readonly t = inject(TranslationService);
@@ -53,7 +54,7 @@ export class CropMonitoringDashboardStore {
   readonly trendReadings = signal<SensorReading[]>([]);
 
   // ── Role ──────────────────────────────────────────────────────
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   // ── Lookups ───────────────────────────────────────────────────
   readonly healthColors: Record<string, string> = {
@@ -277,36 +278,114 @@ export class CropMonitoringDashboardStore {
     this.loading.set(true);
     this.error.set('');
 
+    const f = environment.features;
+    const demoPlantation = this.buildDemoPlantation();
+
     forkJoin({
-      plantations: this.plantationService.list(),
-      alerts: this.alertService.list({ status: 'active', size: 50 }),
-      alertCount: this.alertService.count(),
-      recommendations: this.recommendationService.list({ status: 'published', size: 3 }),
-      readings: this.sensorReadingService.list({ size: 6 }),
-      trendData: this.sensorReadingService.list({ size: 72 }),
-      devices: this.deviceService.list(),
-      inspections: this.inspectionService.list({ size: 4 }),
+      plantations: f.plantationsApi
+        ? this.plantationService.list()
+        : of([demoPlantation]),
+      alerts: f.alerts
+        ? this.alertService.list({ status: 'active', size: 50 })
+        : of({ alerts: [] as Alert[], totalElements: 0, totalPages: 0, page: 1 }),
+      alertCount: f.alerts
+        ? this.alertService.count()
+        : of({ critical: 0, warning: 0, total: 0, informative: 0, unacknowledged: 0 }),
+      recommendations: f.recommendations
+        ? this.recommendationService.list({
+            plantationId: environment.demo.plantationId,
+            // Live API filter requires lowercase: pending | approved | published
+            status: 'published',
+            size: 3,
+          })
+        : of({ recommendations: [] as Recommendation[], totalElements: 0, totalPages: 0, page: 1 }),
+      readings: f.sensors
+        ? this.sensorReadingService.list({ size: 6, deviceMac: environment.demo.deviceMac })
+        : of({ readings: [] as SensorReading[], totalElements: 0, totalPages: 0, page: 1, size: 0 }),
+      trendData: f.sensors
+        ? this.sensorReadingService.list({ size: 72, deviceMac: environment.demo.deviceMac })
+        : of({ readings: [] as SensorReading[], totalElements: 0, totalPages: 0, page: 1, size: 0 }),
+      gateways: f.iotStatus ? this.edgeGatewayService.listGateways() : of([]),
+      inspections: f.inspections
+        ? this.inspectionService.list({ size: 4 })
+        : of({ inspections: [] as FieldInspection[], totalElements: 0, totalPages: 0, page: 1 }),
     })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: ({ plantations, alerts, alertCount, recommendations, readings, trendData, devices, inspections }) => {
+        next: ({ plantations, alerts, alertCount, recommendations, readings, trendData, gateways, inspections }) => {
           this.plantations.set(plantations);
-          this.activeAlerts.set(alerts.alerts);
+          this.activeAlerts.set(alerts.alerts ?? []);
           this.alertCount.set({
-            critical: alertCount.critical,
-            warning: alertCount.warning,
-            total: alertCount.total,
+            critical: alertCount.critical ?? 0,
+            warning: alertCount.warning ?? 0,
+            total: alertCount.total ?? 0,
           });
           this.recommendations.set(recommendations.recommendations);
           this.latestReadings.set(readings.readings);
           this.trendReadings.set(trendData.readings);
-          this.devices.set(devices);
-          this.inspections.set(inspections.inspections);
+          this.devices.set(gateways.map((g, i) => this.gatewayAsDevice(g, i)));
+          this.inspections.set(inspections.inspections ?? []);
 
-          this.loadZones(plantations[0]?.id ?? 0);
+          const firstId = plantations[0]?.id ?? environment.demo.plantationId;
+          this.selectedPlantationId.set(firstId);
+          if (f.plantationsApi) {
+            this.loadZones(firstId);
+          } else {
+            this.zones.set([]);
+          }
         },
-        error: () => this.error.set($localize`:@@dashboard.error.load:No se pudieron cargar los datos del dashboard.`),
+        error: () => this.error.set(this.t.translate('dashboard.error.load')),
       });
+  }
+
+  private buildDemoPlantation(): Plantation {
+    const now = new Date().toISOString();
+    return {
+      id: environment.demo.plantationId,
+      userId: environment.demo.agronomistId,
+      name: `Demo plantation #${environment.demo.plantationId}`,
+      location: 'Live backend / demo',
+      totalHectares: 10,
+      soilType: '—',
+      cropAge: '—',
+      phenologicalPhase: 'produccion',
+      latitude: 0,
+      longitude: 0,
+      zonesCount: 0,
+      devicesCount: 1,
+      overallHealth: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  private gatewayAsDevice(
+    g: { mac: string; isConnected: boolean; status: string },
+    index: number,
+  ): Device {
+    const connectivityStatus: Device['connectivityStatus'] = g.isConnected
+      ? 'connected'
+      : g.status?.toLowerCase().includes('offline')
+        ? 'offline_mode'
+        : 'disconnected';
+    return {
+      id: index + 1,
+      userId: environment.demo.agronomistId,
+      serialNumber: g.mac,
+      plantationId: environment.demo.plantationId,
+      plantationName: `Plantation #${environment.demo.plantationId}`,
+      monitoringZoneId: 0,
+      zoneName: '—',
+      activationStatus: 'active',
+      connectivityStatus,
+      healthStatus: g.isConnected ? 'healthy' : 'warning',
+      samplingIntervalMinutes: 15,
+      transmissionMode: 'batch',
+      retryPolicy: 'default',
+      maxOfflineStorageHours: 24,
+      lastSyncAt: null,
+      createdAt: new Date().toISOString(),
+    };
   }
 
   // ── Plantation selection ──────────────────────────────────────

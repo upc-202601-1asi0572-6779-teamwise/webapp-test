@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { CropMonitoringDashboardStore } from '../../../application/crop-monitoring-dashboard.store';
 import { TranslationService } from '../../../../i18n/translation.service';
 
@@ -13,6 +14,7 @@ export class DashboardComponent implements OnInit {
   readonly store = inject(CropMonitoringDashboardStore);
   private readonly router = inject(Router);
   private readonly t = inject(TranslationService);
+  readonly features = environment.features;
 
   // ── i18n getters (runtime translation) ──
 
@@ -95,6 +97,12 @@ export class DashboardComponent implements OnInit {
   get tableHeaderValue(): string { return this.t.translate('dashboard.table.value'); }
   get tableHeaderDevice(): string { return this.t.translate('dashboard.table.device'); }
   get tableHeaderTime(): string { return this.t.translate('dashboard.table.time'); }
+  get tableHeaderIotMac(): string { return this.t.translate('dashboard.table.iotMac'); }
+  get alertsUnavailableLabel(): string { return this.t.translate('dashboard.alertsUnavailable'); }
+  get edgeGatewaysLabel(): string { return this.t.translate('dashboard.edgeGateways'); }
+  get noGatewaysLabel(): string { return this.t.translate('dashboard.noGateways'); }
+  get zonesUnavailableLabel(): string { return this.t.translate('dashboard.zonesUnavailable'); }
+  get noRecentReadingsLabel(): string { return this.t.translate('dashboard.noRecentReadings'); }
   get topRecommendationEyebrow(): string { return this.t.translate('dashboard.topRecommendation.eyebrow'); }
   get viewDetailLabel(): string { return this.t.translate('dashboard.viewDetail'); }
   get trendUpLabel(): string { return this.t.translate('dashboard.trend.up'); }
