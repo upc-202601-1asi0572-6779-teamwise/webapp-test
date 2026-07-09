@@ -27,6 +27,12 @@ export class MySubscriptionComponent implements OnInit {
   errorTitleLabel(): string { return this.t.translate('subscription.mySubscription.errorTitle'); }
   viewPlansLabel(): string { return this.t.translate('subscription.mySubscription.viewPlans'); }
 
+  /** Resolve stored i18n keys (or raw API text) at render time. */
+  errorLabel(): string {
+    const e = this.error();
+    return e ? this.t.translate(e) : '';
+  }
+
   summaryEyebrowLabel(): string { return this.t.translate('subscription.mySubscription.summaryEyebrow'); }
   actionsEyebrowLabel(): string { return this.t.translate('subscription.mySubscription.actionsEyebrow'); }
   capacityEyebrowLabel(): string { return this.t.translate('subscription.mySubscription.capacityEyebrow'); }

@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, finalize, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { User } from '../../shared/domain/user.model';
 import { AuthService } from '../../shared/infrastructure/auth.service';
 import { TranslationService } from '../../i18n/translation.service';
@@ -49,7 +50,7 @@ export class SubscriptionAndUserManagementStore {
     const sub = this.subscription() ?? this.currentSubscription();
     return sub?.segment !== 'agronomist';
   });
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   // ── Profile methods ───────────────────────────────────────────────
   loadProfile(): void {
@@ -82,12 +83,19 @@ export class SubscriptionAndUserManagementStore {
   loadSubscription(): void {
     this.subscriptionLoading.set(true);
     this.subscriptionError.set('');
+    if (!environment.features.subscriptionApi) {
+      this.subscription.set(null);
+      this.subscriptionLoading.set(false);
+      // Store i18n key (resolved at render) so locale changes / late JSON load still work.
+      this.subscriptionError.set('subscription.mySubscription.error.unavailable');
+      return;
+    }
     this.subscriptionService
       .getMySubscription()
       .pipe(finalize(() => this.subscriptionLoading.set(false)))
       .subscribe({
         next: (sub) => this.subscription.set(sub),
-        error: () => this.subscriptionError.set(this.t.translate('subscription.mySubscription.error.load')),
+        error: () => this.subscriptionError.set('subscription.mySubscription.error.load'),
       });
   }
 

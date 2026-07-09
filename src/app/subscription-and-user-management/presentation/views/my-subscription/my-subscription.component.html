@@ -10,7 +10,7 @@
       <p class="text-sm" style="color: var(--color-text-muted)">{{ loadingLabel() }}</p>
     </div>
     } @else if (error()) {
-    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">{{ error() }}</div>
+    <div class="rounded-2xl border px-5 py-4 text-sm" style="background: var(--color-danger-10); color: var(--color-danger); border-color: var(--color-danger)">{{ errorLabel() }}</div>
     } @else if (subscription(); as sub) {
     <div class="overflow-hidden rounded-[1.75rem] border px-10 py-10" style="background: linear-gradient(145deg, rgba(13, 51, 32, 0.96), rgba(26, 92, 56, 0.92)); border-color: rgba(255,255,255,0.08); box-shadow: 0 28px 60px rgba(7, 25, 15, 0.18)">
       <div class="grid min-w-0 grid-cols-2 gap-8">
