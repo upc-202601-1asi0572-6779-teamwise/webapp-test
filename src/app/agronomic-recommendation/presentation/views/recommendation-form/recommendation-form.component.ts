@@ -1,8 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { AgronomicRecommendationStore } from '../../../application/agronomic-recommendation.store';
 import { TranslationService } from '../../../../i18n/translation.service';
+import { RecommendationScope } from '../../../domain/model/recommendation.entity';
 
 @Component({
   selector: 'app-recommendation-form',
@@ -15,10 +17,11 @@ export class RecommendationFormComponent implements OnInit {
   readonly store = inject(AgronomicRecommendationStore);
   private readonly t = inject(TranslationService);
 
+  readonly defaultSectorId = environment.demo.sectorId ?? 1;
+
   readonly form = this.fb.nonNullable.group({
-    plantationId: [0, [Validators.required, Validators.min(1)]],
-    monitoringZoneId: [0],
-    alertId: [0],
+    scope: ['sector' as RecommendationScope, [Validators.required]],
+    sectorId: [this.defaultSectorId, [Validators.required, Validators.min(1)]],
     title: ['', [Validators.required, Validators.minLength(5)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
     recommendedAction: [''],
@@ -29,8 +32,11 @@ export class RecommendationFormComponent implements OnInit {
   get loadingText(): string { return this.t.translate('rec.form.loading'); }
   get titleText(): string { return this.t.translate('rec.form.title'); }
   get subtitleText(): string { return this.t.translate('rec.form.subtitle'); }
-  get plantationLabel(): string { return this.t.translate('rec.form.plantation'); }
-  get plantationPlaceholder(): string { return this.t.translate('rec.form.plantationPlaceholder'); }
+  get scopeLabel(): string { return this.t.translate('rec.form.scope'); }
+  get scopeSectorLabel(): string { return this.t.translate('rec.form.scopeSector'); }
+  get scopeGeneralLabel(): string { return this.t.translate('rec.form.scopeGeneral'); }
+  get sectorLabel(): string { return this.t.translate('rec.form.sector'); }
+  get sectorHelp(): string { return this.t.translate('rec.form.sectorHelp'); }
   get titleFieldLabel(): string { return this.t.translate('rec.form.titleInput'); }
   get titlePlaceholder(): string { return this.t.translate('rec.form.titlePlaceholder'); }
   get descriptionLabel(): string { return this.t.translate('rec.form.description'); }
@@ -55,24 +61,15 @@ export class RecommendationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.loadPlantationsForForm();
-    this.form.controls.monitoringZoneId.clearValidators();
-    this.form.controls.monitoringZoneId.updateValueAndValidity();
-
-    this.form.controls.plantationId.valueChanges.subscribe((id) => {
-      if (id > 0) {
-        this.store.loadZonesAndAlertsForForm(Number(id));
+    this.store.prepareForm();
+    this.form.controls.scope.valueChanges.subscribe((scope) => {
+      if (scope === 'general') {
+        this.form.controls.sectorId.clearValidators();
       } else {
-        this.store.recommendationFormZones.set([]);
-        this.store.recommendationFormAlerts.set([]);
+        this.form.controls.sectorId.setValidators([Validators.required, Validators.min(1)]);
       }
+      this.form.controls.sectorId.updateValueAndValidity();
     });
-
-    const demoId = this.store.recommendationFormPlants()[0]?.id;
-    if (demoId) {
-      this.form.patchValue({ plantationId: demoId, monitoringZoneId: 1 });
-      this.store.loadZonesAndAlertsForForm(demoId);
-    }
   }
 
   save(): void {
@@ -82,27 +79,29 @@ export class RecommendationFormComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
-    const payload = {
-      plantationId: Number(raw.plantationId) || 0,
-      monitoringZoneId: Number(raw.monitoringZoneId) || 0,
-      alertId: null as number | null,
-      title: raw.title,
-      description: raw.description,
-      recommendedAction: raw.recommendedAction || '',
-      priority: raw.priority,
-      generatedBy: 'manual' as const,
-    };
-    if (!payload.plantationId) {
-      this.form.controls.plantationId.setErrors({ min: true });
+    const scope = raw.scope;
+    const sectorId = scope === 'general' ? null : Number(raw.sectorId) || this.defaultSectorId;
+
+    if (scope === 'sector' && (!sectorId || sectorId <= 0)) {
+      this.form.controls.sectorId.setErrors({ min: true });
       this.form.markAllAsTouched();
       return;
     }
 
-    this.store.createRecommendation(payload).subscribe({
-      next: (rec) => {
-        if (rec.id > 0) this.router.navigate(['/recomendaciones', rec.id]);
-        else this.router.navigate(['/recomendaciones']);
-      },
-    });
+    this.store
+      .createRecommendation({
+        scope,
+        sectorId,
+        title: raw.title,
+        description: raw.description,
+        recommendedAction: raw.recommendedAction || '',
+        priority: raw.priority,
+      })
+      .subscribe({
+        next: (rec) => {
+          if (rec.id > 0) this.router.navigate(['/recomendaciones', rec.id]);
+          else this.router.navigate(['/recomendaciones']);
+        },
+      });
   }
 }

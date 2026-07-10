@@ -27,14 +27,30 @@
       <form [formGroup]="form" (ngSubmit)="save()" class="mt-6 flex flex-col gap-5">
         <div class="grid gap-5 sm:grid-cols-2">
           <div class="sm:col-span-2">
-            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ plantationLabel }}</label>
-            <select formControlName="plantationId" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)">
-              <option [value]="0">{{ plantationPlaceholder }}</option>
-              @for (p of store.recommendationFormPlants(); track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
-              }
-            </select>
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ scopeLabel }}</label>
+            <div class="flex flex-wrap gap-3">
+              <label class="flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium"
+                [style.border-color]="form.controls.scope.value === 'sector' ? 'var(--color-brand-primary)' : 'var(--color-border-subtle)'"
+                [style.background]="form.controls.scope.value === 'sector' ? 'var(--color-bg-soft-2)' : 'var(--color-bg-surface)'">
+                <input type="radio" formControlName="scope" value="sector" class="accent-[var(--color-brand-primary)]" />
+                {{ scopeSectorLabel }}
+              </label>
+              <label class="flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium"
+                [style.border-color]="form.controls.scope.value === 'general' ? 'var(--color-brand-primary)' : 'var(--color-border-subtle)'"
+                [style.background]="form.controls.scope.value === 'general' ? 'var(--color-bg-soft-2)' : 'var(--color-bg-surface)'">
+                <input type="radio" formControlName="scope" value="general" class="accent-[var(--color-brand-primary)]" />
+                {{ scopeGeneralLabel }}
+              </label>
+            </div>
           </div>
+
+          @if (form.controls.scope.value === 'sector') {
+          <div class="sm:col-span-2">
+            <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ sectorLabel }}</label>
+            <input formControlName="sectorId" type="number" min="1" class="w-full rounded-xl border px-4 py-3.5 outline-none transition focus:ring-2 focus:border-transparent" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary); --tw-ring-color: var(--color-brand-primary)" />
+            <p class="mt-1.5 text-xs" style="color: var(--color-text-muted)">{{ sectorHelp }}</p>
+          </div>
+          }
 
           <div class="sm:col-span-2">
             <label class="mb-1.5 block text-sm" style="color: var(--color-text-secondary)">{{ titleFieldLabel }}</label>

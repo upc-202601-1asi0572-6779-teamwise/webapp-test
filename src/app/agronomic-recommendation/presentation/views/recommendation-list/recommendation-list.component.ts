@@ -1,8 +1,10 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { TranslationService } from '../../../../i18n/translation.service';
 import { AgronomicRecommendationStore } from '../../../application/agronomic-recommendation.store';
+import { RecommendationScope } from '../../../domain/model/recommendation.entity';
 
 @Component({
   selector: 'app-recommendation-list',
@@ -13,8 +15,12 @@ export class RecommendationListComponent implements OnInit {
   readonly store = inject(AgronomicRecommendationStore);
   private readonly t = inject(TranslationService);
 
-  /** Agronomist starts on pending (review queue). */
+  readonly sectorId = environment.demo.sectorId ?? 1;
+
+  /** Workflow tab: inbox (non-published) vs published. */
   readonly activeTab = signal<'pending' | 'published'>('pending');
+  /** API scope: sector recommendations vs general. */
+  readonly activeScope = signal<RecommendationScope>('sector');
 
   readonly filteredRecommendations = computed(() => {
     const recs = this.store.recommendations();
@@ -32,13 +38,10 @@ export class RecommendationListComponent implements OnInit {
   };
 
   readonly statusColors: Record<string, string> = {
-    draft: 'var(--color-text-muted)',
     pending_review: 'var(--color-warning)',
     approved: 'var(--color-accent-cyan)',
     published: 'var(--color-success)',
   };
-
-  // ── i18n getters ──
 
   get badgeLabel(): string {
     return this.store.isAgronomist()
@@ -66,6 +69,20 @@ export class RecommendationListComponent implements OnInit {
 
   get tabPublishedLabel(): string {
     return this.t.translate('rec.list.tab.published');
+  }
+
+  get scopeSectorLabel(): string {
+    return this.t.translate('rec.list.scope.sector');
+  }
+
+  get scopeGeneralLabel(): string {
+    return this.t.translate('rec.list.scope.general');
+  }
+
+  get contextLabel(): string {
+    return this.activeScope() === 'general'
+      ? this.t.translate('rec.list.context.general')
+      : this.t.translate('rec.list.context.sector').replace('{{id}}', String(this.sectorId));
   }
 
   get newButtonLabel(): string {
@@ -100,9 +117,27 @@ export class RecommendationListComponent implements OnInit {
     return this.t.translate('rec.list.noIdHint');
   }
 
-  get backDashboardLabel(): string { return this.t.translate('rec.list.backDashboard'); }
-  get recommendedActionLabel(): string { return this.t.translate('rec.list.recommendedAction'); }
-  get createdAtLabel(): string { return this.t.translate('rec.list.createdAt'); }
+  get backDashboardLabel(): string {
+    return this.t.translate('rec.list.backDashboard');
+  }
+
+  get recommendedActionLabel(): string {
+    return this.t.translate('rec.list.recommendedAction');
+  }
+
+  get createdAtLabel(): string {
+    return this.t.translate('rec.list.createdAt');
+  }
+
+  get refreshLabel(): string {
+    return this.t.translate('rec.list.refresh');
+  }
+
+  typeLabel(type: string): string {
+    const key = type?.toLowerCase() === 'general' ? 'rec.list.type.general' : 'rec.list.type.sector';
+    return this.t.translate(key);
+  }
+
   priorityLabel(key: string): string {
     const labels: Record<string, string> = {
       critical: this.t.translate('rec.list.priority.critical'),
@@ -115,7 +150,6 @@ export class RecommendationListComponent implements OnInit {
 
   statusLabel(key: string): string {
     const labels: Record<string, string> = {
-      draft: this.t.translate('rec.list.status.draft'),
       pending_review: this.t.translate('rec.list.status.pendingReview'),
       approved: this.t.translate('rec.list.status.approved'),
       published: this.t.translate('rec.list.status.published'),
@@ -131,10 +165,21 @@ export class RecommendationListComponent implements OnInit {
     this.activeTab.set(tab);
   }
 
+  selectScope(scope: RecommendationScope): void {
+    if (this.activeScope() === scope) return;
+    this.activeScope.set(scope);
+    this.load();
+  }
+
+  refresh(): void {
+    this.load();
+  }
+
   private load(): void {
-    const params = this.store.isAgronomist()
-      ? { size: 50 }
-      : { status: 'published', size: 50 };
-    this.store.loadRecommendations(params);
+    this.store.loadRecommendations({
+      scope: this.activeScope(),
+      sectorId: this.sectorId,
+      size: 50,
+    });
   }
 }

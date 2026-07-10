@@ -1,5 +1,6 @@
-/** Backend DTO — RecommendationResource (no id field). */
+/** Backend RecommendationResource (docs 2026-07-10 — includes id). */
 export interface RecommendationBackendDto {
+  id: number;
   content: string;
   type: string;
   status: string;
@@ -8,17 +9,10 @@ export interface RecommendationBackendDto {
   publishedAt: string | null;
 }
 
-/** Backend DTO — AgronomicInterventionResource (no id field). */
-export interface InterventionBackendDto {
-  description: string;
-  performedBy: string;
-  executionDate: string;
-  createdAt: string;
-}
-
 export interface CreateRecommendationBackendBody {
   agronomistId: number;
   content: string;
+  reportId?: number | null;
 }
 
 export interface UpdateRecommendationContentBody {

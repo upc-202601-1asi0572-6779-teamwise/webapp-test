@@ -1,33 +1,32 @@
-import { Recommendation, AgronomicIntervention } from '../domain/model/recommendation.entity';
-import { InterventionBackendDto, RecommendationBackendDto } from './recommendation.response';
+import { Recommendation } from '../domain/model/recommendation.entity';
+import { RecommendationBackendDto } from './recommendation.response';
 
 const STATUS_TO_UI: Record<string, Recommendation['status']> = {
   Pending: 'pending_review',
   Approved: 'approved',
   Published: 'published',
-  pending_review: 'pending_review',
+  pending: 'pending_review',
   approved: 'approved',
   published: 'published',
-  draft: 'draft',
+  pending_review: 'pending_review',
 };
 
 /**
- * Query-string filter values expected by the live API (lowercase).
- * Response body still returns PascalCase: Pending | Approved | Published.
+ * Query-string filter values for live API (case-insensitive on server).
+ * Prefer PascalCase as documented examples: Pending | Approved | Published.
  */
 const STATUS_TO_BACKEND: Record<string, string> = {
-  draft: 'pending',
-  pending_review: 'pending',
-  approved: 'approved',
-  published: 'published',
-  Pending: 'pending',
-  Approved: 'approved',
-  Published: 'published',
-  pending: 'pending',
-  // tolerate accidental mixed case
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  PUBLISHED: 'published',
+  draft: 'Pending',
+  pending_review: 'Pending',
+  approved: 'Approved',
+  published: 'Published',
+  Pending: 'Pending',
+  Approved: 'Approved',
+  Published: 'Published',
+  pending: 'Pending',
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  PUBLISHED: 'Published',
 };
 
 const PRIORITY_ALIASES: Record<string, Recommendation['priority']> = {
@@ -42,73 +41,18 @@ const PRIORITY_ALIASES: Record<string, Recommendation['priority']> = {
   crítica: 'critical',
 };
 
-export function recommendationClientKey(content: string, createdAt: string): string {
+export function recommendationClientKey(content: string, createdAt: string, id?: number): string {
+  if (id && id > 0) return `id:${id}`;
   return `${createdAt}::${content}`;
 }
 
 export function toUiStatus(backendStatus: string): Recommendation['status'] {
-  return STATUS_TO_UI[backendStatus] ?? 'pending_review';
+  return STATUS_TO_UI[backendStatus] ?? STATUS_TO_UI[backendStatus?.toLowerCase?.() ?? ''] ?? 'pending_review';
 }
 
 export function toBackendStatusFilter(uiOrBackend: string | undefined): string | undefined {
   if (!uiOrBackend) return undefined;
   return STATUS_TO_BACKEND[uiOrBackend] ?? uiOrBackend;
-}
-
-/**
- * Maps backend DTO → domain Recommendation for UI.
- * Does not invent zone/alert/priority unless present in free-text content.
- */
-export function recommendationFromBackend(
-  dto: RecommendationBackendDto,
-  opts: { id?: number; plantationId: number; agronomistId?: number },
-): Recommendation {
-  const content = (dto.content ?? '').trim();
-  const createdAt = dto.createdAt ?? new Date().toISOString();
-  const parsed = parseContent(content);
-
-  return {
-    id: opts.id ?? 0,
-    plantationId: opts.plantationId,
-    content,
-    type: dto.type || 'Manual',
-    status: toUiStatus(dto.status),
-    createdAt,
-    approvedAt: dto.approvedAt,
-    publishedAt: dto.publishedAt,
-    clientKey: recommendationClientKey(content, createdAt),
-    title: parsed.title,
-    description: parsed.description,
-    recommendedAction: parsed.action,
-    priority: parsed.priority ?? 'medium',
-    hasExplicitPriority: parsed.priority !== null,
-    hasExplicitAction: parsed.hasAction,
-    // Language-neutral labels (UI can prefix via i18n if needed)
-    plantationName: `Plantation #${opts.plantationId}`,
-    zoneName: parsed.zone ?? '',
-    hasZone: !!parsed.zone,
-    generatedBy: 'manual',
-    reviewedByAgronomistName: dto.approvedAt ? 'Agronomist' : null,
-    userId: opts.agronomistId ?? 0,
-    monitoringZoneId: 0,
-    alertId: null,
-    alertTitle: null,
-    reviewedByAgronomistId: dto.approvedAt ? (opts.agronomistId ?? null) : null,
-    updatedAt: dto.publishedAt ?? dto.approvedAt ?? createdAt,
-  };
-}
-
-export function interventionFromBackend(
-  dto: InterventionBackendDto,
-  id: number | null = null,
-): AgronomicIntervention {
-  return {
-    id,
-    description: dto.description,
-    performedBy: dto.performedBy,
-    executionDate: dto.executionDate,
-    createdAt: dto.createdAt,
-  };
 }
 
 /** Compose backend content from form fields (backend only stores free text). */
@@ -126,6 +70,59 @@ export function composeRecommendationContent(parts: {
     lines.push(`Prioridad: ${parts.priority}`);
   }
   return lines.join('\n').trim();
+}
+
+/**
+ * Maps backend DTO → domain Recommendation for UI.
+ * Id comes from the resource (no Location/probe registry).
+ */
+export function recommendationFromBackend(
+  dto: RecommendationBackendDto,
+  opts: { sectorId?: number | null; agronomistId?: number } = {},
+): Recommendation {
+  const content = (dto.content ?? '').trim();
+  const createdAt = dto.createdAt ?? new Date().toISOString();
+  const id = typeof dto.id === 'number' && dto.id > 0 ? dto.id : 0;
+  const parsed = parseContent(content);
+  const type = dto.type || 'SectorSpecific';
+  const isGeneral = type.toLowerCase() === 'general';
+  const sectorId = isGeneral ? null : (opts.sectorId ?? null);
+  // Language-neutral technical labels (UI adds i18n type badges separately).
+  const scopeLabel = isGeneral
+    ? 'General'
+    : sectorId != null
+      ? `Sector #${sectorId}`
+      : type;
+
+  return {
+    id,
+    sectorId,
+    content,
+    type,
+    status: toUiStatus(dto.status),
+    createdAt,
+    approvedAt: dto.approvedAt,
+    publishedAt: dto.publishedAt,
+    clientKey: recommendationClientKey(content, createdAt, id),
+    title: parsed.title,
+    description: parsed.description,
+    recommendedAction: parsed.action,
+    priority: parsed.priority ?? 'medium',
+    hasExplicitPriority: parsed.priority !== null,
+    hasExplicitAction: parsed.hasAction,
+    scopeLabel,
+    plantationName: scopeLabel,
+    zoneName: parsed.zone ?? '',
+    hasZone: !!parsed.zone,
+    generatedBy: 'manual',
+    reviewedByAgronomistName: dto.approvedAt ? 'Agronomist' : null,
+    userId: opts.agronomistId ?? 0,
+    monitoringZoneId: 0,
+    alertId: null,
+    alertTitle: null,
+    reviewedByAgronomistId: dto.approvedAt ? (opts.agronomistId ?? null) : null,
+    updatedAt: dto.publishedAt ?? dto.approvedAt ?? createdAt,
+  };
 }
 
 function parseContent(content: string): {
@@ -170,16 +167,12 @@ function parseContent(content: string): {
     }
   }
 
-  // Description = full content (UI can show it as body)
-  const description = content;
-
-  // Zone heuristic: "zona X" / "zone X" in first sentence
   const zoneMatch = content.match(/\bzona\s+([A-Za-z0-9\-]+(?:\s+[A-Za-z0-9\-]+)?)/i);
   const zone = zoneMatch ? zoneMatch[0] : null;
 
   return {
     title: titleShort,
-    description,
+    description: content,
     action: hasAction ? action : '',
     hasAction,
     priority,
