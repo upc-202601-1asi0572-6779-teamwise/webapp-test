@@ -136,9 +136,28 @@ export class SensorReadingService {
       unit: normalizeUnit(dto.unit, meta.unit),
       deviceSerial: dto.iotDeviceMacAddress,
       plantationName: `Sector context`,
-      recordedAt: dto.measuredAt,
+      recordedAt: normalizeMeasuredAt(dto.measuredAt),
     };
   }
+}
+
+/**
+ * Backend often returns "2026-07-10T15:33:25" without offset.
+ * Without normalization, DatePipe can render broken short dates (e.g. "/10/26, 3:35 PM").
+ * Treat bare local ISO as UTC so Angular formats a valid instant.
+ */
+function normalizeMeasuredAt(raw: string | null | undefined): string {
+  if (!raw?.trim()) return '';
+  const s = raw.trim();
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(s)) {
+    return `${s}Z`;
+  }
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? s : d.toISOString();
+  }
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? s : d.toISOString();
 }
 
 function normalizeUnit(raw: string | null | undefined, fallback: string): string {

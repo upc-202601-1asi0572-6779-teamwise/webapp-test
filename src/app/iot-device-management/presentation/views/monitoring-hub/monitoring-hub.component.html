@@ -187,7 +187,7 @@
               <td class="py-2.5 font-medium" style="color: var(--color-text-primary)">{{ sensorTypeLabel(r.sensorType || r.label) }}</td>
               <td class="py-2.5" style="color: var(--color-text-secondary)">{{ r.value | number:'1.0-2' }}{{ r.unit ? ' ' + r.unit : '' }}</td>
               <td class="py-2.5 font-mono text-xs" style="color: var(--color-text-muted)">{{ r.deviceSerial || '—' }}</td>
-              <td class="py-2.5 whitespace-nowrap" style="color: var(--color-text-muted)">{{ r.recordedAt | date:'short' }}</td>
+              <td class="py-2.5 whitespace-nowrap" style="color: var(--color-text-muted)">{{ r.recordedAt | date:'dd/MM/yyyy HH:mm' }}</td>
             </tr>
             }
           </tbody>
