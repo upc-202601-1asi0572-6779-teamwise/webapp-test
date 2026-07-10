@@ -5,15 +5,9 @@ export const authRoutes: Routes = [
     path: 'login',
     loadComponent: () => import('./views/login/login.component').then((m) => m.LoginComponent),
   },
-  {
-    path: 'register',
-    loadComponent: () => import('./views/register/register.component').then((m) => m.RegisterComponent),
-  },
-  {
-    path: 'recover-password',
-    loadComponent: () =>
-      import('./views/recover-password/recover-password.component').then((m) => m.RecoverPasswordComponent),
-  },
+  // Public sign-up removed (IAM: only admin creates users via POST /admin/users).
+  { path: 'register', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'recover-password', redirectTo: 'login', pathMatch: 'full' },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
 
