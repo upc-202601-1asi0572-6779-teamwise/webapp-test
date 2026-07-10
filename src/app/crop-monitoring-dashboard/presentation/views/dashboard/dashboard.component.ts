@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { CropMonitoringDashboardStore } from '../../../application/crop-monitoring-dashboard.store';
 import { TranslationService } from '../../../../i18n/translation.service';
 
@@ -13,112 +14,172 @@ export class DashboardComponent implements OnInit {
   readonly store = inject(CropMonitoringDashboardStore);
   private readonly router = inject(Router);
   private readonly t = inject(TranslationService);
-
-  // ── i18n getters (runtime translation) ──
+  readonly features = environment.features;
+  readonly sectorId = environment.demo.sectorId ?? 1;
 
   get headingText(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.heading.agronomist')
-      : this.t.translate('dashboard.heading.grower');
+    return this.t.translate('dashboard.heading.agronomist');
   }
 
   get subtitleText(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.subtitle.agronomist')
-      : this.t.translate('dashboard.subtitle.grower');
+    return this.t.translate('dashboard.subtitle.agronomist');
   }
 
-  get newReportLabel(): string { return this.t.translate('dashboard.newReport'); }
-  get allPlantationsLabel(): string { return this.t.translate('dashboard.allPlantations'); }
-  get loadingText(): string { return this.t.translate('dashboard.loading'); }
-
-  get alertSectionLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.alerts.agronomist')
-      : this.t.translate('dashboard.alerts.grower');
+  get loadingText(): string {
+    return this.t.translate('dashboard.loading');
   }
 
-  get criticalLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.alerts.criticalAgronomist')
-      : this.t.translate('dashboard.alerts.criticalGrower');
+  get refreshLabel(): string {
+    return this.t.translate('dashboard.refresh');
   }
 
-  get warningLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.alerts.warningAgronomist')
-      : this.t.translate('dashboard.alerts.warningGrower');
+  get sectorChipLabel(): string {
+    return this.t
+      .translate('dashboard.context.sectorChip')
+      .replace('{{id}}', String(this.sectorId));
+  }
+
+  get kpiPendingLabel(): string {
+    return this.t.translate('dashboard.kpi.pendingRecs');
+  }
+  get kpiPublishedLabel(): string {
+    return this.t.translate('dashboard.kpi.publishedRecs');
+  }
+  get kpiInterventionsLabel(): string {
+    return this.t.translate('dashboard.kpi.interventions');
+  }
+  get kpiGatewaysLabel(): string {
+    return this.t.translate('dashboard.kpi.gateways');
+  }
+  get kpiHealthLabel(): string {
+    return this.t.translate('dashboard.kpi.sectorHealth');
   }
 
   get deviceSectionLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.devices.agronomist')
-      : this.t.translate('dashboard.devices.grower');
+    return this.t.translate('dashboard.devices.agronomist');
+  }
+  get connectedLabel(): string {
+    return this.t.translate('dashboard.devices.connected');
+  }
+  get disconnectedLabel(): string {
+    return this.t.translate('dashboard.devices.disconnected');
+  }
+  get noGatewaysLabel(): string {
+    return this.t.translate('dashboard.noGateways');
   }
 
-  get connectedLabel(): string { return this.t.translate('dashboard.devices.connected'); }
-  get offlineLabel(): string { return this.t.translate('dashboard.devices.offline'); }
-  get disconnectedLabel(): string { return this.t.translate('dashboard.devices.disconnected'); }
+  get trendsHeading(): string {
+    return this.t.translate('dashboard.trends.heading');
+  }
+  get trendsSubtitle(): string {
+    return this.t.translate('dashboard.trends.subtitle');
+  }
+  get trendsEmptyLabel(): string {
+    return this.t.translate('dashboard.trends.empty');
+  }
+  get trendsInsufficientLabel(): string {
+    return this.t.translate('dashboard.trends.insufficient');
+  }
 
-  get trendsHeading(): string { return this.t.translate('dashboard.trends.heading'); }
-  get trendsSubtitle(): string { return this.t.translate('dashboard.trends.subtitle'); }
-  get growerTrendsHeading(): string { return this.t.translate('dashboard.growerTrends.heading'); }
-  get growerTrendsSubtitle(): string { return this.t.translate('dashboard.growerTrends.subtitle'); }
+  samplesLabel(n: number): string {
+    return this.t.translate('dashboard.trends.samples').replace('{{n}}', String(n));
+  }
+
+  trendLabel(trend: 'up' | 'down' | 'stable'): string {
+    if (trend === 'up') return this.t.translate('dashboard.trend.up');
+    if (trend === 'down') return this.t.translate('dashboard.trend.down');
+    return this.t.translate('dashboard.trend.stable');
+  }
 
   get healthSectionLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.health.agronomist')
-      : this.t.translate('dashboard.health.grower');
+    return this.t.translate('dashboard.health.agronomist');
   }
-
-  get selectPlantationHint(): string { return this.t.translate('dashboard.zones.selectPlantation'); }
 
   get readingsHeading(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.readings.agronomist')
-      : this.t.translate('dashboard.readings.grower');
+    return this.t.translate('dashboard.readings.agronomist');
+  }
+  get noRecentReadingsLabel(): string {
+    return this.t.translate('dashboard.noRecentReadings');
   }
 
-  get recentAlertsHeading(): string { return this.t.translate('dashboard.recentAlerts'); }
-  get viewAllLabel(): string { return this.t.translate('dashboard.viewAll'); }
-  get recommendationsHeading(): string { return this.t.translate('dashboard.recommendations'); }
-  get inspectionsHeading(): string { return this.t.translate('dashboard.inspections'); }
-
-  get plantationsLabel(): string {
-    return this.store.isAgronomist()
-      ? this.t.translate('dashboard.plantations.agronomist')
-      : this.t.translate('dashboard.plantations.grower');
+  get recommendationsHeading(): string {
+    return this.t.translate('dashboard.recommendations');
+  }
+  get interventionsHeading(): string {
+    return this.t.translate('dashboard.interventions');
+  }
+  get pendingQueueHeading(): string {
+    return this.t.translate('dashboard.pendingQueue');
+  }
+  get viewAllLabel(): string {
+    return this.t.translate('dashboard.viewAll');
+  }
+  get emptyPendingLabel(): string {
+    return this.t.translate('dashboard.emptyPending');
+  }
+  get emptyPublishedLabel(): string {
+    return this.t.translate('dashboard.emptyPublished');
+  }
+  get emptyInterventionsLabel(): string {
+    return this.t.translate('dashboard.emptyInterventions');
   }
 
-  // ── Table header getters ──
-  get tableHeaderVariable(): string { return this.t.translate('dashboard.table.variable'); }
-  get tableHeaderValue(): string { return this.t.translate('dashboard.table.value'); }
-  get tableHeaderDevice(): string { return this.t.translate('dashboard.table.device'); }
-  get tableHeaderTime(): string { return this.t.translate('dashboard.table.time'); }
-  get topRecommendationEyebrow(): string { return this.t.translate('dashboard.topRecommendation.eyebrow'); }
-  get viewDetailLabel(): string { return this.t.translate('dashboard.viewDetail'); }
-  get trendUpLabel(): string { return this.t.translate('dashboard.trend.up'); }
-  get trendDownLabel(): string { return this.t.translate('dashboard.trend.down'); }
-  get trendStableLabel(): string { return this.t.translate('dashboard.trend.stable'); }
-  get urgentLabel(): string { return this.t.translate('dashboard.alerts.urgent'); }
-  get attentionLabel(): string { return this.t.translate('dashboard.alerts.attention'); }
-  get hectaresShortLabel(): string { return this.t.translate('dashboard.units.hectaresShort'); }
+  get tableHeaderVariable(): string {
+    return this.t.translate('dashboard.table.variable');
+  }
+  get tableHeaderValue(): string {
+    return this.t.translate('dashboard.table.value');
+  }
+  get tableHeaderIotMac(): string {
+    return this.t.translate('dashboard.table.iotMac');
+  }
+  get tableHeaderTime(): string {
+    return this.t.translate('dashboard.table.time');
+  }
 
-  phaseLabel(phase: string): string {
-    return phase === 'produccion'
-      ? this.t.translate('dashboard.phase.production')
-      : this.t.translate('dashboard.phase.establishment');
+  get quickMonitoring(): string {
+    return this.t.translate('dashboard.quick.monitoring');
+  }
+  get quickMonitoringHint(): string {
+    return this.t.translate('dashboard.quick.monitoringHint');
+  }
+  get quickRecommendations(): string {
+    return this.t.translate('dashboard.quick.recommendations');
+  }
+  get quickRecommendationsHint(): string {
+    return this.t.translate('dashboard.quick.recommendationsHint');
+  }
+  get quickInterventions(): string {
+    return this.t.translate('dashboard.quick.interventions');
+  }
+  get quickInterventionsHint(): string {
+    return this.t.translate('dashboard.quick.interventionsHint');
+  }
+
+  statusLabel(status: string): string {
+    if (status === 'pending_review') return this.t.translate('dashboard.recStatus.pending');
+    if (status === 'approved') return this.t.translate('dashboard.recStatus.approved');
+    if (status === 'published') return this.t.translate('dashboard.recStatus.published');
+    return status;
   }
 
   ngOnInit(): void {
     this.store.loadAll();
   }
 
-  selectPlantation(id: number): void {
-    this.store.selectPlantation(id);
+  refresh(): void {
+    this.store.loadAll();
   }
 
-  navigateToReports(): void {
-    this.router.navigate(['/reportes']);
+  navigateToMonitoring(): void {
+    this.router.navigate(['/monitoreo']);
+  }
+
+  navigateToRecommendations(): void {
+    this.router.navigate(['/recomendaciones']);
+  }
+
+  navigateToInterventions(): void {
+    this.router.navigate(['/intervenciones']);
   }
 }

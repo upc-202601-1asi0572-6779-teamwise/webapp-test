@@ -62,6 +62,8 @@ const mockPlantationVm = {
   id: 1, name: 'Finca Palma Sur', location: 'Region Sur', totalHectares: 50,
   phenologicalPhase: 'produccion', zonesCount: 3, devicesCount: 5,
   soilType: 'franco_arenoso', overallHealth: 'optimal' as const,
+  connectedDevices: 5,
+  activeAlerts: 0,
 };
 
 describe('PlantationListComponent — i18n (Spanish)', () => {

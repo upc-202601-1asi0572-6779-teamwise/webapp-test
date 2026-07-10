@@ -5,8 +5,8 @@
       <p style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: var(--font-weight-bold); color: var(--color-brand-secondary)">
         Smart Palm
       </p>
-      <p i18n="@@sidebar.operationsCenter" style="font-family: var(--font-body); font-size: 0.8rem; color: var(--color-white-60)">
-        Centro de operaciones
+      <p style="font-family: var(--font-body); font-size: 0.8rem; color: var(--color-white-60)">
+        {{ operationsCenterLabel }}
       </p>
     </div>
   </a>
@@ -33,7 +33,7 @@
       [routerLink]="item.route"
       #rla="routerLinkActive"
       routerLinkActive
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="{ exact: item.exact !== false }"
       class="flex items-center gap-3 rounded-[1.15rem] px-3 py-3 transition-all duration-200 hover:translate-x-0.5"
       [style.text-decoration]="'none'"
       [style.background]="rla.isActive ? 'rgba(255,255,255,0.14)' : 'transparent'"
@@ -45,23 +45,14 @@
           @case ('dashboard') {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
           }
-          @case ('plantations') {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M7 10c0-3 2.5-5 5-8 2.5 3 5 5 5 8a5 5 0 0 1-10 0Z"/><path d="M5 19c2-1 4-1.5 7-1.5s5 .5 7 1.5"/></svg>
-          }
-          @case ('devices') {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/><path d="M9 6h6"/></svg>
-          }
-          @case ('alerts') {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          @case ('monitoring') {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>
           }
           @case ('recommendations') {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
           }
-          @case ('reports') {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M13 2v7h7"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
-          }
-          @case ('inspections') {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M21 21 15 15"/><path d="M7 10h6"/><path d="M10 7v6"/></svg>
+          @case ('interventions') {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           }
         }
       </span>
@@ -79,7 +70,7 @@
         [routerLink]="item.route"
         #rlaAcct="routerLinkActive"
         routerLinkActive
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: item.exact !== false }"
         class="flex items-center gap-3 rounded-[1.15rem] px-3 py-3 transition-all duration-200 hover:translate-x-0.5"
         [style.text-decoration]="'none'"
         [style.background]="rlaAcct.isActive ? 'rgba(255,255,255,0.14)' : 'transparent'"

@@ -1,399 +1,245 @@
 /**
- * Phase 2 — Dashboard Component i18n Tests (Strict TDD)
- *
- * Tests locale-aware behavior: health labels, headers, buttons, empty states,
- * error messages, device statuses, sparkline labels, table headers.
- *
- * ⚠️ ORDER MATTERS: Spanish tests run first (no loadTranslations), then English
- *    tests call loadTranslations. loadTranslations is global and persists.
+ * Dashboard — agronomist desk i18n smoke tests.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { LOCALE_ID } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { loadTranslations } from '@angular/localize';
 import { DashboardComponent } from './dashboard.component';
 import { CropMonitoringDashboardStore } from '../../../application/crop-monitoring-dashboard.store';
-import { AuthService } from '../../../../shared/infrastructure/auth.service';
-
-// --- Test Helpers ---
+import { TranslationService } from '../../../../i18n/translation.service';
 
 @Component({ template: '' })
 class DummyComponent {}
 
-type AnySignal<T> = () => T;
+const ES: Record<string, string> = {
+  'dashboard.heading.agronomist': 'Panel de control agronómico',
+  'dashboard.subtitle.agronomist':
+    'Resumen del sector: salud, recomendaciones, intervenciones y sensores.',
+  'dashboard.loading': 'Cargando dashboard...',
+  'dashboard.refresh': 'Actualizar',
+  'dashboard.context.sector': 'Sector {{id}}',
+  'dashboard.context.sectorChip': 'Sector {{id}}',
+  'dashboard.kpi.pendingRecs': 'Recs. pendientes',
+  'dashboard.kpi.publishedRecs': 'Recs. publicadas',
+  'dashboard.kpi.interventions': 'Intervenciones',
+  'dashboard.kpi.gateways': 'Gateways',
+  'dashboard.kpi.sectorHealth': 'Salud del sector',
+  'dashboard.quick.monitoring': 'Monitoreo',
+  'dashboard.quick.monitoringHint': 'Gateways, umbrales y lecturas',
+  'dashboard.quick.recommendations': 'Recomendaciones',
+  'dashboard.quick.recommendationsHint': 'Cola de revisión y publicadas',
+  'dashboard.quick.interventions': 'Intervenciones',
+  'dashboard.quick.interventionsHint': 'Registro de campo del sector',
+  'dashboard.pendingQueue': 'Cola de revisión',
+  'dashboard.recommendations': 'Publicadas',
+  'dashboard.interventions': 'Intervenciones del sector',
+  'dashboard.emptyPending': 'No hay recomendaciones pendientes en este sector.',
+  'dashboard.emptyPublished': 'Aún no hay recomendaciones publicadas.',
+  'dashboard.emptyInterventions': 'Aún no hay intervenciones registradas.',
+  'dashboard.devices.agronomist': 'Edge gateways',
+  'dashboard.devices.connected': 'Conectados',
+  'dashboard.devices.disconnected': 'Desconectados',
+  'dashboard.noGateways': 'Sin gateways registrados.',
+  'dashboard.trends.heading': 'Tendencias de sensores',
+  'dashboard.trends.subtitle': 'Variables reportadas por el dispositivo del sector',
+  'dashboard.trends.empty': 'Aún no hay lecturas suficientes para mostrar tendencias.',
+  'dashboard.trends.insufficient': 'Pocos puntos para trazar tendencia',
+  'dashboard.trends.samples': '{{n}} lecturas',
+  'dashboard.trend.up': 'Subiendo',
+  'dashboard.trend.down': 'Bajando',
+  'dashboard.trend.stable': 'Estable',
+  'dashboard.health.agronomist': 'Salud del sector',
+  'dashboard.health.optimal': 'Óptimo',
+  'dashboard.health.atRisk': 'En riesgo',
+  'dashboard.health.critical': 'Crítico',
+  'dashboard.health.unknown': 'Sin datos',
+  'dashboard.readings.agronomist': 'Últimas lecturas',
+  'dashboard.noRecentReadings': 'Sin lecturas recientes para el dispositivo configurado.',
+  'dashboard.viewAll': 'Ver todas',
+  'dashboard.table.variable': 'Variable',
+  'dashboard.table.value': 'Valor',
+  'dashboard.table.iotMac': 'IoT MAC',
+  'dashboard.table.time': 'Hora',
+  'dashboard.recStatus.pending': 'Pendiente',
+  'dashboard.recStatus.approved': 'Aprobada',
+  'dashboard.recStatus.published': 'Publicada',
+};
 
-interface MockStoreOverrides {
-  isAgronomist?: AnySignal<boolean>;
-  loading?: AnySignal<boolean>;
-  error?: AnySignal<string>;
-  plantations?: AnySignal<unknown[]>;
-  zones?: AnySignal<unknown[]>;
-  activeAlerts?: AnySignal<unknown[]>;
-  alertCount?: AnySignal<{ critical: number; warning: number; total: number }>;
-  recommendations?: AnySignal<unknown[]>;
-  latestReadings?: AnySignal<unknown[]>;
-  devices?: AnySignal<unknown[]>;
-  connectedCount?: AnySignal<number>;
-  offlineCount?: AnySignal<number>;
-  disconnectedCount?: AnySignal<number>;
-  sparklineItems?: AnySignal<unknown[]>;
-  trendCards?: AnySignal<unknown[]>;
-  inspections?: AnySignal<unknown[]>;
-  topRecommendation?: AnySignal<unknown | null>;
-  selectedPlantation?: AnySignal<unknown | null>;
-  healthLabels?: Record<string, string>;
-  healthColors?: Record<string, string>;
-  zoneHealthItems?: AnySignal<unknown[]>;
-}
+const EN: Record<string, string> = {
+  'dashboard.heading.agronomist': 'Agronomic control panel',
+  'dashboard.subtitle.agronomist':
+    'Sector summary: health, recommendations, interventions and sensors.',
+  'dashboard.loading': 'Loading dashboard...',
+  'dashboard.refresh': 'Refresh',
+  'dashboard.context.sector': 'Sector {{id}}',
+  'dashboard.context.sectorChip': 'Sector {{id}}',
+  'dashboard.kpi.pendingRecs': 'Pending recs',
+  'dashboard.kpi.publishedRecs': 'Published recs',
+  'dashboard.kpi.interventions': 'Interventions',
+  'dashboard.kpi.gateways': 'Gateways',
+  'dashboard.kpi.sectorHealth': 'Sector health',
+  'dashboard.quick.monitoring': 'Monitoring',
+  'dashboard.quick.monitoringHint': 'Gateways, thresholds and readings',
+  'dashboard.quick.recommendations': 'Recommendations',
+  'dashboard.quick.recommendationsHint': 'Review queue and published',
+  'dashboard.quick.interventions': 'Interventions',
+  'dashboard.quick.interventionsHint': 'Field records for the sector',
+  'dashboard.pendingQueue': 'Review queue',
+  'dashboard.recommendations': 'Published',
+  'dashboard.interventions': 'Sector interventions',
+  'dashboard.emptyPending': 'No pending recommendations in this sector.',
+  'dashboard.emptyPublished': 'No published recommendations yet.',
+  'dashboard.emptyInterventions': 'No interventions registered yet.',
+  'dashboard.devices.agronomist': 'Edge gateways',
+  'dashboard.devices.connected': 'Connected',
+  'dashboard.devices.disconnected': 'Disconnected',
+  'dashboard.noGateways': 'No gateways registered.',
+  'dashboard.trends.heading': 'Sensor trends',
+  'dashboard.trends.subtitle': 'Variables reported by the sector device',
+  'dashboard.trends.empty': 'Not enough readings yet to show trends.',
+  'dashboard.trends.insufficient': 'Too few points to chart a trend',
+  'dashboard.trends.samples': '{{n}} readings',
+  'dashboard.trend.up': 'Rising',
+  'dashboard.trend.down': 'Falling',
+  'dashboard.trend.stable': 'Stable',
+  'dashboard.health.agronomist': 'Sector health',
+  'dashboard.health.optimal': 'Optimal',
+  'dashboard.health.atRisk': 'At risk',
+  'dashboard.health.critical': 'Critical',
+  'dashboard.health.unknown': 'No data',
+  'dashboard.readings.agronomist': 'Latest readings',
+  'dashboard.noRecentReadings': 'No recent readings for the configured device.',
+  'dashboard.viewAll': 'View all',
+  'dashboard.table.variable': 'Variable',
+  'dashboard.table.value': 'Value',
+  'dashboard.table.iotMac': 'IoT MAC',
+  'dashboard.table.time': 'Time',
+  'dashboard.recStatus.pending': 'Pending',
+  'dashboard.recStatus.approved': 'Approved',
+  'dashboard.recStatus.published': 'Published',
+};
 
-function createMockStore(overrides: MockStoreOverrides = {}) {
+function createStore(overrides: Record<string, unknown> = {}) {
   const defaults = {
     isAgronomist: () => true,
-    loading: () => false,
-    error: () => '',
-    plantations: () => [],
-    zones: () => [],
-    activeAlerts: () => [],
-    alertCount: () => ({ critical: 2, warning: 3, total: 5 }),
-    recommendations: () => [],
-    latestReadings: () => [],
-    devices: () => [],
-    connectedCount: () => 4,
-    offlineCount: () => 1,
-    disconnectedCount: () => 0,
-    sparklineItems: () => [],
-    trendCards: () => [],
-    inspections: () => [],
-    topRecommendation: () => null,
-    selectedPlantation: () => null,
-    healthLabels: {
-      optimal: 'Optimo',
-      at_risk: 'En riesgo',
-      critical: 'Critico',
-    },
-    healthColors: {
-      optimal: 'var(--color-success)',
-      at_risk: 'var(--color-warning)',
-      critical: 'var(--color-danger)',
-    },
-    zoneHealthItems: () => [],
-    ...overrides,
-  };
-
-  return {
-    ...defaults,
+    loading: signal(false),
+    error: signal(''),
+    sectorId: signal(1),
+    recommendations: signal([]),
+    pendingRecommendations: signal([]),
+    interventions: signal([]),
+    latestReadings: signal([]),
+    trendReadings: signal([]),
+    gateways: signal([]),
+    sectorHealth: signal(null),
+    kpis: signal({
+      pendingRecommendations: 0,
+      publishedRecommendations: 0,
+      interventions: 0,
+      gatewaysConnected: 0,
+      gatewaysTotal: 0,
+      latestReadings: 0,
+      sectorHealthStatus: null as number | null,
+    }),
+    connectedCount: signal(0),
+    offlineCount: signal(0),
+    disconnectedCount: signal(0),
+    sparklineItems: signal([]),
+    topPendingRecommendation: signal(null),
+    healthStatusLabel: (s: number | null) => (s === null ? 'Sin datos' : 'Óptimo'),
+    healthStatusColor: () => 'var(--color-text-muted)',
     loadAll: vi.fn(),
-    selectPlantation: vi.fn(),
-  } as unknown as CropMonitoringDashboardStore;
+  };
+  return { ...defaults, ...overrides } as unknown as CropMonitoringDashboardStore;
 }
 
-function setupTestBed(locale: 'es' | 'en', store: ReturnType<typeof createMockStore>) {
-  const authMock = {
-    currentUser: { id: 1, fullName: 'Dr. Test', role: 'agronomist' },
-    isAuthenticated: true,
-    logout: vi.fn(),
-  };
-
+function setup(locale: 'es' | 'en', store: CropMonitoringDashboardStore) {
+  const map = locale === 'en' ? EN : ES;
   return TestBed.configureTestingModule({
     imports: [DashboardComponent],
     providers: [
-      { provide: LOCALE_ID, useValue: locale },
       { provide: CropMonitoringDashboardStore, useValue: store },
-      { provide: AuthService, useValue: authMock },
+      { provide: TranslationService, useValue: { translate: (k: string) => map[k] ?? k } },
       provideRouter([
         { path: 'dashboard', component: DummyComponent },
-        { path: 'reportes', component: DummyComponent },
-        { path: 'alertas', component: DummyComponent },
-        { path: 'alertas/:id', component: DummyComponent },
+        { path: 'monitoreo', component: DummyComponent },
         { path: 'recomendaciones', component: DummyComponent },
         { path: 'recomendaciones/:id', component: DummyComponent },
-        { path: 'inspecciones', component: DummyComponent },
-        { path: 'inspecciones/:id', component: DummyComponent },
-        { path: 'plantaciones', component: DummyComponent },
+        { path: 'intervenciones', component: DummyComponent },
       ]),
-      provideHttpClient(),
     ],
   });
 }
 
-// English translations keyed by Angular message ID
-const EN: Record<string, string> = {
-  'dashboard.health.optimal': 'Optimal',
-  'dashboard.health.atRisk': 'At Risk',
-  'dashboard.health.critical': 'Critical',
-  'dashboard.heading.agronomist': 'Crop Monitoring',
-  'dashboard.subtitle.agronomist': 'Monitoring all plantations under your charge.',
-  'dashboard.heading.grower': 'My Crop',
-  'dashboard.subtitle.grower': 'Summary of your plantation status',
-  'dashboard.newReport': '+ New Report',
-  'dashboard.allPlantations': 'All Plantations',
-  'dashboard.loading': 'Loading dashboard...',
-  'dashboard.alerts.agronomist': 'Active Alerts',
-  'dashboard.alerts.grower': 'Alerts',
-  'dashboard.alerts.criticalAgronomist': 'Critical',
-  'dashboard.alerts.warningAgronomist': 'Warnings',
-  'dashboard.alerts.criticalGrower': 'Urgent',
-  'dashboard.alerts.warningGrower': 'Attention',
-  'dashboard.devices.agronomist': 'Devices',
-  'dashboard.devices.grower': 'Your Devices',
-  'dashboard.devices.connected': 'Connected',
-  'dashboard.devices.offline': 'Offline',
-  'dashboard.devices.disconnected': 'Disconnected',
-  'dashboard.trends.heading': 'Parameter Trends',
-  'dashboard.trends.subtitle': 'Evolution of key variables over time',
-  'dashboard.sparkline.temperature': 'Temperature',
-  'dashboard.sparkline.soilHumidity': 'Soil Humidity',
-  'dashboard.sparkline.soilPh': 'Soil pH',
-  'dashboard.trend.humidity': 'Humidity',
-  'dashboard.trend.ph': 'pH',
-  'dashboard.growerTrends.heading': 'How Your Crop is Doing',
-  'dashboard.growerTrends.subtitle': 'Latest sensor measurements',
-  'dashboard.health.agronomist': 'Crop Health',
-  'dashboard.health.grower': 'Your Zone Status',
-  'dashboard.zones.selectPlantation': 'Select a plantation to view its zones.',
-  'dashboard.readings.agronomist': 'Latest Readings',
-  'dashboard.readings.grower': 'Recent Readings',
-  'dashboard.recentAlerts': 'Recent Alerts',
-  'dashboard.viewAll': 'View All',
-  'dashboard.recommendations': 'Recommendations',
-  'dashboard.inspections': 'Intervention History',
-  'dashboard.plantations.agronomist': 'Plantations',
-  'dashboard.plantations.grower': 'Your Plantations',
-  'dashboard.table.variable': 'Variable',
-  'dashboard.table.value': 'Value',
-  'dashboard.table.device': 'Device',
-  'dashboard.table.time': 'Time',
-  'dashboard.error.load': 'Could not load dashboard data.',
-};
-
-// ═══════════════════════════════════════════════════════════════════════
-//  SPANISH TESTS (run first — no loadTranslations)
-// ═══════════════════════════════════════════════════════════════════════
-
-describe('DashboardComponent — i18n (Spanish)', () => {
-  it('should show Spanish health labels (Optimo, En riesgo, Critico)', async () => {
-    const store = createMockStore({
-      zones: () => [
-        { id: 1, name: 'Zona Norte', hectares: 12.5, cropHealthStatus: 'optimal' },
-        { id: 2, name: 'Zona Sur', hectares: 8.3, cropHealthStatus: 'critical' },
-      ],
+describe('DashboardComponent — agronomist desk (Spanish)', () => {
+  it('shows Spanish heading and KPIs', async () => {
+    const store = createStore({
+      kpis: signal({
+        pendingRecommendations: 2,
+        publishedRecommendations: 1,
+        interventions: 3,
+        gatewaysConnected: 1,
+        gatewaysTotal: 1,
+        latestReadings: 0,
+        sectorHealthStatus: 0,
+      }),
+      healthStatusLabel: () => 'Óptimo',
     });
-    await setupTestBed('es', store).compileComponents();
+    await setup('es', store).compileComponents();
     const fixture = TestBed.createComponent(DashboardComponent);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Optimo');
-    expect(el.textContent).toContain('Critico');
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toMatch(/Panel de control agron[oó]mico/i);
+    expect(text).toContain('Recs. pendientes');
+    expect(text).toContain('Recs. publicadas');
+    expect(text).toContain('Intervenciones');
+    expect(text).toContain('Actualizar');
+    expect(store.loadAll).toHaveBeenCalled();
   });
 
-  it('should show Spanish agronomist heading', async () => {
-    const store = createMockStore({ isAgronomist: () => true });
-    await setupTestBed('es', store).compileComponents();
+  it('shows Spanish loading state', async () => {
+    const store = createStore({ loading: signal(true) });
+    await setup('es', store).compileComponents();
     const fixture = TestBed.createComponent(DashboardComponent);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Supervision de cultivos');
-    expect(el.textContent).toContain('Monitoreo de todas las plantaciones a tu cargo');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Cargando dashboard');
   });
 
-  it('should show Spanish loading text', async () => {
-    const store = createMockStore({ loading: () => true });
-    await setupTestBed('es', store).compileComponents();
+  it('shows Spanish empty queues', async () => {
+    const store = createStore();
+    await setup('es', store).compileComponents();
     const fixture = TestBed.createComponent(DashboardComponent);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Cargando dashboard');
-  });
-
-  it('should show Spanish alert section labels', async () => {
-    const store = createMockStore({ isAgronomist: () => true });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Alertas activas');
-    expect(el.textContent).toContain('Criticas');
-    expect(el.textContent).toContain('Advertencias');
-  });
-
-  it('should show Spanish device status labels', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      connectedCount: () => 4,
-      offlineCount: () => 1,
-      disconnectedCount: () => 0,
-    });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Conectados');
-    expect(el.textContent).toContain('Modo offline');
-  });
-
-  it('should show Spanish sparkline labels', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      sparklineItems: () => [
-        { label: 'Temperatura', unit: '°C', color: 'var(--color-warning)', currentValue: 28.5, vMin: 25, vMax: 32, points: '3,40 100,30 197,50' },
-      ],
-    });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Tendencias de parametros');
-    expect(el.textContent).toContain('Temperatura');
-  });
-
-  it('should show Spanish table headers', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      latestReadings: () => [
-        { id: 1, label: 'Temperatura', value: 28.5, unit: '°C', deviceSerial: 'SN-001', deviceId: 1, recordedAt: '2025-06-15T10:00:00Z' },
-      ],
-    });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Variable');
-    expect(el.textContent).toContain('Valor');
-    expect(el.textContent).toContain('Dispositivo');
-    expect(el.textContent).toContain('Hora');
-  });
-
-  it('should show Spanish section headings when agronomist', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      inspections: () => [{ id: 1, plantationName: 'Finca Test', inspectionDate: '2025-06-10', findings: 'Todo en orden', observations: 'Revisión completa' }],
-    });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Salud del cultivo');
-    expect(el.textContent).toContain('Historial de intervenciones');
-    expect(el.textContent).toContain('Plantaciones');
-  });
-
-  it('should display store error message in Spanish', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      loading: () => false,
-      error: () => 'No se pudieron cargar los datos del dashboard.',
-    });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('No se pudieron cargar los datos del dashboard');
-  });
-
-  it('should show Spanish grower heading', async () => {
-    const store = createMockStore({ isAgronomist: () => false });
-    await setupTestBed('es', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Mi cultivo');
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Cola de revisión');
+    expect(text).toMatch(/No hay recomendaciones pendientes/i);
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════
-//  ENGLISH TESTS (run after — loadTranslations persists)
-// ═══════════════════════════════════════════════════════════════════════
-
-describe('DashboardComponent — i18n (English)', () => {
-  beforeAll(() => {
-    loadTranslations(EN);
-  });
-
-  it('should show English agronomist heading', async () => {
-    const store = createMockStore({ isAgronomist: () => true });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Crop Monitoring');
-  });
-
-  it('should show English loading text', async () => {
-    const store = createMockStore({ loading: () => true });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Loading dashboard');
-  });
-
-  it('should show English alert section labels', async () => {
-    const store = createMockStore({ isAgronomist: () => true });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Active Alerts');
-    expect(el.textContent).toContain('Critical');
-    expect(el.textContent).toContain('Warnings');
-  });
-
-  it('should show English device status labels', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      connectedCount: () => 4,
-      offlineCount: () => 1,
-      disconnectedCount: () => 2,
+describe('DashboardComponent — agronomist desk (English)', () => {
+  it('shows English heading and KPIs', async () => {
+    const store = createStore({
+      kpis: signal({
+        pendingRecommendations: 0,
+        publishedRecommendations: 0,
+        interventions: 0,
+        gatewaysConnected: 0,
+        gatewaysTotal: 0,
+        latestReadings: 0,
+        sectorHealthStatus: null,
+      }),
+      healthStatusLabel: () => 'No data',
     });
-    await setupTestBed('en', store).compileComponents();
+    await setup('en', store).compileComponents();
     const fixture = TestBed.createComponent(DashboardComponent);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Connected');
-    expect(el.textContent).toContain('Offline');
-    expect(el.textContent).toContain('Disconnected');
-  });
-
-  it('should show English table headers', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      latestReadings: () => [
-        { id: 1, label: 'Temperature', value: 28.5, unit: '°C', deviceSerial: 'SN-001', deviceId: 1, recordedAt: '2025-06-15T10:00:00Z' },
-      ],
-    });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Variable');
-    expect(el.textContent).toContain('Value');
-    expect(el.textContent).toContain('Device');
-    expect(el.textContent).toContain('Time');
-  });
-
-  it('should show English section headings when agronomist', async () => {
-    const store = createMockStore({
-      isAgronomist: () => true,
-      inspections: () => [{ id: 1, plantationName: 'Test Farm', inspectionDate: '2025-06-10', findings: 'All good', observations: 'Full review' }],
-    });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Crop Health');
-    expect(el.textContent).toContain('Intervention History');
-    expect(el.textContent).toContain('Plantations');
-  });
-
-  it('should show English grower heading', async () => {
-    const store = createMockStore({ isAgronomist: () => false });
-    await setupTestBed('en', store).compileComponents();
-    const fixture = TestBed.createComponent(DashboardComponent);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('My Crop');
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Agronomic control panel');
+    expect(text).toContain('Pending recs');
+    expect(text).toContain('Published recs');
+    expect(text).toContain('Refresh');
+    expect(text).toContain('Monitoring');
+    expect(text).toContain('Sector 1');
   });
 });

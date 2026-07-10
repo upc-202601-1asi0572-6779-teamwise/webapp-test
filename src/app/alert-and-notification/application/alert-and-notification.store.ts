@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Alert, AlertCount } from '../domain/model/alert.entity';
 import { Notification, NotificationCount } from '../domain/model/notification.entity';
 import { AlertService } from '../infrastructure/alert-api.service';
@@ -44,6 +45,14 @@ export class AlertAndNotificationStore {
   loadAlerts(): void {
     this.alertsLoading.set(true);
     this.alertsError.set('');
+    if (!environment.features.alerts) {
+      this.alerts.set([]);
+      this.alertsLoading.set(false);
+      this.alertsError.set(
+        $localize`:@@alert.error.unavailable:Las alertas no están disponibles en el backend real todavía.`,
+      );
+      return;
+    }
     this.alertService
       .list({ status: this.activeTab() })
       .pipe(finalize(() => this.alertsLoading.set(false)))
@@ -54,6 +63,10 @@ export class AlertAndNotificationStore {
   }
 
   loadAlertCount(): void {
+    if (!environment.features.alerts) {
+      this.badgeCount.set({ total: 0, critical: 0, warning: 0, informative: 0, unacknowledged: 0 });
+      return;
+    }
     this.alertService.count().subscribe({
       next: (count) => this.badgeCount.set(count),
     });

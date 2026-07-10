@@ -16,6 +16,8 @@ export interface RegisterRequest {
 }
 
 export interface LoginRequest {
-  email: string;
+  /** Backend IAM uses `username` (not email). Kept optional for legacy form fields. */
+  username?: string;
+  email?: string;
   password: string;
 }

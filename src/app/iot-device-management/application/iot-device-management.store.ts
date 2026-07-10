@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, finalize, tap } from 'rxjs';
 import { AuthService } from '../../shared/infrastructure/auth.service';
+import { TranslationService } from '../../i18n/translation.service';
 import { Device, CreateDeviceRequest, DeviceConfigurationRequest } from '../domain/model/device.entity';
 import { DeviceService } from '../infrastructure/device-api.service';
 import { PlantationService } from '../../field-technical-management/infrastructure/field-technical-management-api';
@@ -24,6 +25,7 @@ export class IotDeviceManagementStore {
   private readonly plantationService = inject(PlantationService);
   private readonly accessService = inject(Bc01AccessService);
   private readonly authService = inject(AuthService);
+  private readonly t = inject(TranslationService);
 
   // ── Device list state ────────────────────────────────────────────
   readonly devices = signal<Device[]>([]);
@@ -60,7 +62,7 @@ export class IotDeviceManagementStore {
   readonly accessError = signal('');
 
   // ── Computed ──────────────────────────────────────────────────────
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   readonly canWrite = computed(() => this.access()?.canWrite ?? false);
   readonly accessMessage = computed(() => this.access()?.message ?? '');
@@ -74,7 +76,7 @@ export class IotDeviceManagementStore {
       .pipe(finalize(() => this.devicesLoading.set(false)))
       .subscribe({
         next: (devices) => this.devices.set(devices),
-        error: () => this.devicesError.set('No se pudieron cargar los dispositivos.'),
+        error: () => this.devicesError.set(this.t.translate('device.list.error.load')),
       });
   }
 
@@ -90,7 +92,7 @@ export class IotDeviceManagementStore {
       .subscribe({
         next: (device) => this.device.set(device),
         error: (err: unknown) =>
-          this.deviceError.set(this.apiMessage(err, 'No se pudo cargar el dispositivo.')),
+          this.deviceError.set(this.apiMessage(err, this.t.translate('device.error.loadDevice'))),
       });
   }
 
@@ -104,7 +106,7 @@ export class IotDeviceManagementStore {
       .subscribe({
         next: (plantations) => this.plantations.set(plantations),
         error: (err: unknown) =>
-          this.plantationsError.set(this.apiMessage(err, 'No se pudieron cargar las plantaciones.')),
+          this.plantationsError.set(this.apiMessage(err, this.t.translate('device.error.loadPlantations'))),
       });
   }
 
@@ -117,7 +119,7 @@ export class IotDeviceManagementStore {
       .subscribe({
         next: (zones) => this.zones.set(zones),
         error: (err: unknown) =>
-          this.zonesError.set(this.apiMessage(err, 'No se pudieron cargar las zonas.')),
+          this.zonesError.set(this.apiMessage(err, this.t.translate('device.error.loadZones'))),
       });
   }
 
@@ -130,7 +132,7 @@ export class IotDeviceManagementStore {
       .pipe(finalize(() => this.accessLoading.set(false)))
       .subscribe({
         next: (a) => this.access.set(a),
-        error: () => this.accessError.set('No se pudo validar la suscripcion.'),
+        error: () => this.accessError.set(this.t.translate('device.error.validateSubscription')),
       });
   }
 
@@ -141,7 +143,7 @@ export class IotDeviceManagementStore {
     return this.deviceService.create(request).pipe(
       tap({
         error: (err: unknown) =>
-          this.formError.set(this.apiMessage(err, 'No se pudo registrar el dispositivo.')),
+          this.formError.set(this.apiMessage(err, this.t.translate('device.error.register'))),
       }),
       finalize(() => this.formSaving.set(false)),
     );
@@ -154,7 +156,7 @@ export class IotDeviceManagementStore {
     return this.deviceService.updateConfiguration(id, request).pipe(
       tap({
         error: (err: unknown) =>
-          this.actionError.set(this.apiMessage(err, 'No se pudo actualizar la configuracion.')),
+          this.actionError.set(this.apiMessage(err, this.t.translate('device.error.updateConfig'))),
       }),
       finalize(() => this.actionLoading.set('')),
     );
@@ -167,7 +169,7 @@ export class IotDeviceManagementStore {
     return this.deviceService.activate(id).pipe(
       tap({
         error: (err: unknown) =>
-          this.actionError.set(this.apiMessage(err, 'No se pudo actualizar el estado del dispositivo.')),
+          this.actionError.set(this.apiMessage(err, this.t.translate('device.error.updateStatus'))),
       }),
       finalize(() => this.actionLoading.set('')),
     );
@@ -180,7 +182,7 @@ export class IotDeviceManagementStore {
     return this.deviceService.deactivate(id).pipe(
       tap({
         error: (err: unknown) =>
-          this.actionError.set(this.apiMessage(err, 'No se pudo actualizar el estado del dispositivo.')),
+          this.actionError.set(this.apiMessage(err, this.t.translate('device.error.updateStatus'))),
       }),
       finalize(() => this.actionLoading.set('')),
     );
@@ -193,7 +195,7 @@ export class IotDeviceManagementStore {
     return this.deviceService.reassignZone(id, monitoringZoneId).pipe(
       tap({
         error: (err: unknown) =>
-          this.actionError.set(this.apiMessage(err, 'No se pudo reasignar la zona.')),
+          this.actionError.set(this.apiMessage(err, this.t.translate('device.error.reassignZone'))),
       }),
       finalize(() => this.actionLoading.set('')),
     );

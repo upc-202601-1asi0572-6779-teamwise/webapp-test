@@ -1,64 +1,75 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { authGuard } from './shared/infrastructure/guards/auth.guard';
 import { noAuthGuard } from './shared/infrastructure/guards/no-auth.guard';
+import { deskGuard } from './shared/infrastructure/guards/desk.guard';
+import { adminGuard } from './shared/infrastructure/guards/admin.guard';
 
+/**
+ * Agronomist desk + hidden platform admin console.
+ * Admin entry: /auth/login/admin (not linked from public login).
+ */
 export const routes: Routes = [
   {
     path: 'auth',
     canActivate: [noAuthGuard],
     loadChildren: () =>
-      import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then((m) => m.authRoutes),
+      import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then(
+        (m) => m.authRoutes,
+      ),
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadChildren: () =>
+      import('./platform-admin/presentation/platform-admin.routes').then(
+        (m) => m.platformAdminRoutes,
+      ),
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, deskGuard],
     loadComponent: () =>
       import('./shared/presentation/auth-shell/auth-shell.component').then((m) => m.AuthShellComponent),
     children: [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./crop-monitoring-dashboard/presentation/crop-monitoring-dashboard.routes').then((m) => m.dashboardRoutes),
+          import('./crop-monitoring-dashboard/presentation/crop-monitoring-dashboard.routes').then(
+            (m) => m.dashboardRoutes,
+          ),
       },
       {
-        path: 'plantaciones',
+        path: 'monitoreo',
         loadChildren: () =>
-          import('./field-technical-management/presentation/field-technical-management.routes').then((m) => m.plantationRoutes),
-      },
-      {
-        path: 'dispositivos',
-        loadChildren: () =>
-          import('./iot-device-management/presentation/iot-device-management.routes').then((m) => m.deviceRoutes),
-      },
-      {
-        path: 'alertas',
-        loadChildren: () =>
-          import('./alert-and-notification/presentation/alert-and-notification.routes').then((m) => m.alertRoutes),
+          import('./iot-device-management/presentation/monitoring.routes').then((m) => m.monitoringRoutes),
       },
       {
         path: 'recomendaciones',
         loadChildren: () =>
-          import('./agronomic-recommendation/presentation/agronomic-recommendation.routes').then((m) => m.recommendationRoutes),
+          import('./agronomic-recommendation/presentation/agronomic-recommendation.routes').then(
+            (m) => m.recommendationRoutes,
+          ),
       },
       {
-        path: 'reportes',
+        path: 'intervenciones',
         loadChildren: () =>
-          import('./agronomic-recommendation/presentation/agronomic-recommendation.routes').then((m) => m.reportRoutes),
-      },
-      {
-        path: 'inspecciones',
-        loadChildren: () =>
-          import('./field-technical-management/presentation/field-technical-management.routes').then((m) => m.inspectionRoutes),
+          import('./field-technical-management/presentation/intervention.routes').then(
+            (m) => m.interventionRoutes,
+          ),
       },
       {
         path: 'profile',
         loadChildren: () =>
-          import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then((m) => m.profileRoutes),
+          import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then(
+            (m) => m.profileRoutes,
+          ),
       },
       {
         path: 'subscription',
         loadChildren: () =>
-          import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then((m) => m.subscriptionRoutes),
+          import('./subscription-and-user-management/presentation/subscription-and-user-management.routes').then(
+            (m) => m.subscriptionRoutes,
+          ),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' },

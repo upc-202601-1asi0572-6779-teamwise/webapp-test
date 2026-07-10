@@ -1,25 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
 import { AuthService } from '../../../../shared/infrastructure/auth.service';
-import { Plantation } from '../../../domain/model/plantation.entity';
-import { PlantationService } from '../../../infrastructure/plantation-api.service';
+import { FieldTechnicalManagementStore } from '../../../application/field-technical-management.store';
 import { TranslationService } from '../../../../i18n/translation.service';
-
-interface PlantationVm {
-  id: number;
-  name: string;
-  location: string;
-  totalHectares: number;
-  phenologicalPhase: string;
-  zonesCount: number;
-  devicesCount: number;
-  soilType: string;
-  overallHealth?: 'optimal' | 'at_risk' | 'critical' | null;
-  connectedDevices?: number;
-  activeAlerts?: number;
-}
 
 @Component({
   selector: 'app-plantation-list',
@@ -27,15 +11,15 @@ interface PlantationVm {
   templateUrl: './plantation-list.component.html',
 })
 export class PlantationListComponent implements OnInit {
-  private readonly plantationService = inject(PlantationService);
+  private readonly store = inject(FieldTechnicalManagementStore);
   private readonly authService = inject(AuthService);
   private readonly t = inject(TranslationService);
 
-  readonly plantations = signal<PlantationVm[]>([]);
-  readonly loading = signal(false);
-  readonly error = signal('');
+  readonly plantations = this.store.plantations;
+  readonly loading = this.store.plantationsLoading;
+  readonly error = this.store.plantationsError;
 
-  readonly isAgronomist = this.authService.currentUser?.role === 'agronomist';
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   readonly healthDot: Record<string, string> = {
     optimal: 'var(--color-success)',
@@ -46,19 +30,19 @@ export class PlantationListComponent implements OnInit {
   // ── i18n getters/methods (runtime) ──
 
   get badgeLabel(): string {
-    return this.isAgronomist
+    return this.isAgronomist()
       ? this.t.translate('plant.list.badge.agronomist')
       : this.t.translate('plant.list.badge.grower');
   }
 
   get headingText(): string {
-    return this.isAgronomist
+    return this.isAgronomist()
       ? this.t.translate('plant.list.heading.agronomist')
       : this.t.translate('plant.list.heading.grower');
   }
 
   get subtitleText(): string {
-    return this.isAgronomist
+    return this.isAgronomist()
       ? this.t.translate('plant.list.subtitle.agronomist')
       : this.t.translate('plant.list.subtitle.grower');
   }
@@ -75,6 +59,8 @@ export class PlantationListComponent implements OnInit {
   get devicesLabel(): string { return this.t.translate('plant.list.devices'); }
   get soilLabel(): string { return this.t.translate('plant.list.soil'); }
   get loadErrorLabel(): string { return this.t.translate('plant.list.error.load'); }
+  get demoNote(): string { return this.t.translate('plant.list.demoNote'); }
+  get notAvailableLabel(): string { return this.t.translate('common.notAvailable'); }
 
   phaseLabel(phase: string): string {
     return phase === 'produccion'
@@ -89,6 +75,7 @@ export class PlantationListComponent implements OnInit {
   }
 
   soilTypeLabel(value: string): string {
+    if (!value || value === '—' || value === '-') return 'Sin dato';
     const normalizedKey = this.normalizeSoilTypeKey(value);
     const translationKey = `plant.list.soilTypes.${normalizedKey}`;
     const translated = this.t.translate(translationKey);
@@ -123,35 +110,6 @@ export class PlantationListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.load();
-  }
-
-  private load(): void {
-    this.loading.set(true);
-    this.error.set('');
-
-    this.plantationService
-      .list()
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (raw) => this.plantations.set(raw.map((p) => this.toVm(p))),
-        error: () => this.error.set(this.loadErrorLabel),
-      });
-  }
-
-  private toVm(p: Plantation): PlantationVm {
-    return {
-      id: p.id,
-      name: p.name,
-      location: p.location,
-      totalHectares: p.totalHectares,
-      phenologicalPhase: p.phenologicalPhase,
-      zonesCount: p.zonesCount ?? 0,
-      devicesCount: p.devicesCount ?? 0,
-      soilType: p.soilType,
-      overallHealth: p.overallHealth ?? undefined,
-      connectedDevices: 0,
-      activeAlerts: 0,
-    };
+    this.store.loadPlantations();
   }
 }

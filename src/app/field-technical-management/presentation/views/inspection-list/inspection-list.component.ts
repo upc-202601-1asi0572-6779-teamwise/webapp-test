@@ -21,7 +21,7 @@ export class InspectionListComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal('');
 
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   // ── i18n getters ──
 
