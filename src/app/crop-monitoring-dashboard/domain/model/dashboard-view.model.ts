@@ -1,39 +1,34 @@
 /**
- * Dashboard-specific view models.
- *
- * These are presentation-oriented summarised types consumed exclusively by
- * the crop-monitoring-dashboard bounded context. They are derived from
- * domain entities owned by other BCs.
+ * Dashboard-specific view models for the agronomist desk.
  */
 
+export type SparklineTrend = 'up' | 'down' | 'stable';
+
 export interface SparklineItem {
+  /** Mapped variable type (temperature, soil_humidity, …). */
+  key: string;
   label: string;
   unit: string;
   color: string;
   currentValue: number;
   vMin: number;
   vMax: number;
+  /** SVG polyline points when enough samples exist. */
   points: string;
+  /** Closed polygon for area fill under the line. */
+  areaPoints: string;
+  sampleCount: number;
+  /** True when ≥2 samples — chart is meaningful. */
+  hasTrend: boolean;
+  trend: SparklineTrend;
 }
 
-export interface TrendCard {
-  label: string;
-  unit: string;
-  currentValue: number;
-  delta: number;
-  direction: 'up' | 'down' | 'stable';
-  color: string;
-  icon: string;
-  alertLevel: string | null;
-}
-
-export interface ZoneHealthItem {
-  id: number;
-  name: string;
-  hectares: number;
-  status: 'optimal' | 'at_risk' | 'critical';
-  statusColor: string;
-  statusLabel: string;
-  criticalParam: string | null;
-  criticalParamColor: string;
+export interface DashboardKpis {
+  pendingRecommendations: number;
+  publishedRecommendations: number;
+  interventions: number;
+  gatewaysConnected: number;
+  gatewaysTotal: number;
+  latestReadings: number;
+  sectorHealthStatus: number | null;
 }
