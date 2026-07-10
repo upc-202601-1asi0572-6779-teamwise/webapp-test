@@ -23,7 +23,9 @@
       "agronomist": "Agronomist",
       "grower": "Grower"
     },
-    "devices": "Devices"
+    "devices": "Devices",
+    "monitoring": "Monitoring",
+    "interventions": "Interventions"
   },
   "login": {
     "heroBadge": "Monitoring and agronomic decision center",
@@ -54,7 +56,12 @@
     "invalidCredentials": "Incorrect credentials. Please try again.",
     "forgotPassword": "Forgot your password?",
     "noAccountPrompt": "Don't have an account?",
-    "registerLink": "Sign up"
+    "registerLink": "Sign up",
+    "usernameLabel": "USERNAME",
+    "usernamePlaceholder": "your username",
+    "usernameRequired": "Enter your username.",
+    "usernameMin": "Username must be at least 3 characters.",
+    "noPublicRegisterHint": "Accounts are created by an administrator. There is no public registration."
   },
   "alert": {
     "section": {
@@ -129,12 +136,42 @@
   },
   "dashboard": {
     "heading": {
-      "agronomist": "Crop monitoring",
+      "agronomist": "Agronomic control panel",
       "grower": "My crop"
     },
     "subtitle": {
-      "agronomist": "Monitoring all plantations under your responsibility.",
+      "agronomist": "Sector summary: health, recommendations, interventions and sensors.",
       "grower": "Summary of your plantations status"
+    },
+    "refresh": "Refresh",
+    "context": {
+      "sector": "Sector {{id}}",
+      "sectorChip": "Sector {{id}}"
+    },
+    "kpi": {
+      "pendingRecs": "Pending recs",
+      "publishedRecs": "Published recs",
+      "interventions": "Interventions",
+      "gateways": "Gateways",
+      "sectorHealth": "Sector health"
+    },
+    "quick": {
+      "monitoring": "Monitoring",
+      "monitoringHint": "Gateways, thresholds and readings",
+      "recommendations": "Recommendations",
+      "recommendationsHint": "Review queue and published",
+      "interventions": "Interventions",
+      "interventionsHint": "Field records for the sector"
+    },
+    "pendingQueue": "Review queue",
+    "interventions": "Sector interventions",
+    "emptyPending": "No pending recommendations in this sector.",
+    "emptyPublished": "No published recommendations yet.",
+    "emptyInterventions": "No interventions registered yet.",
+    "recStatus": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "published": "Published"
     },
     "newReport": "+ New report",
     "allPlantations": "All plantations",
@@ -150,26 +187,31 @@
       "attention": "Attention"
     },
     "devices": {
-      "agronomist": "Devices",
+      "agronomist": "Edge gateways",
       "grower": "Your devices",
       "connected": "Connected",
       "offline": "Offline mode",
       "disconnected": "Disconnected"
     },
     "trends": {
-      "heading": "Parameter trends",
-      "subtitle": "Evolution of key variables over time"
+      "heading": "Sensor trends",
+      "subtitle": "Variables reported by the sector device",
+      "empty": "Not enough readings yet to show trends.",
+      "insufficient": "Too few points to chart a trend",
+      "samples": "{{n}} readings"
     },
     "sparkline": {
       "temperature": "Temperature",
-      "soilHumidity": "Soil humidity",
-      "soilPh": "Soil pH"
+      "soilHumidity": "Humidity",
+      "soilMoisture": "Soil moisture",
+      "soilPh": "Soil pH",
+      "luminosity": "Luminosity"
     },
     "trend": {
       "up": "Rising",
       "down": "Falling",
       "stable": "Stable",
-      "humidity": "Soil humidity",
+      "humidity": "Humidity",
       "ph": "Soil pH"
     },
     "growerTrends": {
@@ -177,11 +219,12 @@
       "subtitle": "Most recent sensor measurements"
     },
     "health": {
-      "agronomist": "Crop health",
+      "agronomist": "Sector health",
       "grower": "State of your zones",
       "optimal": "Optimal",
       "atRisk": "At risk",
-      "critical": "Critical"
+      "critical": "Critical",
+      "unknown": "No data"
     },
     "zones": {
       "selectPlantation": "Select a plantation to view its zones."
@@ -193,7 +236,7 @@
     "recentAlerts": "Recent alerts",
     "viewAll": "View all",
     "viewDetail": "View detail",
-    "recommendations": "Recommendations",
+    "recommendations": "Published",
     "inspections": "Intervention history",
     "topRecommendation": {
       "eyebrow": "Your agronomist recommends"
@@ -220,7 +263,7 @@
     "edgeGateways": "Edge gateways",
     "noGateways": "No gateways registered.",
     "zonesUnavailable": "Zones unavailable: plantation sectors are not exposed by the backend on this deploy yet.",
-    "noRecentReadings": "No recent readings for the demo device.",
+    "noRecentReadings": "No recent readings for the configured device.",
     "error": {
       "load": "Could not load dashboard data."
     }
@@ -275,7 +318,7 @@
       },
       "heading": "Recommendations",
       "subtitle": {
-        "agronomist": "Manage agronomic recommendations: review, approve and publish them for your growers.",
+        "agronomist": "Manage sector or general recommendations: review, approve and publish.",
         "grower": "View agronomic recommendations published by your agronomist."
       },
       "counter": "recommendations",
@@ -283,12 +326,25 @@
         "pending": "Pending",
         "published": "Published"
       },
+      "scope": {
+        "sector": "By sector",
+        "general": "General"
+      },
+      "context": {
+        "sector": "Sector #{{id}}",
+        "general": "General recommendations (whole operation)"
+      },
+      "type": {
+        "sector": "Sector-specific",
+        "general": "General"
+      },
       "newButton": "+ New",
+      "refresh": "Refresh",
       "loading": "Loading recommendations...",
       "emptyPending": "No pending",
-      "emptyPendingDesc": "No recommendations require review.",
+      "emptyPendingDesc": "No recommendations require review in this scope.",
       "emptyPublished": "No published",
-      "emptyPublishedDesc": "No recommendations have been published yet.",
+      "emptyPublishedDesc": "No recommendations have been published in this scope yet.",
       "createFirst": "Create first recommendation",
       "recommendedAction": "Recommended action",
       "createdAt": "Created on",
@@ -308,7 +364,7 @@
         "approved": "Approved",
         "published": "Published"
       },
-      "noIdHint": "No id from the API — create a new one to open detail and approve/publish."
+      "noIdHint": "No id from the API — detail cannot be opened."
     },
     "error": {
       "load": "Recommendations could not be loaded.",
@@ -329,7 +385,13 @@
       "summary": "Summary",
       "publicationInfo": "Publication info",
       "plantation": "Plantation",
+      "scope": "Scope",
+      "id": "Identifier",
       "zone": "Zone",
+      "type": {
+        "sector": "Sector-specific",
+        "general": "General"
+      },
       "reviewedBy": "Reviewed by",
       "publishedOn": "Published on",
       "pendingReview": "Pending review",
@@ -362,16 +424,21 @@
       "back": "Back to recommendations",
       "loading": "Loading form...",
       "title": "New recommendation",
-      "subtitle": "Write the recommendation. It is sent as content to the backend.",
+      "subtitle": "Write the recommendation. It is sent as content to the backend (sector or general).",
+      "scope": "Scope",
+      "scopeSector": "Sector-specific",
+      "scopeGeneral": "General (no sector)",
+      "sector": "Sector ID",
+      "sectorHelp": "Sector configured by administration (demo uses the environment sector).",
       "plantation": "Plantation",
       "plantationPlaceholder": "Select a plantation",
       "titleInput": "Title",
-      "titlePlaceholder": "E.g. Apply lime amendment in South zone",
+      "titlePlaceholder": "E.g. Increase irrigation in sector 1",
       "description": "Description",
       "descriptionPlaceholder": "Describe the context and rationale for the recommendation...",
       "recommendedAction": "Recommended action",
       "actionOptional": "(optional)",
-      "actionPlaceholder": "E.g. Apply dolomitic lime (2 ton/ha)",
+      "actionPlaceholder": "E.g. Adjust flow and check pump",
       "priority": "Priority",
       "priorityInText": "(in text)",
       "priorityLow": "Low",
@@ -416,16 +483,27 @@
         "growers": "growers",
         "reportsPerMonth": "reports/month",
         "hectaresShort": "ha",
-        "devices": "devices",
+        "devices": "sensors",
+        "history": "plantation history",
         "max": "max",
         "period": "/month"
       },
+      "feature": {
+        "hectares": "Up to {{n}} hectares",
+        "hectaresUnlimited": "Unlimited hectares",
+        "sensors": "Up to {{n}} sensors",
+        "sensorsUnlimited": "Unlimited sensors",
+        "history": "Plantation history: {{n}}"
+      },
+      "viewMySubscription": "My subscription",
+      "catalogNote": "Plan changes and new subscriptions are managed by an administrator (IAM). This page is a catalog view only.",
       "actions": {
         "current": "Current plan",
         "subscribe": "Subscribe",
         "processing": "Processing...",
         "change": "Switch to this plan",
         "changing": "Switching...",
+        "contactAdmin": "Request change from administrator",
         "selectPayment": "Payment method (visa, mastercard, etc.):",
         "defaultPayment": "visa_ending_0000",
         "paymentMethods": {
@@ -442,7 +520,9 @@
         "noActive": "You do not have an active subscription.",
         "subscribe": "The subscription could not be completed.",
         "change": "The plan could not be changed.",
-        "missingPayment": "Provide a payment method to continue."
+        "missingPayment": "Provide a payment method to continue.",
+        "subscribeUnavailable": "Plan signup is not available for your role. Contact an administrator.",
+        "changeUnavailable": "Plan changes are not available from this app. Contact an administrator."
       }
     },
     "mySubscription": {
@@ -451,6 +531,31 @@
       "loading": "Loading your subscription information...",
       "errorTitle": "My subscription",
       "viewPlans": "View available plans",
+      "paymentsHeading": "Payment history",
+      "emptyPayments": "No payments recorded yet.",
+      "price": "Price",
+      "billingCycle": "Billing cycle",
+      "limitsHeading": "Plan limits",
+      "adminNote": "Subscriptions are created and activated with payment by an administrator. You can view and cancel yours.",
+      "cancelConfirm": "Cancel subscription? You may keep access until the end of the current period.",
+      "cancelSuccess": "Subscription cancelled.",
+      "limitLabels": {
+        "hectares": "Hectares",
+        "sensors": "Sensors",
+        "history": "Plantation history"
+      },
+      "payments": {
+        "plan": "Plan",
+        "period": "Period",
+        "amount": "Amount",
+        "status": "Status",
+        "date": "Processed"
+      },
+      "paymentStatus": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "failed": "Failed"
+      },
       "summaryEyebrow": "QUICK SUMMARY",
       "actionsEyebrow": "PLAN ACTIONS",
       "capacityEyebrow": "PLAN CAPACITY",
@@ -477,6 +582,7 @@
         "inactive": "Plan inactive",
         "expired": "Plan expired",
         "cancelled": "Plan cancelled",
+        "pending": "Plan pending",
         "renewing": "Renewing...",
         "cancelling": "Cancelling..."
       },
@@ -484,7 +590,8 @@
         "active": "Active",
         "inactive": "Inactive",
         "expired": "Expired",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "pending": "Pending"
       },
       "summaryLabels": {
         "status": "Status",
@@ -506,18 +613,19 @@
         "change": "Change plan",
         "changing": "Changing...",
         "changeHelp": "Explore other plans available for your segment.",
-        "cancel": "Disable renewal",
+        "cancel": "Cancel subscription",
         "cancelling": "Cancelling...",
-        "cancelHelp": "You will keep access until the end date."
+        "cancelHelp": "End your current plan. You may keep access until the end date if applicable."
       },
       "subtitles": {
         "grower": "Track your plan status, review your available capacity and manage renewal in one place.",
-        "agronomist": "Monitor the growers under your care, your plan capacity and the generation of technical reports."
+        "agronomist": "Review your Seed/Harvest plan, limits, payments and cancel if needed."
       },
       "error": {
         "load": "The subscription could not be loaded.",
         "renew": "The subscription could not be renewed.",
-        "cancel": "The renewal could not be cancelled.",
+        "renewUnavailable": "User-side renewal is not available. An administrator processes payments.",
+        "cancel": "The subscription could not be cancelled.",
         "unavailable": "Subscription is not available on the real backend yet."
       }
     },
@@ -569,6 +677,10 @@
     }
   },
   "notifications": {
+    "header": "Notifications",
+    "empty": "You have no recent notifications.",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
     "markError": "Could not mark as read.",
     "markAllError": "Could not mark all as read.",
     "loadError": "Notifications could not be loaded."
@@ -849,5 +961,95 @@
     "submitting": "Sending...",
     "success": "A recovery link was sent to the registered email.",
     "backLogin": "Back to sign in"
+  },
+  "monitor": {
+    "heading": "Technical monitoring",
+    "subtitle": "Gateways, readings, agronomic thresholds and sector health. Work context is set by administration.",
+    "gateways": "Edge gateways",
+    "devices": "Gateway IoT devices",
+    "thresholds": "Agronomic thresholds",
+    "readings": "Recent readings",
+    "loading": "Loading monitoring...",
+    "saveThreshold": "Save threshold",
+    "saving": "Saving...",
+    "emptyGateways": "No gateways registered.",
+    "emptyDevices": "No devices on this gateway.",
+    "emptyThresholds": "No thresholds for this device.",
+    "emptyReadings": "No recent readings.",
+    "emptyHealth": "No sector health data (no readings or no IoT assigned).",
+    "context": "Work context",
+    "contextLine": "GW {{gateway}} · IoT {{device}} · Sector #{{sector}}",
+    "sectorHealth": "Sector health",
+    "refresh": "Refresh",
+    "backDashboard": "Dashboard",
+    "thresholdSaved": "Threshold saved.",
+    "editThresholdHint": "Select a threshold or pick a sensor type to create/update (Agronomist role).",
+    "exceeded": "Out of range",
+    "inRange": "In range",
+    "error": {
+      "load": "Could not load monitoring.",
+      "save": "Could not save threshold.",
+      "invalidRange": "Minimum must be less than maximum."
+    },
+    "form": {
+      "type": "Sensor type",
+      "min": "Min",
+      "max": "Max",
+      "description": "Description"
+    },
+    "table": {
+      "type": "Type",
+      "value": "Value",
+      "device": "IoT MAC",
+      "when": "When"
+    },
+    "connectivity": {
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "sensorType": {
+      "Temperature": "Temperature",
+      "Humidity": "Humidity",
+      "PH": "pH",
+      "Luminosity": "Luminosity",
+      "SoilMoisture": "Soil moisture"
+    },
+    "health": {
+      "healthy": "Healthy",
+      "warning": "Warning",
+      "critical": "Critical",
+      "unknown": "No data"
+    }
+  },
+  "interv": {
+    "heading": "Field interventions",
+    "subtitle": "Register and review interventions by sector. Optionally link a published recommendation.",
+    "loading": "Loading interventions...",
+    "empty": "No interventions in this sector yet.",
+    "formTitle": "New intervention",
+    "listHeading": "Sector history",
+    "description": "Description",
+    "performedBy": "Performed by",
+    "executionDate": "Execution date",
+    "originRecommendationId": "Origin recommendation (optional)",
+    "recNone": "No linked recommendation",
+    "recsLoading": "Loading published recommendations...",
+    "recsEmpty": "No published recommendations in this sector. You can still register without a link.",
+    "publishedHint": "Only recommendations with Published status are listed (backend requirement).",
+    "recommendationRef": "Rec. #{{id}}",
+    "openRecommendation": "Open recommendation",
+    "submit": "Register intervention",
+    "saving": "Saving...",
+    "context": "Context",
+    "contextSector": "Sector #{{id}}",
+    "refresh": "Refresh",
+    "backDashboard": "Dashboard",
+    "counter": "interventions",
+    "created": "Intervention registered successfully.",
+    "error": {
+      "load": "Could not load interventions.",
+      "create": "Could not register the intervention.",
+      "invalidDate": "Invalid execution date."
+    }
   }
 }
