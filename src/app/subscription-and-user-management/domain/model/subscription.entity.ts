@@ -1,4 +1,4 @@
-export type SubscriptionStatus = 'active' | 'inactive' | 'expired';
+export type SubscriptionStatus = 'active' | 'inactive' | 'expired' | 'pending' | 'cancelled';
 
 export interface Subscription {
   id: string;
@@ -20,4 +20,17 @@ export interface Subscription {
   usedGrowers?: number;
   maxReports?: number;
   usedReports?: number;
+  /** Live IAM fields */
+  price?: number;
+  billingCycle?: string;
+  currency?: string;
+}
+
+export interface SubscriptionPayment {
+  planName: string;
+  periodStart: string;
+  periodEnd: string;
+  amount: number;
+  status: string;
+  processedAt: string;
 }

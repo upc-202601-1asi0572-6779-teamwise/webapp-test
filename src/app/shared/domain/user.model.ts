@@ -1,8 +1,10 @@
+export type UserRole = 'palm_grower' | 'agronomist' | 'administrator';
+
 export interface User {
   id: number;
   email: string;
   fullName: string;
-  role: 'palm_grower' | 'agronomist';
+  role: UserRole;
   phone: string;
   region: string;
   city: string;

@@ -1,23 +1,50 @@
-/** Recommendation domain entity for the Agronomic Recommendation bounded context. */
+/**
+ * Recommendation domain model for presentation.
+ * Maps backend RecommendationResource (docs 2026-07-10):
+ * id, content, type (SectorSpecific|General), status (Pending|Approved|Published), dates.
+ */
+export type RecommendationUiStatus = 'pending_review' | 'approved' | 'published';
+export type RecommendationScope = 'sector' | 'general';
+
 export interface Recommendation {
   id: number;
-  userId: number;
-  plantationId: number;
-  plantationName: string;
-  monitoringZoneId: number;
-  zoneName: string;
-  alertId: number | null;
-  alertTitle: string | null;
+  /** Sector path id when type is SectorSpecific; null for General. */
+  sectorId: number | null;
+  /** Raw backend content (source of truth). */
+  content: string;
+  /** Backend type: SectorSpecific | General (or legacy Manual). */
+  type: string;
+  /**
+   * UI status mapped from backend:
+   * Pending → pending_review | Approved → approved | Published → published
+   */
+  status: RecommendationUiStatus;
+  createdAt: string;
+  approvedAt: string | null;
+  publishedAt: string | null;
+  /** Stable key for list tracking. */
+  clientKey: string;
+
+  // ── Derived for display ──
   title: string;
   description: string;
   recommendedAction: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'draft' | 'pending_review' | 'approved' | 'published';
+  hasExplicitPriority: boolean;
+  hasExplicitAction: boolean;
+  /** Human-readable scope label (Sector #N / General). */
+  scopeLabel: string;
+  /** Alias of scopeLabel for dashboard / legacy templates. */
+  plantationName: string;
+  zoneName: string;
+  hasZone: boolean;
   generatedBy: 'ai' | 'manual';
-  reviewedByAgronomistId: number | null;
   reviewedByAgronomistName: string | null;
-  publishedAt: string | null;
-  createdAt: string;
+  userId: number;
+  monitoringZoneId: number;
+  alertId: number | null;
+  alertTitle: string | null;
+  reviewedByAgronomistId: number | null;
   updatedAt: string;
 }
 
@@ -28,13 +55,18 @@ export interface RecommendationListResponse {
   recommendations: Recommendation[];
 }
 
+/**
+ * Form payload. Backend CreateRecommendationResource:
+ * { agronomistId, content, reportId? }
+ * Path: /sectors/{id}/recommendations or /recommendations/general
+ */
 export interface CreateRecommendationRequest {
-  plantationId: number;
-  monitoringZoneId: number;
-  alertId?: number | null;
+  scope: RecommendationScope;
+  sectorId: number | null;
+  agronomistId?: number;
   title: string;
   description: string;
   recommendedAction: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  generatedBy: 'ai' | 'manual';
+  reportId?: number | null;
 }

@@ -1,39 +1,39 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, finalize, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../shared/infrastructure/auth.service';
+import { TranslationService } from '../../i18n/translation.service';
 import { getApiErrorMessage } from '../../shared/infrastructure/api-error-message';
-import { Recommendation, CreateRecommendationRequest, RecommendationListResponse } from '../domain/model/recommendation.entity';
+import {
+  Recommendation,
+  CreateRecommendationRequest,
+  RecommendationScope,
+} from '../domain/model/recommendation.entity';
 import { Report } from '../domain/model/report.entity';
 import { RecommendationService } from '../infrastructure/recommendation-api.service';
 import { ReportService } from '../infrastructure/report-api.service';
-import { AlertService } from '../../alert-and-notification/infrastructure/alert-and-notification-api';
-import { PlantationService } from '../../field-technical-management/infrastructure/field-technical-management-api';
-import { Alert } from '../../alert-and-notification/domain/model/alert.entity';
 import { Plantation } from '../../field-technical-management/domain/model/plantation.entity';
-import { Zone } from '../../field-technical-management/domain/model/zone.entity';
 
 /**
  * Central state store for the Agronomic Recommendation bounded context.
- *
- * Exposes readonly signals and orchestration methods so presentation views
- * consume pre‑computed state without duplicating fetch/update logic.
  */
 @Injectable({ providedIn: 'root' })
 export class AgronomicRecommendationStore {
   private readonly recommendationService = inject(RecommendationService);
   private readonly reportService = inject(ReportService);
-  private readonly alertService = inject(AlertService);
-  private readonly plantationService = inject(PlantationService);
   private readonly authService = inject(AuthService);
+  private readonly t = inject(TranslationService);
 
   // ── Recommendation list state ─────────────────────────────────────
   readonly recommendations = signal<Recommendation[]>([]);
   readonly recommendationsLoading = signal(false);
   readonly recommendationsError = signal('');
+  /** Active list scope: sector (default) or general. */
+  readonly listScope = signal<RecommendationScope>('sector');
+  readonly listSectorId = signal(environment.demo.sectorId ?? 1);
 
   // ── Recommendation detail state ───────────────────────────────────
   readonly recommendationDetail = signal<Recommendation | null>(null);
-  readonly linkedAlert = signal<Alert | null>(null);
   readonly recommendationDetailLoading = signal(false);
   readonly recommendationDetailError = signal('');
   readonly recommendationActionLoading = signal('');
@@ -41,16 +41,12 @@ export class AgronomicRecommendationStore {
   readonly recommendationActionSuccess = signal('');
 
   // ── Recommendation form state ─────────────────────────────────────
-  readonly recommendationFormPlants = signal<Plantation[]>([]);
-  readonly recommendationFormZones = signal<Zone[]>([]);
-  readonly recommendationFormAlerts = signal<Alert[]>([]);
   readonly recommendationFormLoading = signal(false);
   readonly recommendationFormSaving = signal(false);
   readonly recommendationFormError = signal('');
-  readonly recommendationFormZonesLoading = signal(false);
-  readonly recommendationFormAlertsLoading = signal(false);
+  readonly formSectorId = signal(environment.demo.sectorId ?? 1);
 
-  // ── Report list state ──────────────────────────────────────────────
+  // ── Report list state (feature-flagged off) ───────────────────────
   readonly reports = signal<Report[]>([]);
   readonly reportsLoading = signal(false);
   readonly reportsError = signal('');
@@ -65,7 +61,7 @@ export class AgronomicRecommendationStore {
   readonly reportActionError = signal('');
 
   // ── Computed ──────────────────────────────────────────────────────
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   // ═══════════════════════════════════════════════════════════════════
   //  Recommendation list
@@ -73,18 +69,32 @@ export class AgronomicRecommendationStore {
 
   loadRecommendations(params?: {
     status?: string;
-    plantationId?: number;
+    sectorId?: number;
+    scope?: RecommendationScope;
     size?: number;
   }): void {
     this.recommendationsLoading.set(true);
     this.recommendationsError.set('');
+    const scope = params?.scope ?? this.listScope();
+    const sectorId = params?.sectorId ?? this.listSectorId();
+    this.listScope.set(scope);
+    this.listSectorId.set(sectorId);
+
     this.recommendationService
-      .list(params)
+      .list({ status: params?.status, sectorId, scope, size: params?.size })
       .pipe(finalize(() => this.recommendationsLoading.set(false)))
       .subscribe({
         next: (res) => this.recommendations.set(res.recommendations),
-        error: () => this.recommendationsError.set($localize`:@@rec.error.load:No se pudieron cargar las recomendaciones.`),
+        error: (err: unknown) =>
+          this.recommendationsError.set(
+            getApiErrorMessage(err, this.t.translate('rec.error.load')),
+          ),
       });
+  }
+
+  setListScope(scope: RecommendationScope): void {
+    this.listScope.set(scope);
+    this.loadRecommendations({ scope, sectorId: this.listSectorId() });
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -95,26 +105,25 @@ export class AgronomicRecommendationStore {
     this.recommendationDetailLoading.set(true);
     this.recommendationDetailError.set('');
     this.recommendationDetail.set(null);
-    this.linkedAlert.set(null);
+    this.recommendationActionError.set('');
+    this.recommendationActionSuccess.set('');
+
+    if (!id) {
+      this.recommendationDetailLoading.set(false);
+      this.recommendationDetailError.set(this.t.translate('rec.error.noId'));
+      return;
+    }
 
     this.recommendationService
       .getById(id)
       .pipe(finalize(() => this.recommendationDetailLoading.set(false)))
       .subscribe({
-        next: (rec) => {
-          this.recommendationDetail.set(rec);
-          if (rec.alertId) {
-            this.loadLinkedAlert(rec.alertId);
-          }
-        },
-        error: () => this.recommendationDetailError.set($localize`:@@rec.error.loadDetail:No se pudo cargar la recomendacion.`),
+        next: (rec) => this.recommendationDetail.set(rec),
+        error: (err: unknown) =>
+          this.recommendationDetailError.set(
+            getApiErrorMessage(err, this.t.translate('rec.error.loadDetail')),
+          ),
       });
-  }
-
-  private loadLinkedAlert(alertId: number): void {
-    this.alertService.getById(alertId).subscribe({
-      next: (alert) => this.linkedAlert.set(alert),
-    });
   }
 
   approveRecommendation(id: number): Observable<Recommendation> {
@@ -123,9 +132,14 @@ export class AgronomicRecommendationStore {
     this.recommendationActionSuccess.set('');
     return this.recommendationService.approve(id).pipe(
       tap({
-        next: () => this.recommendationActionSuccess.set('Recomendacion aprobada correctamente.'),
+        next: (rec) => {
+          this.recommendationDetail.set(rec);
+          this.recommendationActionSuccess.set(this.t.translate('rec.action.approved'));
+        },
         error: (err: unknown) =>
-          this.recommendationActionError.set(getApiErrorMessage(err, 'No se pudo aprobar.')),
+          this.recommendationActionError.set(
+            getApiErrorMessage(err, this.t.translate('rec.error.approve')),
+          ),
       }),
       finalize(() => this.recommendationActionLoading.set('')),
     );
@@ -137,86 +151,84 @@ export class AgronomicRecommendationStore {
     this.recommendationActionSuccess.set('');
     return this.recommendationService.publish(id).pipe(
       tap({
-        next: () => this.recommendationActionSuccess.set('Recomendacion publicada correctamente.'),
+        next: (rec) => {
+          this.recommendationDetail.set(rec);
+          this.recommendationActionSuccess.set(this.t.translate('rec.action.published'));
+        },
         error: (err: unknown) =>
-          this.recommendationActionError.set(getApiErrorMessage(err, 'No se pudo publicar.')),
+          this.recommendationActionError.set(
+            getApiErrorMessage(err, this.t.translate('rec.error.publish')),
+          ),
       }),
       finalize(() => this.recommendationActionLoading.set('')),
     );
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  Recommendation form helpers
+  //  Recommendation form
   // ═══════════════════════════════════════════════════════════════════
 
-  loadPlantationsForForm(): void {
-    this.recommendationFormLoading.set(true);
-    this.plantationService
-      .list()
-      .pipe(finalize(() => this.recommendationFormLoading.set(false)))
-      .subscribe({
-        next: (plants) => this.recommendationFormPlants.set(plants),
-        error: (err: unknown) =>
-          this.recommendationFormError.set(getApiErrorMessage(err, 'No se pudieron cargar las plantaciones.')),
-      });
-  }
-
-  loadZonesAndAlertsForForm(plantationId: number): void {
-    this.recommendationFormZonesLoading.set(true);
-    this.recommendationFormAlertsLoading.set(true);
-
-    this.plantationService
-      .listZones(plantationId)
-      .pipe(finalize(() => this.recommendationFormZonesLoading.set(false)))
-      .subscribe({
-        next: (zones) => this.recommendationFormZones.set(zones),
-        error: (err: unknown) =>
-          this.recommendationFormError.set(getApiErrorMessage(err, 'No se pudieron cargar las zonas.')),
-      });
-
-    this.alertService
-      .list({ status: 'active', plantationId, size: 50 })
-      .pipe(finalize(() => this.recommendationFormAlertsLoading.set(false)))
-      .subscribe({
-        next: (res) => this.recommendationFormAlerts.set(res.alerts),
-      });
+  prepareForm(): void {
+    this.recommendationFormLoading.set(false);
+    this.recommendationFormError.set('');
+    this.formSectorId.set(environment.demo.sectorId ?? 1);
   }
 
   createRecommendation(request: CreateRecommendationRequest): Observable<Recommendation> {
     this.recommendationFormSaving.set(true);
     this.recommendationFormError.set('');
-    return this.recommendationService.create(request).pipe(
+    const payload: CreateRecommendationRequest = {
+      ...request,
+      sectorId:
+        request.scope === 'general'
+          ? null
+          : request.sectorId || this.formSectorId() || environment.demo.sectorId || 1,
+      agronomistId: request.agronomistId || this.authService.user()?.id || environment.demo.agronomistId,
+    };
+    return this.recommendationService.create(payload).pipe(
       tap({
         error: (err: unknown) =>
-          this.recommendationFormError.set(getApiErrorMessage(err, 'No se pudo crear la recomendacion.')),
+          this.recommendationFormError.set(
+            getApiErrorMessage(err, this.t.translate('rec.error.create')),
+          ),
       }),
       finalize(() => this.recommendationFormSaving.set(false)),
     );
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  Report list
+  //  Reports (disabled in agronomist path — keep stubs for report views)
   // ═══════════════════════════════════════════════════════════════════
 
-  loadReports(params?: { status?: string; plantationId?: number; size?: number }): void {
+  loadReports(_params?: { status?: string; plantationId?: number; size?: number }): void {
+    if (!environment.features.reports) {
+      this.reports.set([]);
+      this.reportsLoading.set(false);
+      this.reportsError.set(this.t.translate('report.error.unavailable'));
+      return;
+    }
     this.reportsLoading.set(true);
     this.reportsError.set('');
     this.reportService
-      .list(params)
+      .list(_params)
       .pipe(finalize(() => this.reportsLoading.set(false)))
       .subscribe({
         next: (res) => this.reports.set(res.reports),
-        error: () => this.reportsError.set($localize`:@@report.error.load:No se pudieron cargar los reportes.`),
+        error: () => this.reportsError.set(this.t.translate('report.error.load')),
       });
   }
 
   loadPlantationsForReports(): void {
-    this.plantationService.list().subscribe({
-      next: (plants) => this.reportPlantations.set(plants),
-    });
+    this.reportPlantations.set([]);
   }
 
   generateDraftReport(plantationId: number): Observable<Report> {
+    if (!environment.features.reports) {
+      this.reportsError.set(this.t.translate('report.error.unavailable'));
+      return new Observable<Report>((sub) => {
+        sub.error(new Error('Reports feature disabled'));
+      });
+    }
     this.reportGeneratingPlantationId.set(plantationId);
     this.reportsError.set('');
     return this.reportService.generateDraft(plantationId).pipe(
@@ -228,15 +240,16 @@ export class AgronomicRecommendationStore {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  //  Report detail
-  // ═══════════════════════════════════════════════════════════════════
-
   loadReportDetail(id: number): void {
+    if (!environment.features.reports) {
+      this.reportDetail.set(null);
+      this.reportDetailLoading.set(false);
+      this.reportDetailError.set(this.t.translate('report.error.unavailable'));
+      return;
+    }
     this.reportDetailLoading.set(true);
     this.reportDetailError.set('');
     this.reportDetail.set(null);
-
     this.reportService
       .getById(id)
       .pipe(finalize(() => this.reportDetailLoading.set(false)))
@@ -247,6 +260,12 @@ export class AgronomicRecommendationStore {
   }
 
   publishReport(id: number): Observable<Report> {
+    if (!environment.features.reports) {
+      this.reportActionError.set(this.t.translate('report.error.unavailable'));
+      return new Observable<Report>((sub) => {
+        sub.error(new Error('Reports feature disabled'));
+      });
+    }
     this.reportActionLoading.set('publish');
     this.reportActionError.set('');
     return this.reportService.publish(id).pipe(

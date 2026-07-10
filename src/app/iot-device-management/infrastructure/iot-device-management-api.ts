@@ -8,6 +8,13 @@
 
 // Services
 export { DeviceService } from './device-api.service';
+export { EdgeGatewayService } from './edge-gateway-api.service';
+export type {
+  ConnectivityStatus,
+  GatewayDevices,
+  AgronomicThreshold,
+  UpdateThresholdRequest,
+} from './edge-gateway-api.service';
 
 // Response contracts
 export type { DeviceResponse } from './device.response';

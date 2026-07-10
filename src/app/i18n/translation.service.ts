@@ -37,7 +37,10 @@ export class TranslationService {
   }
 
   private loadTranslations(locale: Locale): void {
-    if (this._loadedLocale() === locale) return;
+    // Always reload on locale change so hot-updated JSON is picked up in dev.
+    if (this._loadedLocale() === locale && Object.keys(this._translations()).length > 0) {
+      return;
+    }
 
     this._loading.set(true);
 

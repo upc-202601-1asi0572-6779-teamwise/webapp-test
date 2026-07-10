@@ -1,3 +1,4 @@
+@if (enabled) {
 <div class="relative">
   <button type="button" (click)="toggle()"
     class="relative flex h-11 w-11 items-center justify-center rounded-full transition hover:scale-[1.03]"
@@ -22,10 +23,10 @@
   <div class="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[22rem] rounded-[1.35rem] p-5 shadow-[0_22px_50px_rgba(3,14,9,0.28)]"
     style="background: rgba(11, 38, 24, 0.97); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(18px); color: var(--color-text-inverse)">
     <div class="flex items-center justify-between gap-3">
-      <h3 i18n="@@notifications.header" style="font-family: var(--font-heading); font-size: 1.1rem;">Notificaciones</h3>
+      <h3 style="font-family: var(--font-heading); font-size: 1.1rem;">{{ headerLabel }}</h3>
       @if (unreadCount() > 0) {
       <button type="button" (click)="markAllAsRead()" class="text-xs font-semibold transition hover:opacity-80" style="color: var(--color-brand-secondary)">
-        <span i18n="@@notifications.markAllRead">Marcar todas leídas</span>
+        {{ markAllReadLabel }}
       </button>
       }
     </div>
@@ -38,7 +39,7 @@
 
     <div class="mt-4 flex max-h-[20rem] flex-col gap-1 overflow-auto pr-1">
       @if (!notifications().length) {
-      <p i18n="@@notifications.empty" class="py-6 text-center text-sm" style="color: var(--color-white-50)">No tienes notificaciones recientes.</p>
+      <p class="py-6 text-center text-sm" style="color: var(--color-white-50)">{{ emptyLabel }}</p>
       } @else {
       @for (notification of notifications(); track notification.id) {
       <button type="button" (click)="navigateToResource(notification)"
@@ -58,7 +59,7 @@
             <span>{{ notification.createdAt | date:'short' }}</span>
             @if (!notification.read) {
             <button type="button" (click)="markAsRead(notification, $event)" class="font-semibold transition hover:opacity-80" style="color: var(--color-brand-secondary)">
-              <span i18n="@@notifications.markRead">Marcar leída</span>
+              {{ markReadLabel }}
             </button>
             }
           </div>
@@ -70,3 +71,4 @@
   </div>
   }
 </div>
+}

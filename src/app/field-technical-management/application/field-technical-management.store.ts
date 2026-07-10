@@ -1,7 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, finalize, map, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../shared/infrastructure/auth.service';
+import { TranslationService } from '../../i18n/translation.service';
 import { Plantation, CreatePlantationRequest, UpdatePlantationRequest } from '../domain/model/plantation.entity';
 import { Zone, CreateZoneRequest, UpdateZoneRequest } from '../domain/model/zone.entity';
 import { FieldInspection, InspectionListResponse } from '../domain/model/inspection.entity';
@@ -35,6 +37,7 @@ export class FieldTechnicalManagementStore {
   private readonly inspectionService = inject(InspectionService);
   private readonly accessService = inject(Bc01AccessService);
   private readonly authService = inject(AuthService);
+  private readonly t = inject(TranslationService);
 
   // ── Plantation list state ────────────────────────────────────────
   readonly plantations = signal<PlantationVm[]>([]);
@@ -75,7 +78,7 @@ export class FieldTechnicalManagementStore {
   readonly inspectionError = signal('');
 
   // ── Computed ──────────────────────────────────────────────────────
-  readonly isAgronomist = computed(() => this.authService.currentUser?.role === 'agronomist');
+  readonly isAgronomist = computed(() => this.authService.user()?.role === 'agronomist');
 
   readonly canWrite = computed(() => this.access()?.canWrite ?? false);
   readonly hectareLimitReached = computed(() => this.access()?.hectareLimitReached ?? false);
@@ -85,12 +88,35 @@ export class FieldTechnicalManagementStore {
   loadPlantations(): void {
     this.plantationsLoading.set(true);
     this.plantationsError.set('');
+
+    // Backend still lacks GET /plantations for agronomist portfolio (CropMonitoring WIP).
+    if (!environment.features.plantationsApi) {
+      const now = new Date().toISOString();
+      this.plantations.set([
+        {
+          id: environment.demo.plantationId,
+          name: `Demo plantation #${environment.demo.plantationId}`,
+          location: 'Demo / live backend',
+          totalHectares: 10,
+          phenologicalPhase: 'produccion',
+          zonesCount: 0,
+          devicesCount: 1,
+          soilType: '—',
+          overallHealth: null,
+          connectedDevices: 0,
+          activeAlerts: 0,
+        },
+      ]);
+      this.plantationsLoading.set(false);
+      return;
+    }
+
     this.plantationService
       .list()
       .pipe(finalize(() => this.plantationsLoading.set(false)))
       .subscribe({
         next: (raw) => this.plantations.set(raw.map((p) => this.toVm(p))),
-        error: () => this.plantationsError.set($localize`:@@ftm.error.loadPlantations:No se pudieron cargar las plantaciones.`),
+        error: () => this.plantationsError.set(this.t.translate('ftm.error.loadPlantations')),
       });
   }
 
@@ -98,24 +124,55 @@ export class FieldTechnicalManagementStore {
   loadPlantation(id: number): void {
     this.plantationLoading.set(true);
     this.plantationError.set('');
+
+    if (!environment.features.plantationsApi) {
+      const now = new Date().toISOString();
+      this.plantation.set({
+        id: id || environment.demo.plantationId,
+        userId: environment.demo.agronomistId,
+        name: `Demo plantation #${id || environment.demo.plantationId}`,
+        location: 'Demo / live backend (no GET /plantations)',
+        totalHectares: 10,
+        soilType: '—',
+        cropAge: '—',
+        phenologicalPhase: 'produccion',
+        latitude: 0,
+        longitude: 0,
+        zonesCount: 0,
+        devicesCount: 1,
+        overallHealth: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      this.plantationLoading.set(false);
+      return;
+    }
+
     this.plantationService
       .getById(id)
       .pipe(finalize(() => this.plantationLoading.set(false)))
       .subscribe({
         next: (p) => this.plantation.set(p),
-        error: () => this.plantationError.set($localize`:@@ftm.error.loadPlantation:No se pudo cargar la plantacion.`),
+        error: () => this.plantationError.set(this.t.translate('ftm.error.loadPlantation')),
       });
   }
 
   loadPlantationZones(plantationId: number): void {
     this.zonesLoading.set(true);
     this.zonesError.set('');
+
+    if (!environment.features.plantationsApi) {
+      this.zones.set([]);
+      this.zonesLoading.set(false);
+      return;
+    }
+
     this.plantationService
       .listZones(plantationId)
       .pipe(finalize(() => this.zonesLoading.set(false)))
       .subscribe({
         next: (z) => this.zones.set(z),
-        error: () => this.zonesError.set($localize`:@@ftm.error.loadZones:No se pudieron cargar las zonas.`),
+        error: () => this.zonesError.set(this.t.translate('ftm.error.loadZones')),
       });
   }
 
@@ -182,18 +239,34 @@ export class FieldTechnicalManagementStore {
   loadInspections(params?: { plantationId?: number; size?: number }): void {
     this.inspectionsLoading.set(true);
     this.inspectionsError.set('');
+    if (!environment.features.inspections) {
+      this.inspections.set([]);
+      this.inspectionsLoading.set(false);
+      this.inspectionsError.set(
+        this.t.translate('ftm.error.inspectionsUnavailable'),
+      );
+      return;
+    }
     this.inspectionService
       .list(params ?? { size: 50 })
       .pipe(finalize(() => this.inspectionsLoading.set(false)))
       .subscribe({
         next: (res) => this.inspections.set(res.inspections),
-        error: () => this.inspectionsError.set($localize`:@@ftm.error.loadInspections:No se pudieron cargar las inspecciones.`),
+        error: () => this.inspectionsError.set(this.t.translate('ftm.error.loadInspections')),
       });
   }
 
   loadInspection(id: number): void {
     this.inspectionLoading.set(true);
     this.inspectionError.set('');
+    if (!environment.features.inspections) {
+      this.inspection.set(null);
+      this.inspectionLoading.set(false);
+      this.inspectionError.set(
+        this.t.translate('ftm.error.inspectionsUnavailable'),
+      );
+      return;
+    }
     this.inspectionService
       .getById(id)
       .pipe(finalize(() => this.inspectionLoading.set(false)))

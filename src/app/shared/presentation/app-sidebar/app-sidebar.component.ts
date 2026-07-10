@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../shared/infrastructure/auth.service';
 import { User } from '../../../shared/domain/user.model';
@@ -8,8 +8,13 @@ type SidebarItem = {
   id: string;
   label: string;
   route: string;
+  exact?: boolean;
 };
 
+/**
+ * Agronomist operations desk navigation.
+ * Aligns with documented path: monitoring, recommendations, interventions, plan, profile.
+ */
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive],
@@ -18,52 +23,63 @@ type SidebarItem = {
 export class AppSidebarComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly translationService = inject(TranslationService);
+  private readonly t = inject(TranslationService);
 
-  // Reactive labels that update when locale changes
-  private readonly t = this.translationService;
-
-  readonly _primaryItems = computed<SidebarItem[]>(() => {
-    if (this.isAgronomist) {
-      return [
-        { id: 'dashboard', label: this.t.translate('sidebar.dashboard'), route: '/dashboard' },
-        { id: 'plantations', label: this.t.translate('sidebar.plantationPortfolio'), route: '/plantaciones' },
-        { id: 'alerts', label: this.t.translate('sidebar.alerts'), route: '/alertas' },
-        { id: 'recommendations', label: this.t.translate('sidebar.recommendations'), route: '/recomendaciones' },
-        { id: 'reports', label: this.t.translate('sidebar.reports'), route: '/reportes' },
-        { id: 'inspections', label: this.t.translate('sidebar.inspections'), route: '/inspecciones' },
-      ];
-    }
-    return [
-      { id: 'dashboard', label: this.t.translate('sidebar.dashboard'), route: '/dashboard' },
-      { id: 'plantations', label: this.t.translate('sidebar.plantationPortfolio'), route: '/plantaciones' },
-      { id: 'devices', label: this.t.translate('sidebar.devices'), route: '/dispositivos' },
-      { id: 'alerts', label: this.t.translate('sidebar.alerts'), route: '/alertas' },
-      { id: 'recommendations', label: this.t.translate('sidebar.recommendations'), route: '/recomendaciones' },
-      { id: 'reports', label: this.t.translate('sidebar.reports'), route: '/reportes' },
-    ];
-  });
+  readonly _primaryItems = computed<SidebarItem[]>(() => [
+    { id: 'dashboard', label: this.t.translate('sidebar.dashboard'), route: '/dashboard', exact: true },
+    { id: 'monitoring', label: this.t.translate('sidebar.monitoring'), route: '/monitoreo', exact: false },
+    {
+      id: 'recommendations',
+      label: this.t.translate('sidebar.recommendations'),
+      route: '/recomendaciones',
+      exact: false,
+    },
+    {
+      id: 'interventions',
+      label: this.t.translate('sidebar.interventions'),
+      route: '/intervenciones',
+      exact: false,
+    },
+  ]);
 
   readonly _accountItems = computed<SidebarItem[]>(() => [
-    { id: 'subscription', label: this.t.translate('sidebar.mySubscription'), route: '/subscription/me' },
-    { id: 'profile', label: this.t.translate('sidebar.myProfile'), route: '/profile' },
+    {
+      id: 'subscription',
+      label: this.t.translate('sidebar.mySubscription'),
+      route: '/subscription/me',
+      exact: false,
+    },
+    { id: 'profile', label: this.t.translate('sidebar.myProfile'), route: '/profile', exact: true },
   ]);
 
   readonly _logoutLabel = computed(() => this.t.translate('sidebar.logout'));
+  readonly _operationsCenterLabel = computed(() => this.t.translate('sidebar.operationsCenter'));
 
   readonly _roleLabel = computed(() => {
     if (!this.currentUser) return '';
-    const key = this.currentUser.role === 'agronomist'
-      ? 'sidebar.role.agronomist'
-      : 'sidebar.role.grower';
+    if (this.currentUser.role === 'administrator') {
+      return this.t.translate('sidebar.role.admin');
+    }
+    const key =
+      this.currentUser.role === 'agronomist' ? 'sidebar.role.agronomist' : 'sidebar.role.grower';
     return this.t.translate(key);
   });
 
-  // Public getters for template compatibility
-  get primaryItems(): SidebarItem[] { return this._primaryItems(); }
-  get accountItems(): SidebarItem[] { return this._accountItems(); }
-  get logoutLabel(): string { return this._logoutLabel(); }
-  get roleLabel(): string { return this._roleLabel(); }
+  get primaryItems(): SidebarItem[] {
+    return this._primaryItems();
+  }
+  get accountItems(): SidebarItem[] {
+    return this._accountItems();
+  }
+  get logoutLabel(): string {
+    return this._logoutLabel();
+  }
+  get roleLabel(): string {
+    return this._roleLabel();
+  }
+  get operationsCenterLabel(): string {
+    return this._operationsCenterLabel();
+  }
 
   get currentUser(): User | null {
     return this.authService.currentUser;
