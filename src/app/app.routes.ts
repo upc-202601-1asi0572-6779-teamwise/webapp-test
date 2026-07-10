@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './shared/infrastructure/guards/auth.guard';
 import { noAuthGuard } from './shared/infrastructure/guards/no-auth.guard';
+import { deskGuard } from './shared/infrastructure/guards/desk.guard';
+import { adminGuard } from './shared/infrastructure/guards/admin.guard';
 
 /**
- * Agronomist console shell — sections aligned to IAM + SensorData + FTM path.
- * Old grower/admin sections (plantations CRUD, devices CRUD, alerts, reports, inspections)
- * are not registered here.
+ * Agronomist desk + hidden platform admin console.
+ * Admin entry: /auth/login/admin (not linked from public login).
  */
 export const routes: Routes = [
   {
@@ -17,8 +18,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadChildren: () =>
+      import('./platform-admin/presentation/platform-admin.routes').then(
+        (m) => m.platformAdminRoutes,
+      ),
+  },
+  {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, deskGuard],
     loadComponent: () =>
       import('./shared/presentation/auth-shell/auth-shell.component').then((m) => m.AuthShellComponent),
     children: [

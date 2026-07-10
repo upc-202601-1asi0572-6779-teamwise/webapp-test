@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest } from '../domain/auth-response.model';
-import { User } from '../domain/user.model';
+import { User, UserRole } from '../domain/user.model';
 import { decodeJwtPayload, userIdFromToken } from './jwt.util';
 
 const TOKEN_KEY = 'smartpalm_access_token_v1';
@@ -18,15 +18,15 @@ interface SignInApiResponse {
   token: string;
 }
 
+/**
+ * Auth uses sessionStorage so each browser tab can hold a different session
+ * (e.g. agronomist desk + admin console open at once for demos).
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  /**
-   * Hydrate from storage only — no auto-login.
-   * Real JWT required when demoAuth is off.
-   */
   private readonly _user = signal<User | null>(null);
   readonly user = this._user.asReadonly();
   private readonly currentUser$ = new BehaviorSubject<User | null>(null);
@@ -50,9 +50,18 @@ export class AuthService {
     return this._user();
   }
 
+  get isAdministrator(): boolean {
+    return this._user()?.role === 'administrator';
+  }
+
   private setUser(user: User | null): void {
     this._user.set(user);
     this.currentUser$.next(user);
+  }
+
+  private storage(): Storage | null {
+    if (!this.isBrowser) return null;
+    return sessionStorage;
   }
 
   /**
@@ -75,7 +84,6 @@ export class AuthService {
       );
   }
 
-  /** Public sign-up removed from product — users are created by admin only. */
   register(_request?: unknown): Observable<AuthResponse> {
     return new Observable((sub) => {
       sub.error({
@@ -107,15 +115,22 @@ export class AuthService {
     const current = this._user();
     if (!current) return null;
     const updated = { ...current, ...partial };
-    if (this.isBrowser) {
-      localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    const store = this.storage();
+    if (store) {
+      store.setItem(USER_KEY, JSON.stringify(updated));
     }
     this.setUser(updated);
     return updated;
   }
 
   logout(): void {
+    const store = this.storage();
+    if (store) {
+      store.removeItem(TOKEN_KEY);
+      store.removeItem(USER_KEY);
+    }
     if (this.isBrowser) {
+      // Clear legacy localStorage keys so old sessions do not leak across tabs.
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       for (const k of LEGACY_KEYS) localStorage.removeItem(k);
@@ -125,17 +140,26 @@ export class AuthService {
 
   getToken(): string | null {
     if (!this.isBrowser) return null;
-    const token = localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem('accessToken');
+    const store = this.storage();
+    const token =
+      store?.getItem(TOKEN_KEY) ??
+      localStorage.getItem(TOKEN_KEY) ??
+      localStorage.getItem('accessToken');
     if (!token || token.startsWith('demo-token') || token === 'pending-real-token') return null;
-    // Prefer real JWTs (3 segments)
     if (token.split('.').length !== 3) return null;
     return token;
   }
 
   private persist(res: AuthResponse): void {
+    const store = this.storage();
+    if (store) {
+      store.setItem(TOKEN_KEY, res.accessToken);
+      store.setItem(USER_KEY, JSON.stringify(res.user));
+    }
     if (this.isBrowser) {
-      localStorage.setItem(TOKEN_KEY, res.accessToken);
-      localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+      // Prefer per-tab session; remove shared local session.
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
       for (const k of LEGACY_KEYS) localStorage.removeItem(k);
     }
     this.setUser(res.user);
@@ -144,12 +168,12 @@ export class AuthService {
   private readStoredSession(): { user: User } | null {
     if (!this.isBrowser) return null;
     this.clearLegacyIfNeeded();
-    // Require a real token when not in demo mode
     if (!environment.demoAuth && !this.getToken()) {
+      this.storage()?.removeItem(USER_KEY);
       localStorage.removeItem(USER_KEY);
       return null;
     }
-    const raw = localStorage.getItem(USER_KEY);
+    const raw = this.storage()?.getItem(USER_KEY) ?? localStorage.getItem(USER_KEY);
     if (!raw) return null;
     try {
       return { user: JSON.parse(raw) as User };
@@ -160,7 +184,7 @@ export class AuthService {
 
   private clearLegacyIfNeeded(): void {
     if (!this.isBrowser) return;
-    if (localStorage.getItem(USER_KEY) || localStorage.getItem(TOKEN_KEY)) {
+    if (this.storage()?.getItem(USER_KEY) || this.storage()?.getItem(TOKEN_KEY)) {
       for (const k of LEGACY_KEYS) localStorage.removeItem(k);
     }
   }
@@ -188,10 +212,6 @@ export class AuthService {
     return { accessToken: token, user };
   }
 
-  /**
-   * Sign-in only returns { userId, username, token }. Enrich UI from known seed
-   * profiles when present (local/dev); otherwise derive from username.
-   */
   private knownSeedProfile(
     username: string,
     userId: number,
@@ -204,7 +224,7 @@ export class AuthService {
       },
       admin: {
         email: 'admin@smartpalm.com',
-        fullName: 'Administrator',
+        fullName: 'System Administrator',
       },
       palmgrower01: {
         email: 'grower1@smartpalm.com',
@@ -225,24 +245,27 @@ export class AuthService {
   }
 
   /**
-   * JWT from TokenService only includes Sid + Name (no role claim).
-   * This product is the agronomist console: default role is agronomist.
-   * If a role claim appears later, map it.
+   * JWT may omit role; backend Authorize middleware loads role from DB.
+   * Front uses claims + username heuristics for UI routing only.
    */
-  private resolveRole(token: string, username: string): User['role'] {
+  private resolveRole(token: string, username: string): UserRole {
     const payload = decodeJwtPayload(token);
     const raw =
       (payload?.role as string | undefined) ||
-      (payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as string | undefined) ||
+      (payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as
+        | string
+        | undefined) ||
       '';
     const normalized = raw.toLowerCase().replace(/\s+/g, '');
+    if (normalized.includes('admin')) return 'administrator';
     if (normalized.includes('grower') || normalized === 'palmgrower') return 'palm_grower';
     if (normalized.includes('agronom')) return 'agronomist';
-    // Username heuristic for seed users without role claim
+
     const u = username.trim().toLowerCase();
+    // Exact/prefix match only — do not use includes('admin') (false positives).
+    if (u === 'admin' || u.startsWith('admin')) return 'administrator';
     if (u.includes('grower') || u === 'palmgrower01') return 'palm_grower';
     if (u.includes('agronom') || u === 'agronomist01') return 'agronomist';
-    // Agronomist web app default (admin/grower should use other clients)
     return 'agronomist';
   }
 }

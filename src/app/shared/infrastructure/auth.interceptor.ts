@@ -39,8 +39,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         !isAuthRequest &&
         !environment.demoAuth
       ) {
+        const wasAdmin = authService.currentUser?.role === 'administrator';
         authService.logout();
-        router.navigate(['/auth/login']);
+        router.navigate([wasAdmin ? '/auth/login/admin' : '/auth/login']);
       }
       return throwError(() => error);
     }),

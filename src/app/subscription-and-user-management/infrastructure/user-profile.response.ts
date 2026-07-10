@@ -3,7 +3,7 @@ export interface UserProfileResponse {
   id: number;
   email: string;
   fullName: string;
-  role: 'palm_grower' | 'agronomist';
+  role: 'palm_grower' | 'agronomist' | 'administrator';
   phone: string;
   region: string;
   city: string;

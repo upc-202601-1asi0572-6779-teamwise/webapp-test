@@ -1,6 +1,15 @@
 ﻿import { Routes } from '@angular/router';
 
 export const authRoutes: Routes = [
+  /**
+   * Hidden admin entry for demos (second browser tab):
+   * /auth/login/admin — declare BEFORE plain `login` so it never gets swallowed.
+   */
+  {
+    path: 'login/admin',
+    loadComponent: () => import('./views/login/login.component').then((m) => m.LoginComponent),
+    data: { adminLogin: true },
+  },
   {
     path: 'login',
     loadComponent: () => import('./views/login/login.component').then((m) => m.LoginComponent),

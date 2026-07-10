@@ -1,4 +1,4 @@
-﻿import { inject } from '@angular/core';
+import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
@@ -10,5 +10,8 @@ export const noAuthGuard: CanActivateFn = () => {
     return true;
   }
 
+  if (authService.currentUser?.role === 'administrator') {
+    return router.createUrlTree(['/admin']);
+  }
   return router.createUrlTree(['/dashboard']);
 };

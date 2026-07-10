@@ -57,6 +57,9 @@ export class AppSidebarComponent {
 
   readonly _roleLabel = computed(() => {
     if (!this.currentUser) return '';
+    if (this.currentUser.role === 'administrator') {
+      return this.t.translate('sidebar.role.admin');
+    }
     const key =
       this.currentUser.role === 'agronomist' ? 'sidebar.role.agronomist' : 'sidebar.role.grower';
     return this.t.translate(key);
