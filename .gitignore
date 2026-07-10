@@ -54,5 +54,6 @@ skills-lock.json
 # System / tooling artifacts
 /.atl
 /openspec
-/docs
+# Keep project documentation versioned
+# /docs
 /scripts
