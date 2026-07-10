@@ -18,6 +18,14 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
+            /**
+             * Flatten output for Cloudflare Pages: all static files at dist/cloudflare/*
+             * (no nested browser/ folder). Set CF "Build output directory" to: dist/cloudflare
+             */
+            "outputPath": {
+              "base": "dist/cloudflare",
+              "browser": ""
+            },
             "polyfills": [
               "@angular/localize/init"
             ],

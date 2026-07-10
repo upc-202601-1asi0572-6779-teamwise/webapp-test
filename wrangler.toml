@@ -1,4 +1,6 @@
-# Cloudflare Pages — SPA output from Angular application builder
+# Cloudflare Pages
+# Dashboard "Build output directory" must match:
+#   dist/cloudflare
 name = "webapp-test"
 compatibility_date = "2025-07-01"
-pages_build_output_dir = "dist/web-app-smart-palm/browser"
+pages_build_output_dir = "dist/cloudflare"
