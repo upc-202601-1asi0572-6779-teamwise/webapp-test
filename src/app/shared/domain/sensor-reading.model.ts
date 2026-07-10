@@ -4,7 +4,10 @@ export interface SensorReading {
   plantationId: number;
   monitoringZoneId: number;
   userId: number;
-  variableType: 'temperature' | 'soil_humidity' | 'soil_ph';
+  /** Backend SensorType mapped for UI/charts. */
+  variableType: 'temperature' | 'soil_humidity' | 'soil_ph' | 'luminosity' | 'soil_moisture';
+  /** Raw backend sensorType when available. */
+  sensorType?: string;
   label: string;
   value: number;
   unit: string;

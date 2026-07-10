@@ -30,6 +30,34 @@ export interface UpdateThresholdRequest {
   description?: string;
 }
 
+/** GET /sectors/{id}/health */
+export interface SectorHealthDto {
+  sectorId: number;
+  /** 0 Healthy | 1 Warning | 2 Critical */
+  status: number;
+  sensorDetails: {
+    sensorType: string;
+    value: number;
+    minThreshold: number;
+    maxThreshold: number;
+    isExceeded: boolean;
+  }[];
+}
+
+/** Backend SensorTypes for thresholds / readings. */
+export const SENSOR_TYPES = [
+  'Temperature',
+  'Humidity',
+  'PH',
+  'Luminosity',
+  'SoilMoisture',
+] as const;
+
+export type SensorTypeName = (typeof SENSOR_TYPES)[number];
+
+/**
+ * Edge gateways + agronomic thresholds + sector health (SensorData + IoT BCs).
+ */
 @Injectable({ providedIn: 'root' })
 export class EdgeGatewayService {
   private readonly http = inject(HttpClient);
@@ -67,5 +95,9 @@ export class EdgeGatewayService {
       `${environment.apiUrl}/devices/${encodeURIComponent(deviceMac)}/thresholds`,
       body,
     );
+  }
+
+  getSectorHealth(sectorId: number): Observable<SectorHealthDto> {
+    return this.http.get<SectorHealthDto>(`${environment.apiUrl}/sectors/${sectorId}/health`);
   }
 }

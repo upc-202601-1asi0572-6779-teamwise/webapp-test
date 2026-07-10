@@ -4,8 +4,8 @@ import { Observable, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SensorReading, SensorReadingsResponse } from '../domain/sensor-reading.model';
 
-/** Backend SensorReadingViewResource */
-interface SensorReadingBackendDto {
+/** Backend SensorReadingViewResource (docs SensorDataProcessing). */
+export interface SensorReadingBackendDto {
   edgeDeviceMacAddress: string;
   iotDeviceMacAddress: string;
   sensorType: string;
@@ -14,23 +14,22 @@ interface SensorReadingBackendDto {
   measuredAt: string;
 }
 
-/** Only types the UI dashboard charts understand (temperature / soil_humidity / soil_ph). */
 const SENSOR_MAP: Record<
   string,
-  { variableType: SensorReading['variableType']; label: string; unit: string } | null
+  { variableType: SensorReading['variableType']; labelKey: string; unit: string }
 > = {
-  Humidity: { variableType: 'soil_humidity', label: 'Humedad', unit: '%' },
-  PH: { variableType: 'soil_ph', label: 'pH', unit: '' },
-  // Luminosity has no chart slot in the current UI — omit from mapped series.
-  Luminosity: null,
-  Temperature: { variableType: 'temperature', label: 'Temperatura', unit: '°C' },
-  SoilMoisture: { variableType: 'soil_humidity', label: 'Humedad suelo', unit: '%' },
+  Humidity: { variableType: 'soil_humidity', labelKey: 'Humidity', unit: '%' },
+  PH: { variableType: 'soil_ph', labelKey: 'PH', unit: '' },
+  Luminosity: { variableType: 'luminosity', labelKey: 'Luminosity', unit: 'lux' },
+  Temperature: { variableType: 'temperature', labelKey: 'Temperature', unit: '°C' },
+  SoilMoisture: { variableType: 'soil_moisture', labelKey: 'SoilMoisture', unit: '%' },
 };
 
 @Injectable({ providedIn: 'root' })
 export class SensorReadingService {
   private readonly http = inject(HttpClient);
 
+  /** GET /api/v1/devices/{deviceMac}/sensor-readings */
   list(params?: {
     deviceId?: number;
     plantationId?: number;
@@ -47,45 +46,81 @@ export class SensorReadingService {
     }
 
     const deviceMac = params?.deviceMac ?? environment.demo.deviceMac;
+    return this.http
+      .get<SensorReadingBackendDto[]>(
+        `${environment.apiUrl}/devices/${encodeURIComponent(deviceMac)}/sensor-readings${this.query(params)}`,
+      )
+      .pipe(map((items) => this.toResponse(items, params)));
+  }
+
+  /** GET /api/v1/edge-gateways/{gatewayMac}/sensor-readings */
+  listByGateway(
+    gatewayMac: string,
+    params?: { from?: string; to?: string; page?: number; size?: number; deviceMac?: string },
+  ): Observable<SensorReadingsResponse> {
+    if (!environment.features.sensors) {
+      return of({ readings: [], totalElements: 0, totalPages: 0, page: 1, size: params?.size ?? 0 });
+    }
     const query = new URLSearchParams();
     if (params?.from) query.set('from', params.from);
     if (params?.to) query.set('to', params.to);
     if (params?.page !== undefined) query.set('page', String(params.page));
     if (params?.size !== undefined) query.set('size', String(params.size));
+    if (params?.deviceMac) query.set('deviceMac', params.deviceMac);
     const suffix = query.size ? `?${query.toString()}` : '';
 
     return this.http
       .get<SensorReadingBackendDto[]>(
-        `${environment.apiUrl}/devices/${encodeURIComponent(deviceMac)}/sensor-readings${suffix}`,
+        `${environment.apiUrl}/edge-gateways/${encodeURIComponent(gatewayMac)}/sensor-readings${suffix}`,
       )
-      .pipe(
-        map((items) => {
-          let readings = (items ?? [])
-            .map((dto, index) => this.toDomain(dto, index))
-            .filter((r): r is SensorReading => r !== null);
-          if (params?.variableType) {
-            readings = readings.filter((r) => r.variableType === params.variableType);
-          }
-          if (params?.size) {
-            readings = readings.slice(0, params.size);
-          }
-          return {
-            readings,
-            totalElements: readings.length,
-            totalPages: 1,
-            page: params?.page ?? 1,
-            size: params?.size ?? readings.length,
-          };
-        }),
-      );
+      .pipe(map((items) => this.toResponse(items, params)));
+  }
+
+  private query(params?: {
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  }): string {
+    const query = new URLSearchParams();
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.page !== undefined) query.set('page', String(params.page));
+    if (params?.size !== undefined) query.set('size', String(params.size));
+    return query.size ? `?${query.toString()}` : '';
+  }
+
+  private toResponse(
+    items: SensorReadingBackendDto[] | null | undefined,
+    params?: { variableType?: string; size?: number; page?: number },
+  ): SensorReadingsResponse {
+    let readings = (items ?? [])
+      .map((dto, index) => this.toDomain(dto, index))
+      .filter((r): r is SensorReading => r !== null);
+    if (params?.variableType) {
+      readings = readings.filter((r) => r.variableType === params.variableType);
+    }
+    // Keep chronological newest first for monitoring tables
+    readings = [...readings].sort(
+      (a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
+    );
+    if (params?.size) {
+      readings = readings.slice(0, params.size);
+    }
+    return {
+      readings,
+      totalElements: readings.length,
+      totalPages: 1,
+      page: params?.page ?? 1,
+      size: params?.size ?? readings.length,
+    };
   }
 
   private toDomain(dto: SensorReadingBackendDto, index: number): SensorReading | null {
     const mapped = SENSOR_MAP[dto.sensorType];
-    if (mapped === null) return null;
     const meta = mapped ?? {
       variableType: 'temperature' as const,
-      label: dto.sensorType,
+      labelKey: dto.sensorType,
       unit: dto.unit ?? '',
     };
     return {
@@ -95,11 +130,12 @@ export class SensorReadingService {
       monitoringZoneId: 0,
       userId: environment.demo.agronomistId,
       variableType: meta.variableType,
-      label: meta.label,
+      label: meta.labelKey,
+      sensorType: dto.sensorType,
       value: dto.value,
       unit: normalizeUnit(dto.unit, meta.unit),
       deviceSerial: dto.iotDeviceMacAddress,
-      plantationName: `Plantation #${environment.demo.plantationId}`,
+      plantationName: `Sector context`,
       recordedAt: dto.measuredAt,
     };
   }
@@ -108,6 +144,6 @@ export class SensorReadingService {
 function normalizeUnit(raw: string | null | undefined, fallback: string): string {
   if (!raw || raw === 'Unknown' || raw === 'unknown') return fallback;
   if (raw === 'Percent') return '%';
+  if (raw === 'Celsius') return '°C';
   return raw;
 }
-
