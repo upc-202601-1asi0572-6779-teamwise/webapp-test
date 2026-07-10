@@ -5,7 +5,7 @@
     "loginCTA": "Iniciar sesión",
     "role": {
       "agronomist": "Agrónomo",
-      "grower": "Palm grower"
+      "grower": "Agricultor"
     }
   },
   "sidebar": {
@@ -22,7 +22,7 @@
     "logout": "Cerrar sesión",
     "role": {
       "agronomist": "Agrónomo",
-      "grower": "Palm grower",
+      "grower": "Agricultor",
       "admin": "Administrador"
     },
     "monitoring": "Monitoreo",
@@ -67,7 +67,7 @@
     "adminHeroBadge": "Consola de plataforma",
     "adminHeroEyebrow": "SMART PALM / ADMIN",
     "adminHeroTitle": "Prepara usuarios, acceso e infraestructura IoT.",
-    "adminHeroDescription": "Activa agrónomos y palm growers, habilita su plan y vincula gateways y sensores para que el desk agronómico opere con datos reales.",
+    "adminHeroDescription": "Activa agrónomos y agricultores, habilita su plan y vincula gateways y sensores para que el desk agronómico opere con datos reales.",
     "adminFormEyebrow": "ACCESO ADMINISTRACIÓN",
     "adminHeroHeadline": "Consola de administración.",
     "adminFormSubtitle": "Solo administradores. Usa una pestaña aparte del desk del agrónomo.",
@@ -86,19 +86,19 @@
     "nav": {
       "home": "Inicio",
       "users": "Usuarios",
-      "growers": "Palm growers",
+      "growers": "Agricultores",
       "access": "Planes y acceso",
       "field": "Campo e IoT"
     },
     "home": {
       "title": "Centro de administración",
-      "subtitle": "Gestiona el onboarding de agrónomos y palm growers: cuentas, planes de acceso e infraestructura de campo. La app del palm grower es móvil; aquí defines su cuenta y su predio.",
+      "subtitle": "Gestiona el onboarding de agrónomos y agricultores: cuentas, planes de acceso e infraestructura de campo. La app del agricultor es móvil; aquí defines su cuenta y su predio.",
       "step1Title": "Crear usuarios",
-      "step1Desc": "Alta de agrónomo o palm grower con usuario y contraseña.",
+      "step1Desc": "Alta de agrónomo o agricultor con usuario y contraseña.",
       "step1Cta": "Ir a usuarios",
-      "step2Title": "Palm grower completo",
+      "step2Title": "Agricultor completo",
       "step2Desc": "Cuenta, plan, plantación a su nombre, sensores y vínculo con agrónomo.",
-      "step2Cta": "Ir a palm growers",
+      "step2Cta": "Ir a agricultores",
       "step3Title": "Campo e IoT",
       "step3Desc": "Configuración de gateway y dispositivos de campo cuando se requiera por separado.",
       "step3Cta": "Ir a campo",
@@ -107,16 +107,16 @@
       "step4Cta": ""
     },
     "growers": {
-      "title": "Palm growers",
-      "subtitle": "Alta y provisión de la cuenta del palm grower para su app móvil: plan activo, plantación propia, sensores y agrónomo vinculado.",
-      "run": "Provisionar palm grower",
+      "title": "Agricultores",
+      "subtitle": "Alta y provisión de la cuenta del agricultor para su app móvil: plan activo, plantación propia, sensores y agrónomo vinculado.",
+      "run": "Provisionar agricultor",
       "running": "Provisionando...",
-      "step1": "Cuenta del palm grower",
-      "step1Help": "Crea un palm grower nuevo o reutiliza uno existente.",
+      "step1": "Cuenta del agricultor",
+      "step1Help": "Crea un agricultor nuevo o reutiliza uno existente.",
       "modeExisting": "Existente",
       "modeCreate": "Nuevo",
-      "grower": "Palm grower",
-      "growerPassword": "Contraseña del palm grower",
+      "grower": "Agricultor",
+      "growerPassword": "Contraseña del agricultor",
       "passwordHelp": "Se usa solo para registrar la plantación a su nombre. No se almacena en la sesión de administración.",
       "fullName": "Nombre completo",
       "username": "Usuario",
@@ -125,8 +125,8 @@
       "step2": "Plan y acceso",
       "plan": "Plan",
       "amount": "Monto del pago",
-      "step3": "Plantación del palm grower",
-      "step3Help": "La plantación queda del palm grower (no del administrador), lista para la app móvil.",
+      "step3": "Plantación del agricultor",
+      "step3Help": "La plantación queda del agricultor (no del administrador), lista para la app móvil.",
       "plantationName": "Nombre de la plantación",
       "hectares": "Hectáreas",
       "address": "Dirección",
@@ -138,18 +138,18 @@
       "linkAgronomist": "Afiliar un agrónomo a esta plantación",
       "logTitle": "Progreso",
       "plantationsTitle": "Plantaciones en la plataforma",
-      "done": "Palm grower {{name}} listo · plantación {{id}} (app móvil + desk agrónomo).",
-      "error": "No se pudo completar el aprovisionamiento del palm grower.",
-      "errorForm": "Completa usuario, correo y contraseña del palm grower nuevo.",
-      "errorPassword": "Elige un palm grower e indica su contraseña para crear la plantación a su nombre.",
-      "errorGrower": "No se pudo resolver el palm grower.",
+      "done": "Agricultor {{name}} listo · plantación {{id}} (app móvil + desk agrónomo).",
+      "error": "No se pudo completar el aprovisionamiento del agricultor.",
+      "errorForm": "Completa usuario, correo y contraseña del agricultor nuevo.",
+      "errorPassword": "Elige un agricultor e indica su contraseña para crear la plantación a su nombre.",
+      "errorGrower": "No se pudo resolver el agricultor.",
       "log": {
-        "createdGrower": "Cuenta de palm grower creada: {{name}}",
-        "useGrower": "Usando palm grower {{name}}",
+        "createdGrower": "Cuenta de agricultor creada: {{name}}",
+        "useGrower": "Usando agricultor {{name}}",
         "accessOk": "Plan activado (suscripción + pago)",
         "accessRetry": "Reintento de acceso:",
         "accessSkip": "Acceso (omitido o ya activo):",
-        "plantationOk": "Plantación del palm grower creada {{id}}",
+        "plantationOk": "Plantación del agricultor creada {{id}}",
         "sectorOk": "Sector asignado",
         "sectorSkip": "Sector (omitido):",
         "gatewayOk": "Edge gateway listo",
@@ -162,7 +162,7 @@
     },
     "users": {
       "title": "Usuarios",
-      "subtitle": "Alta de cuentas de agrónomo y palm grower. Después activa su plan de acceso.",
+      "subtitle": "Alta de cuentas de agrónomo y agricultor. Después activa su plan de acceso.",
       "createTitle": "Nuevo usuario",
       "listTitle": "Usuarios registrados",
       "fullName": "Nombre completo",
@@ -180,13 +180,13 @@
       "role": {
         "admin": "Administrador",
         "agronomist": "Agrónomo",
-        "grower": "Palm grower"
+        "grower": "Agricultor"
       },
-      "roleHelp": "Puedes crear agrónomo o palm grower. No se crea otro administrador desde aquí."
+      "roleHelp": "Puedes crear agrónomo o agricultor. No se crea otro administrador desde aquí."
     },
     "access": {
       "title": "Planes y acceso",
-      "subtitle": "Asigna y activa el plan de suscripción de un agrónomo o palm grower para habilitar su acceso a la plataforma.",
+      "subtitle": "Asigna y activa el plan de suscripción de un agrónomo o agricultor para habilitar su acceso a la plataforma.",
       "help": "Selecciona el usuario, elige el plan y confirma el pago. El acceso queda activo de inmediato.",
       "user": "Usuario",
       "userPlaceholder": "Selecciona un usuario",
@@ -202,8 +202,8 @@
     },
     "field": {
       "title": "Campo e IoT",
-      "subtitle": "Configuración técnica de plantación, sector, gateway e IoT. Para el predio del palm grower usa la sección Palm growers.",
-      "hint": "Si creas plantación aquí, el dueño será el administrador. Preferible: sección Palm growers para plantación del palm grower.",
+      "subtitle": "Configuración técnica de plantación, sector, gateway e IoT. Para el predio del agricultor usa la sección Agricultores.",
+      "hint": "Si creas plantación aquí, el dueño será el administrador. Preferible: sección Agricultores para plantación del agricultor.",
       "plantationBlock": "Plantación",
       "devicesBlock": "Gateway y sensores",
       "existing": "Usar plantación existente",
@@ -827,7 +827,7 @@
       "noActivePlan": "Sin plan activo",
       "until": "hasta",
       "role": {
-        "palm_grower": "Palm grower",
+        "palm_grower": "Agricultor",
         "agronomist": "Agrónomo"
       },
       "error": {
@@ -1089,7 +1089,7 @@
     "passwordPlaceholder": "Mínimo 8 caracteres, una mayúscula y un número",
     "role": "Rol",
     "roleAgronomist": "Agrónomo",
-    "roleGrower": "Palm grower",
+    "roleGrower": "Agricultor",
     "phone": "Teléfono",
     "phoneHint": "Usa exactamente este formato: +51 961 234 567.",
     "phonePlaceholder": "+51 961 234 567",
