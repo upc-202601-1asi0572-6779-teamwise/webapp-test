@@ -6,9 +6,13 @@ export const environment = {
   demo: {
     plantationId: 1,
     agronomistId: 3,
-    /** Align with backend seed when available on Render. */
-    deviceMac: 'AA:BB:CC:DD:EE:01',
-    gatewayMac: 'AA:BB:CC:00:00:01',
+    /**
+     * Fallback MACs when API discovery fails.
+     * Live Render (2026-07): gateway 24:6f:28:a1:74:8c, IoT 30:76:f5:a5:88:f8.
+     * Prefer runtime discovery via IotDeviceContextService.
+     */
+    deviceMac: '30:76:f5:a5:88:f8',
+    gatewayMac: '24:6f:28:a1:74:8c',
     sectorId: 1,
   },
   features: {

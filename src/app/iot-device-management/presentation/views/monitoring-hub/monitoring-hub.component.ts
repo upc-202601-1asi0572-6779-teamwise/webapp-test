@@ -2,7 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, finalize, forkJoin, of, switchMap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { getApiErrorMessage } from '../../../../shared/infrastructure/api-error-message';
 import { SensorReadingService } from '../../../../shared/infrastructure/sensor-reading.service';
@@ -15,6 +16,7 @@ import {
   SectorHealthDto,
   UpdateThresholdRequest,
 } from '../../../infrastructure/edge-gateway-api.service';
+import { IotDeviceContextService } from '../../../infrastructure/iot-device-context.service';
 import { TranslationService } from '../../../../i18n/translation.service';
 
 @Component({
@@ -25,11 +27,13 @@ import { TranslationService } from '../../../../i18n/translation.service';
 export class MonitoringHubComponent implements OnInit {
   private readonly edge = inject(EdgeGatewayService);
   private readonly sensors = inject(SensorReadingService);
+  private readonly iotContext = inject(IotDeviceContextService);
   private readonly fb = inject(FormBuilder);
   private readonly t = inject(TranslationService);
 
-  readonly deviceMac = environment.demo.deviceMac;
-  readonly gatewayMac = environment.demo.gatewayMac;
+  /** Active MAC context (resolved from API; falls back to environment.demo). */
+  readonly deviceMac = signal(environment.demo.deviceMac);
+  readonly gatewayMac = signal(environment.demo.gatewayMac);
   readonly sectorId = environment.demo.sectorId ?? 1;
   readonly sensorTypes = SENSOR_TYPES;
 
@@ -38,6 +42,7 @@ export class MonitoringHubComponent implements OnInit {
   readonly gateways = signal<ConnectivityStatus[]>([]);
   readonly gatewayDevices = signal<string[]>([]);
   readonly thresholds = signal<AgronomicThreshold[]>([]);
+  readonly thresholdsForbidden = signal(false);
   readonly readings = signal<SensorReading[]>([]);
   readonly sectorHealth = signal<SectorHealthDto | null>(null);
   readonly savingThreshold = signal(false);
@@ -94,7 +99,9 @@ export class MonitoringHubComponent implements OnInit {
     return this.t.translate('monitor.emptyDevices');
   }
   get emptyThresholds(): string {
-    return this.t.translate('monitor.emptyThresholds');
+    return this.thresholdsForbidden()
+      ? this.t.translate('monitor.thresholdsForbidden')
+      : this.t.translate('monitor.emptyThresholds');
   }
   get emptyReadings(): string {
     return this.t.translate('monitor.emptyReadings');
@@ -105,8 +112,8 @@ export class MonitoringHubComponent implements OnInit {
   get contextLabel(): string {
     return this.t
       .translate('monitor.contextLine')
-      .replace('{{gateway}}', this.gatewayMac)
-      .replace('{{device}}', this.deviceMac)
+      .replace('{{gateway}}', this.gatewayMac())
+      .replace('{{device}}', this.deviceMac())
       .replace('{{sector}}', String(this.sectorId));
   }
   get healthLabel(): string {
@@ -190,27 +197,54 @@ export class MonitoringHubComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     this.thresholdMsg.set('');
+    this.thresholdsForbidden.set(false);
 
-    forkJoin({
-      gateways: this.edge.listGateways().pipe(catchError(() => of([] as ConnectivityStatus[]))),
-      devices: this.edge.getDevices(this.gatewayMac).pipe(
-        catchError(() => of({ gatewayMac: this.gatewayMac, devices: [] })),
-      ),
-      thresholds: this.edge.listThresholds(this.deviceMac).pipe(catchError(() => of([]))),
-      readings: this.sensors
-        .list({ deviceMac: this.deviceMac, size: 30 })
-        .pipe(catchError(() => of({ readings: [] as SensorReading[] }))),
-      sectorHealth: this.edge.getSectorHealth(this.sectorId).pipe(catchError(() => of(null))),
-    })
-      .pipe(finalize(() => this.loading.set(false)))
+    this.iotContext
+      .resolve({ refresh: true })
+      .pipe(
+        switchMap((ctx) => {
+          this.deviceMac.set(ctx.deviceMac);
+          this.gatewayMac.set(ctx.gatewayMac);
+          const deviceMac = ctx.deviceMac;
+          const gatewayMac = ctx.gatewayMac;
+
+          return forkJoin({
+            gateways: this.edge
+              .listGateways()
+              .pipe(catchError(() => of([] as ConnectivityStatus[]))),
+            devices: this.edge.getDevices(gatewayMac).pipe(
+              catchError(() => of({ gatewayMac, devices: [] as { deviceMac: string }[] })),
+            ),
+            thresholds: this.edge.listThresholds(deviceMac).pipe(
+              catchError((err: unknown) => {
+                if (err instanceof HttpErrorResponse && err.status === 403) {
+                  this.thresholdsForbidden.set(true);
+                }
+                return of([] as AgronomicThreshold[]);
+              }),
+            ),
+            readings: this.sensors
+              .list({ deviceMac, size: 30 })
+              .pipe(catchError(() => of({ readings: [] as SensorReading[] }))),
+            sectorHealth: this.edge
+              .getSectorHealth(this.sectorId)
+              .pipe(catchError(() => of(null))),
+          });
+        }),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: ({ gateways, devices, thresholds, readings, sectorHealth }) => {
           this.gateways.set(gateways ?? []);
-          this.gatewayDevices.set((devices?.devices ?? []).map((d) => d.deviceMac));
+          const macs = (devices?.devices ?? []).map((d) => d.deviceMac);
+          this.gatewayDevices.set(macs);
+          // If devices list has entries, keep active device aligned when possible
+          if (macs.length && !macs.includes(this.deviceMac())) {
+            this.deviceMac.set(macs[0]);
+          }
           this.thresholds.set(thresholds ?? []);
           this.readings.set(readings.readings ?? []);
           this.sectorHealth.set(sectorHealth);
-          // Prefill form with Temperature threshold if present
           const temp = (thresholds ?? []).find((th) => th.type === 'Temperature');
           if (temp) this.selectThreshold(temp);
         },
@@ -231,6 +265,11 @@ export class MonitoringHubComponent implements OnInit {
   }
 
   saveThreshold(): void {
+    if (this.thresholdsForbidden()) {
+      this.thresholdMsgOk.set(false);
+      this.thresholdMsg.set(this.t.translate('monitor.thresholdsForbidden'));
+      return;
+    }
     if (this.thresholdForm.invalid) {
       this.thresholdForm.markAllAsTouched();
       return;
@@ -253,17 +292,22 @@ export class MonitoringHubComponent implements OnInit {
     this.savingThreshold.set(true);
     this.thresholdMsg.set('');
     this.thresholdMsgOk.set(false);
+    const deviceMac = this.deviceMac();
     this.edge
-      .updateThreshold(body, this.deviceMac)
+      .updateThreshold(body, deviceMac)
       .pipe(finalize(() => this.savingThreshold.set(false)))
       .subscribe({
         next: () => {
           this.thresholdMsgOk.set(true);
           this.thresholdMsg.set(this.t.translate('monitor.thresholdSaved'));
-          this.edge.listThresholds(this.deviceMac).subscribe({
+          this.edge.listThresholds(deviceMac).subscribe({
             next: (th) => this.thresholds.set(th ?? []),
+            error: (err: unknown) => {
+              if (err instanceof HttpErrorResponse && err.status === 403) {
+                this.thresholdsForbidden.set(true);
+              }
+            },
           });
-          // Health depends on thresholds — refresh
           this.edge.getSectorHealth(this.sectorId).subscribe({
             next: (h) => this.sectorHealth.set(h),
             error: () => undefined,
@@ -271,6 +315,11 @@ export class MonitoringHubComponent implements OnInit {
         },
         error: (e) => {
           this.thresholdMsgOk.set(false);
+          if (e instanceof HttpErrorResponse && e.status === 403) {
+            this.thresholdsForbidden.set(true);
+            this.thresholdMsg.set(this.t.translate('monitor.thresholdsForbidden'));
+            return;
+          }
           this.thresholdMsg.set(getApiErrorMessage(e, this.t.translate('monitor.error.save')));
         },
       });

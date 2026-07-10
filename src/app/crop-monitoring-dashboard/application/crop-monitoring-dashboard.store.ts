@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../shared/infrastructure/auth.service';
 import { RecommendationService } from '../../agronomic-recommendation/infrastructure/agronomic-recommendation-api';
@@ -8,6 +8,7 @@ import {
   EdgeGatewayService,
   SectorHealthDto,
 } from '../../iot-device-management/infrastructure/edge-gateway-api.service';
+import { IotDeviceContextService } from '../../iot-device-management/infrastructure/iot-device-context.service';
 import {
   AgronomicInterventionDto,
   InterventionApiService,
@@ -27,6 +28,7 @@ export class CropMonitoringDashboardStore {
   private readonly recommendationService = inject(RecommendationService);
   private readonly sensorReadingService = inject(SensorReadingService);
   private readonly edgeGatewayService = inject(EdgeGatewayService);
+  private readonly iotContext = inject(IotDeviceContextService);
   private readonly interventionApi = inject(InterventionApiService);
   private readonly authService = inject(AuthService);
   private readonly t = inject(TranslationService);
@@ -224,38 +226,48 @@ export class CropMonitoringDashboardStore {
       size: 0,
     };
 
-    forkJoin({
-      pendingRecs: f.recommendations
-        ? this.recommendationService.list({ scope: 'sector', sectorId }).pipe(
-            catchError(() => of(emptyRecs)),
-          )
-        : of(emptyRecs),
-      publishedRecs: f.recommendations
-        ? this.recommendationService
-            .list({ scope: 'sector', sectorId, status: 'Published' })
-            .pipe(catchError(() => of(emptyRecs)))
-        : of(emptyRecs),
-      interventions: f.interventions
-        ? this.interventionApi.listBySector(sectorId).pipe(catchError(() => of([])))
-        : of([] as AgronomicInterventionDto[]),
-      readings: f.sensors
-        ? this.sensorReadingService
-            .list({ size: 8, deviceMac: environment.demo.deviceMac })
-            .pipe(catchError(() => of(emptyReadings)))
-        : of(emptyReadings),
-      trendData: f.sensors
-        ? this.sensorReadingService
-            .list({ size: 72, deviceMac: environment.demo.deviceMac })
-            .pipe(catchError(() => of(emptyReadings)))
-        : of(emptyReadings),
-      gateways: f.iotStatus
-        ? this.edgeGatewayService.listGateways().pipe(catchError(() => of([])))
-        : of([]),
-      sectorHealth: f.monitoring
-        ? this.edgeGatewayService.getSectorHealth(sectorId).pipe(catchError(() => of(null)))
-        : of(null),
-    })
-      .pipe(finalize(() => this.loading.set(false)))
+    // Discover live gateway/device MACs first (avoids seed MAC 404s on Render).
+    this.iotContext
+      .resolve()
+      .pipe(
+        switchMap((ctx) => {
+          const deviceMac = ctx.deviceMac;
+          return forkJoin({
+            pendingRecs: f.recommendations
+              ? this.recommendationService.list({ scope: 'sector', sectorId }).pipe(
+                  catchError(() => of(emptyRecs)),
+                )
+              : of(emptyRecs),
+            publishedRecs: f.recommendations
+              ? this.recommendationService
+                  .list({ scope: 'sector', sectorId, status: 'Published' })
+                  .pipe(catchError(() => of(emptyRecs)))
+              : of(emptyRecs),
+            interventions: f.interventions
+              ? this.interventionApi.listBySector(sectorId).pipe(catchError(() => of([])))
+              : of([] as AgronomicInterventionDto[]),
+            readings: f.sensors
+              ? this.sensorReadingService
+                  .list({ size: 8, deviceMac })
+                  .pipe(catchError(() => of(emptyReadings)))
+              : of(emptyReadings),
+            trendData: f.sensors
+              ? this.sensorReadingService
+                  .list({ size: 72, deviceMac })
+                  .pipe(catchError(() => of(emptyReadings)))
+              : of(emptyReadings),
+            gateways: f.iotStatus
+              ? this.edgeGatewayService.listGateways().pipe(catchError(() => of([])))
+              : of([]),
+            sectorHealth: f.monitoring
+              ? this.edgeGatewayService
+                  .getSectorHealth(sectorId)
+                  .pipe(catchError(() => of(null)))
+              : of(null),
+          });
+        }),
+        finalize(() => this.loading.set(false)),
+      )
       .subscribe({
         next: ({
           pendingRecs,

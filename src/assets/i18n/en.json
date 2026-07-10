@@ -1144,6 +1144,7 @@
     "emptyGateways": "No gateways registered.",
     "emptyDevices": "No devices on this gateway.",
     "emptyThresholds": "No thresholds for this device.",
+    "thresholdsForbidden": "Thresholds require an administrator or agronomist role. Your account cannot view or edit them.",
     "emptyReadings": "No recent readings.",
     "emptyHealth": "No sector health data (no readings or no IoT assigned).",
     "context": "Work context",

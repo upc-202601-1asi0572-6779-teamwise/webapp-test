@@ -1144,6 +1144,7 @@
     "emptyGateways": "Sin gateways registrados.",
     "emptyDevices": "Sin dispositivos en este gateway.",
     "emptyThresholds": "Sin umbrales para este dispositivo.",
+    "thresholdsForbidden": "Los umbrales requieren rol de administrador o agrónomo. Tu cuenta no puede verlos ni editarlos.",
     "emptyReadings": "Sin lecturas recientes.",
     "emptyHealth": "Sin datos de salud para el sector (sin lecturas o sin IoT asignado).",
     "context": "Contexto de trabajo",
