@@ -31,8 +31,8 @@ export class UserService {
       if (updated) return of(updated);
       return of({
         id: environment.demo.agronomistId,
-        email: 'agronomo.demo@smartpalm.io',
-        fullName: data.fullName ?? 'Agrónomo Demo',
+        email: 'agro1@smartpalm.com',
+        fullName: data.fullName ?? 'Agronomist One',
         role: 'agronomist',
         phone: data.phone ?? '',
         region: data.region ?? '',

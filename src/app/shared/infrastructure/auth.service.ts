@@ -1,19 +1,22 @@
 import { Injectable, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, tap, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../domain/auth-response.model';
+import { AuthResponse, LoginRequest } from '../domain/auth-response.model';
 import { User } from '../domain/user.model';
-import { userIdFromToken } from './jwt.util';
+import { decodeJwtPayload, userIdFromToken } from './jwt.util';
 
 const TOKEN_KEY = 'smartpalm_access_token_v1';
 const USER_KEY = 'smartpalm_user_v1';
-/** Local multi-user registry for demoAuth (email → profile). */
-const USERS_REGISTRY_KEY = 'smartpalm_demo_users_v1';
-const LEGACY_KEYS = ['accessToken', 'user'];
+const LEGACY_KEYS = ['accessToken', 'user', 'smartpalm_demo_users_v1'];
 
-type DemoUserRecord = User & { password?: string };
+/** Backend POST /authentication/sign-in response (IAM docs 2026-07-10). */
+interface SignInApiResponse {
+  userId: number;
+  username: string;
+  token: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,9 +24,8 @@ export class AuthService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /**
-   * Start null; hydrate from storage only (no forced auto-login).
-   * User must login or register — required for a coherent agronomist flow.
-   * Signal is the source of truth for reactive consumers (computed isAgronomist, etc.).
+   * Hydrate from storage only — no auto-login.
+   * Real JWT required when demoAuth is off.
    */
   private readonly _user = signal<User | null>(null);
   readonly user = this._user.asReadonly();
@@ -48,135 +50,65 @@ export class AuthService {
     return this._user();
   }
 
-  /** Keep signal + BehaviorSubject in lockstep. */
   private setUser(user: User | null): void {
     this._user.set(user);
     this.currentUser$.next(user);
   }
 
+  /**
+   * POST /api/v1/authentication/sign-in
+   * Body: { username, password } (camelCase)
+   * 200: { userId, username, token }
+   */
   login(request: LoginRequest): Observable<AuthResponse> {
-    if (environment.demoAuth) {
-      const registered = this.findDemoUser(request.email);
-      if (registered) {
-        // Optional password check in demo (lenient if no password stored)
-        if (registered.password && registered.password !== request.password) {
-          return new Observable((sub) => {
-            sub.error({ status: 401, message: 'Credenciales invalidas (modo demo).' });
-          });
-        }
-        const { password: _pw, ...user } = registered;
-        const res: AuthResponse = {
-          accessToken: 'demo-token-no-backend-users',
-          user,
-        };
-        this.persist(res);
-        return of(res);
-      }
-      // First-time demo login: create agronomist session from email
-      const res = this.buildDemoAuthResponse(request, 'agronomist', request.email.split('@')[0] || 'Agrónomo');
-      this.persist(res);
-      this.upsertDemoUser({ ...res.user, password: request.password });
-      return of(res);
-    }
+    const username = (request.username ?? request.email ?? '').trim();
+    const password = request.password ?? '';
 
     return this.http
-      .post<{ username: string; token: string }>(`${environment.apiUrl}/authentication/sign-in`, {
-        Username: request.email,
-        Password: request.password,
+      .post<SignInApiResponse>(`${environment.apiUrl}/authentication/sign-in`, {
+        username,
+        password,
       })
       .pipe(
-        map((body) => this.mapSignInToAuthResponse(body, request)),
+        map((body) => this.mapSignInToAuthResponse(body)),
         tap((res) => this.persist(res)),
       );
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    if (environment.demoAuth) {
-      const existing = this.findDemoUser(request.email);
-      if (existing) {
-        return new Observable((sub) => {
-          sub.error({ status: 409, message: 'Ya existe una cuenta con ese correo (modo demo).' });
-        });
-      }
-
-      const user: User = {
-        id: this.nextDemoUserId(),
-        email: request.email,
-        fullName: request.fullName,
-        role: request.role,
-        phone: request.phone,
-        region: request.region,
-        city: request.city,
-        avatarUrl: null,
-        subscriptionId: null,
-        createdAt: new Date().toISOString(),
-      };
-      const res: AuthResponse = {
-        accessToken: 'demo-token-no-backend-users',
-        user,
-      };
-      this.upsertDemoUser({ ...user, password: request.password });
-      this.persist(res);
-      return of(res);
-    }
-
-    const role =
-      request.role === 'agronomist' ? 'Agronomist' : request.role === 'palm_grower' ? 'PalmGrower' : request.role;
-
-    return this.http
-      .post<{ message: string }>(`${environment.apiUrl}/authentication/sign-up`, {
-        username: request.email,
-        password: request.password,
-        email: request.email,
-        fullName: request.fullName,
-        role,
-      })
-      .pipe(
-        map(() => {
-          const user: User = {
-            id: environment.demo.agronomistId,
-            email: request.email,
-            fullName: request.fullName,
-            role: request.role,
-            phone: request.phone,
-            region: request.region,
-            city: request.city,
-            avatarUrl: null,
-            subscriptionId: null,
-            createdAt: new Date().toISOString(),
-          };
-          return { accessToken: 'pending-real-token', user } satisfies AuthResponse;
-        }),
-        tap((res) => this.persist(res)),
-      );
-  }
-
-  recoverPassword(email: string): Observable<{ message: string }> {
-    if (environment.demoAuth) {
-      return of({ message: 'Modo demo: revisa tu bandeja (simulado). Usa login con tu contraseña registrada.' });
-    }
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/authentication/recover-password`, {
-      email,
+  /** Public sign-up removed from product — users are created by admin only. */
+  register(_request?: unknown): Observable<AuthResponse> {
+    return new Observable((sub) => {
+      sub.error({
+        status: 404,
+        message: 'El registro público no está disponible. Contacta a un administrador.',
+      });
     });
   }
 
-  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
-    if (environment.demoAuth) {
-      return of({ message: 'Modo demo: reset no disponible en el backend real.' });
-    }
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/authentication/reset-password`, {
-      token,
-      newPassword,
+  recoverPassword(_email: string): Observable<{ message: string }> {
+    return new Observable((sub) => {
+      sub.error({
+        status: 501,
+        message: 'Recuperación de contraseña no disponible en el backend actual.',
+      });
+    });
+  }
+
+  resetPassword(_token: string, _newPassword: string): Observable<{ message: string }> {
+    return new Observable((sub) => {
+      sub.error({
+        status: 501,
+        message: 'Restablecimiento de contraseña no disponible en el backend actual.',
+      });
     });
   }
 
   patchCurrentUser(partial: Partial<User>): User | null {
-    const current = this.currentUser$.value;
+    const current = this._user();
     if (!current) return null;
     const updated = { ...current, ...partial };
     if (this.isBrowser) {
       localStorage.setItem(USER_KEY, JSON.stringify(updated));
-      this.upsertDemoUser({ ...updated, password: this.findDemoUser(updated.email)?.password });
     }
     this.setUser(updated);
     return updated;
@@ -195,6 +127,8 @@ export class AuthService {
     if (!this.isBrowser) return null;
     const token = localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem('accessToken');
     if (!token || token.startsWith('demo-token') || token === 'pending-real-token') return null;
+    // Prefer real JWTs (3 segments)
+    if (token.split('.').length !== 3) return null;
     return token;
   }
 
@@ -210,6 +144,11 @@ export class AuthService {
   private readStoredSession(): { user: User } | null {
     if (!this.isBrowser) return null;
     this.clearLegacyIfNeeded();
+    // Require a real token when not in demo mode
+    if (!environment.demoAuth && !this.getToken()) {
+      localStorage.removeItem(USER_KEY);
+      return null;
+    }
     const raw = localStorage.getItem(USER_KEY);
     if (!raw) return null;
     try {
@@ -226,67 +165,17 @@ export class AuthService {
     }
   }
 
-  private readDemoRegistry(): Record<string, DemoUserRecord> {
-    if (!this.isBrowser) return {};
-    try {
-      const raw = localStorage.getItem(USERS_REGISTRY_KEY);
-      return raw ? (JSON.parse(raw) as Record<string, DemoUserRecord>) : {};
-    } catch {
-      return {};
-    }
-  }
+  private mapSignInToAuthResponse(body: SignInApiResponse): AuthResponse {
+    const token = body.token;
+    const id = body.userId || userIdFromToken(token) || 0;
+    const username = body.username || '';
+    const role = this.resolveRole(token, username);
+    const profile = this.knownSeedProfile(username, id);
 
-  private writeDemoRegistry(map: Record<string, DemoUserRecord>): void {
-    if (!this.isBrowser) return;
-    localStorage.setItem(USERS_REGISTRY_KEY, JSON.stringify(map));
-  }
-
-  private findDemoUser(email: string): DemoUserRecord | null {
-    const key = email.trim().toLowerCase();
-    return this.readDemoRegistry()[key] ?? null;
-  }
-
-  private upsertDemoUser(user: DemoUserRecord): void {
-    const map = this.readDemoRegistry();
-    map[user.email.trim().toLowerCase()] = user;
-    this.writeDemoRegistry(map);
-  }
-
-  private nextDemoUserId(): number {
-    const map = this.readDemoRegistry();
-    const ids = Object.values(map).map((u) => u.id);
-    return (ids.length ? Math.max(...ids) : 0) + 1;
-  }
-
-  private mapSignInToAuthResponse(
-    body: { username: string; token: string },
-    request: LoginRequest,
-  ): AuthResponse {
-    const id = userIdFromToken(body.token) ?? environment.demo.agronomistId;
     const user: User = {
       id,
-      email: request.email || body.username,
-      fullName: body.username,
-      role: 'agronomist',
-      phone: '',
-      region: '',
-      city: '',
-      avatarUrl: null,
-      subscriptionId: null,
-      createdAt: new Date().toISOString(),
-    };
-    return { accessToken: body.token, user };
-  }
-
-  private buildDemoAuthResponse(
-    request: LoginRequest,
-    role: User['role'] = 'agronomist',
-    fullName?: string,
-  ): AuthResponse {
-    const user: User = {
-      id: environment.demo.agronomistId,
-      email: request.email || 'agronomo.demo@smartpalm.io',
-      fullName: fullName || 'Agrónomo Demo',
+      email: profile.email,
+      fullName: profile.fullName,
       role,
       phone: '',
       region: '',
@@ -295,9 +184,65 @@ export class AuthService {
       subscriptionId: null,
       createdAt: new Date().toISOString(),
     };
-    return {
-      accessToken: 'demo-token-no-backend-users',
-      user,
+
+    return { accessToken: token, user };
+  }
+
+  /**
+   * Sign-in only returns { userId, username, token }. Enrich UI from known seed
+   * profiles when present (local/dev); otherwise derive from username.
+   */
+  private knownSeedProfile(
+    username: string,
+    userId: number,
+  ): { email: string; fullName: string } {
+    const key = username.trim().toLowerCase();
+    const seeds: Record<string, { email: string; fullName: string }> = {
+      agronomist01: {
+        email: 'agro1@smartpalm.com',
+        fullName: 'Agronomist One',
+      },
+      admin: {
+        email: 'admin@smartpalm.com',
+        fullName: 'Administrator',
+      },
+      palmgrower01: {
+        email: 'grower1@smartpalm.com',
+        fullName: 'Palm Grower One',
+      },
     };
+    if (seeds[key]) return seeds[key];
+    if (userId === environment.demo.agronomistId) {
+      return {
+        email: 'agro1@smartpalm.com',
+        fullName: 'Agronomist One',
+      };
+    }
+    return {
+      email: username.includes('@') ? username : `${username}@smartpalm.local`,
+      fullName: username,
+    };
+  }
+
+  /**
+   * JWT from TokenService only includes Sid + Name (no role claim).
+   * This product is the agronomist console: default role is agronomist.
+   * If a role claim appears later, map it.
+   */
+  private resolveRole(token: string, username: string): User['role'] {
+    const payload = decodeJwtPayload(token);
+    const raw =
+      (payload?.role as string | undefined) ||
+      (payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as string | undefined) ||
+      '';
+    const normalized = raw.toLowerCase().replace(/\s+/g, '');
+    if (normalized.includes('grower') || normalized === 'palmgrower') return 'palm_grower';
+    if (normalized.includes('agronom')) return 'agronomist';
+    // Username heuristic for seed users without role claim
+    const u = username.trim().toLowerCase();
+    if (u.includes('grower') || u === 'palmgrower01') return 'palm_grower';
+    if (u.includes('agronom') || u === 'agronomist01') return 'agronomist';
+    // Agronomist web app default (admin/grower should use other clients)
+    return 'agronomist';
   }
 }

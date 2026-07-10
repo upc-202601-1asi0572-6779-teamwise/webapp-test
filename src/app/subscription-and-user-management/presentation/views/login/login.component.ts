@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { getApiErrorMessage } from '../../../../shared/infrastructure/api-error-message';
 import { AuthService } from '../../../../shared/infrastructure/auth.service';
@@ -9,7 +9,7 @@ import { TranslationService } from '../../../../i18n/translation.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -19,8 +19,9 @@ export class LoginComponent {
   readonly localeService = inject(LocaleService);
   private readonly t = inject(TranslationService);
 
+  /** IAM sign-in uses username (not email). */
   form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required]],
   });
 
@@ -56,32 +57,31 @@ export class LoginComponent {
   get formSubtitle(): string { return this.t.translate('login.formSubtitle'); }
 
   // ── Form labels & placeholders ──
-  get emailLabel(): string { return this.t.translate('login.emailLabel'); }
-  get emailPlaceholder(): string { return this.t.translate('login.emailPlaceholder'); }
+  get usernameLabel(): string { return this.t.translate('login.usernameLabel'); }
+  get usernamePlaceholder(): string { return this.t.translate('login.usernamePlaceholder'); }
   get passwordLabel(): string { return this.t.translate('login.passwordLabel'); }
   get passwordPlaceholder(): string { return this.t.translate('login.passwordPlaceholder'); }
 
   // ── Links ──
   get forgotPassword(): string { return this.t.translate('login.forgotPassword'); }
-  get noAccountPrompt(): string { return this.t.translate('login.noAccountPrompt'); }
-  get registerLink(): string { return this.t.translate('login.registerLink'); }
+  get noPublicRegisterHint(): string { return this.t.translate('login.noPublicRegisterHint'); }
 
-  hasError(controlName: 'email' | 'password'): boolean {
+  hasError(controlName: 'username' | 'password'): boolean {
     const control = this.form.controls[controlName];
     return control.invalid && (control.touched || control.dirty);
   }
 
-  getErrorMessage(controlName: 'email' | 'password'): string {
+  getErrorMessage(controlName: 'username' | 'password'): string {
     const control = this.form.controls[controlName];
 
     if (control.errors?.['required']) {
-      return controlName === 'email'
-        ? this.t.translate('login.emailRequired')
+      return controlName === 'username'
+        ? this.t.translate('login.usernameRequired')
         : this.t.translate('login.passwordRequired');
     }
 
-    if (control.errors?.['email']) {
-      return this.t.translate('login.emailInvalid');
+    if (control.errors?.['minlength']) {
+      return this.t.translate('login.usernameMin');
     }
 
     return '';
@@ -95,8 +95,9 @@ export class LoginComponent {
 
     this.loading = true;
     this.error = '';
+    const raw = this.form.getRawValue();
     this.authService
-      .login(this.form.getRawValue())
+      .login({ username: raw.username.trim(), password: raw.password })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => this.router.navigate(['/dashboard']),

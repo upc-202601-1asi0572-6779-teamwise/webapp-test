@@ -24,9 +24,10 @@ export class MyProfileComponent implements OnInit {
 
   form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(3)]],
-    phone: ['', [Validators.required, Validators.pattern(/^\+51\s?\d{3}\s?\d{3}\s?\d{3}$/)]],
-    region: ['', [Validators.required]],
-    city: ['', [Validators.required]],
+    // Optional: seed agronomist has empty phone; backend profile is session-local.
+    phone: [''],
+    region: [''],
+    city: [''],
   });
 
   regions = ['Ucayali', 'San Martin', 'Loreto'];

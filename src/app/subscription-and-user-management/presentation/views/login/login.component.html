@@ -100,19 +100,19 @@
             <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-5">
               <div>
                 <label class="mb-2 block" style="font-family: var(--font-body); font-size: 0.85rem; line-height: var(--line-height-label); letter-spacing: 0.12em; color: var(--color-white-60)">
-                  {{ emailLabel }}
+                  {{ usernameLabel }}
                 </label>
                 <input
-                  formControlName="email"
-                  type="email"
-                  autocomplete="email"
+                  formControlName="username"
+                  type="text"
+                  autocomplete="username"
                   class="w-full rounded-2xl border px-5 py-4 text-[1rem] outline-none transition-all duration-300 focus:ring-2 focus:border-transparent sm:text-[1.05rem]"
                  style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: var(--color-text-inverse); font-family: var(--font-body); --tw-ring-color: var(--color-brand-secondary); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04)"
-                 [placeholder]="emailPlaceholder"
+                 [placeholder]="usernamePlaceholder"
                 />
-                @if (hasError('email')) {
+                @if (hasError('username')) {
                 <p class="mt-2 text-sm" style="font-family: var(--font-body); color: #ffd4d4">
-                  {{ getErrorMessage('email') }}
+                  {{ getErrorMessage('username') }}
                 </p>
                 }
               </div>
@@ -147,14 +147,8 @@
             </form>
 
             <div class="mt-6 flex flex-col items-center gap-3 text-center" style="font-family: var(--font-body)">
-              <a routerLink="/auth/recover-password" class="transition-colors hover:opacity-80" style="font-size: 0.98rem; color: var(--color-brand-mint)">
-                {{ forgotPassword }}
-              </a>
-              <p style="font-size: 0.98rem; color: var(--color-white-60)">
-                <span>{{ noAccountPrompt }}</span>
-                <a routerLink="/auth/register" class="font-semibold transition-colors hover:opacity-80 ml-1" style="color: var(--color-brand-secondary)">
-                  {{ registerLink }}
-                </a>
+              <p style="font-size: 0.9rem; line-height: 1.55; color: var(--color-white-60); max-width: 22rem">
+                {{ noPublicRegisterHint }}
               </p>
             </div>
           </div>

@@ -27,10 +27,27 @@ export function decodeJwtPayload(token: string | null | undefined): JwtPayload |
   }
 }
 
-/** User id from claim `sid` (backend TokenService). */
+/**
+ * User id from JWT claims used by .NET TokenService.
+ * ClaimTypes.Sid often serializes as a long URI, not short "sid".
+ */
 export function userIdFromToken(token: string | null | undefined): number | null {
   const payload = decodeJwtPayload(token);
-  if (payload?.sid === undefined || payload.sid === null) return null;
-  const id = Number(payload.sid);
-  return Number.isFinite(id) ? id : null;
+  if (!payload) return null;
+
+  const candidates = [
+    payload.sid,
+    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid'],
+    payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid'],
+    payload['sub'],
+    payload['nameid'],
+    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+  ];
+
+  for (const c of candidates) {
+    if (c === undefined || c === null || c === '') continue;
+    const id = Number(c);
+    if (Number.isFinite(id) && id > 0) return id;
+  }
+  return null;
 }
