@@ -71,6 +71,9 @@ export class AdminUsersComponent implements OnInit {
   get roleHelp(): string {
     return this.t.translate('admin.users.roleHelp');
   }
+  get reloadLabel(): string {
+    return this.t.translate('admin.users.reload');
+  }
 
   /** Two creatable product roles (Administrator is seed-only). */
   readonly roleOptions: { value: 'Agronomist' | 'PalmGrower'; labelKey: string }[] = [

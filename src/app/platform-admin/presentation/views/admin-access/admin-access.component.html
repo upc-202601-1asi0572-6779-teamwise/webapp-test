@@ -23,9 +23,9 @@
 
       <label class="mt-4 block text-xs font-semibold uppercase tracking-wide" style="color: var(--color-text-muted)">{{ userLabel }}</label>
       <select formControlName="userId" class="mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm" style="border-color: var(--color-border-subtle); background: var(--color-bg-surface); color: var(--color-text-primary)">
-        <option value="">—</option>
+        <option value="" disabled>{{ userPlaceholder }}</option>
         @for (u of users(); track u.id) {
-        <option [value]="u.id">#{{ u.id }} · {{ u.username }} ({{ u.role }})</option>
+        <option [value]="u.id">{{ formatUserOption(u) }}</option>
         }
       </select>
 

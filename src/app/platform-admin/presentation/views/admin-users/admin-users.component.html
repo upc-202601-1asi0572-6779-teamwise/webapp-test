@@ -11,7 +11,7 @@
   <div class="rounded-xl border px-4 py-3 text-sm" style="background: var(--color-emerald-15); color: var(--color-brand-primary); border-color: var(--color-brand-secondary)">{{ success() }}</div>
   }
 
-  <div class="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
+  <div class="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
     <form (ngSubmit)="submit()" [formGroup]="form" class="rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
       <div class="flex items-center gap-2">
         <span class="flex h-8 w-8 items-center justify-center rounded-full" style="background: var(--color-emerald-15); color: var(--color-brand-primary)">
@@ -48,7 +48,16 @@
     <div class="rounded-2xl border px-5 py-5" style="background: var(--color-bg-surface); border-color: var(--color-border-subtle); box-shadow: var(--shadow-card)">
       <div class="flex items-center justify-between gap-3">
         <h2 class="text-sm font-semibold uppercase tracking-wider" style="color: var(--color-text-muted)">{{ listTitle }}</h2>
-        <button type="button" (click)="reload()" class="rounded-lg px-2.5 py-1 text-xs font-semibold transition hover:opacity-80" style="background: var(--color-bg-soft-2); color: var(--color-brand-primary)">↻</button>
+        <button
+          type="button"
+          (click)="reload()"
+          class="rounded-lg px-2.5 py-1 text-xs font-semibold transition hover:opacity-80"
+          style="background: var(--color-bg-soft-2); color: var(--color-brand-primary)"
+          [attr.aria-label]="reloadLabel"
+          [title]="reloadLabel"
+        >
+          ↻
+        </button>
       </div>
 
       @if (loading()) {
@@ -56,16 +65,33 @@
       } @else if (!users().length) {
       <p class="mt-6 text-sm" style="color: var(--color-text-secondary)">{{ emptyLabel }}</p>
       } @else {
-      <ul class="mt-4 flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
+      <ul class="mt-4 flex max-h-[32rem] flex-col gap-3 overflow-y-auto pr-1">
         @for (u of users(); track u.id) {
-        <li class="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-3 transition hover:bg-[var(--color-bg-soft-2)]" style="border-color: var(--color-border-subtle)">
-          <div class="min-w-0">
-            <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary)">{{ u.fullName || u.username }}</p>
-            <p class="truncate text-xs" style="color: var(--color-text-muted)">#{{ u.id }} · {{ u.username }} · {{ u.email }}</p>
+        <li class="rounded-xl border px-4 py-3.5 transition hover:bg-[var(--color-bg-soft-2)]" style="border-color: var(--color-border-subtle)">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold leading-5" style="color: var(--color-text-primary)">
+                {{ u.fullName || u.username }}
+              </p>
+              <dl class="mt-2.5 grid gap-1.5">
+                <div class="grid grid-cols-[5.5rem_1fr] items-baseline gap-x-2 gap-y-0.5 sm:grid-cols-[6rem_1fr]">
+                  <dt class="text-[11px] font-semibold uppercase tracking-wide" style="color: var(--color-text-muted)">{{ usernameLabel }}</dt>
+                  <dd class="truncate text-sm font-medium" style="color: var(--color-text-primary)">{{ u.username }}</dd>
+                </div>
+                <div class="grid grid-cols-[5.5rem_1fr] items-baseline gap-x-2 gap-y-0.5 sm:grid-cols-[6rem_1fr]">
+                  <dt class="text-[11px] font-semibold uppercase tracking-wide" style="color: var(--color-text-muted)">{{ emailLabel }}</dt>
+                  <dd class="truncate text-sm" style="color: var(--color-text-secondary)">{{ u.email || '—' }}</dd>
+                </div>
+              </dl>
+            </div>
+            <span
+              class="flex-shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none"
+              [style.background]="roleChipBg(u.role)"
+              [style.color]="roleChipFg(u.role)"
+            >
+              {{ roleLabel(u.role) }}
+            </span>
           </div>
-          <span class="flex-shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold" [style.background]="roleChipBg(u.role)" [style.color]="roleChipFg(u.role)">
-            {{ roleLabel(u.role) }}
-          </span>
         </li>
         }
       </ul>

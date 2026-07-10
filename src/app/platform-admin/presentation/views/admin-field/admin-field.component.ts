@@ -25,7 +25,7 @@ export class AdminFieldComponent implements OnInit {
   readonly log = signal<string[]>([]);
 
   form = this.fb.nonNullable.group({
-    plantationName: ['Plantación demo', Validators.required],
+    plantationName: ['', Validators.required],
     hectares: [12, [Validators.required, Validators.min(0.1)]],
     address: ['Pucallpa', Validators.required],
     sectorName: ['Sector Norte', Validators.required],

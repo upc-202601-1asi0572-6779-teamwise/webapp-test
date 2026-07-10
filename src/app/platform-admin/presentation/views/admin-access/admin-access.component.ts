@@ -66,6 +66,34 @@ export class AdminAccessComponent implements OnInit {
   get plansHint(): string {
     return this.t.translate('admin.access.plansHint');
   }
+  get userPlaceholder(): string {
+    return this.t.translate('admin.access.userPlaceholder');
+  }
+
+  roleLabel(role: string): string {
+    const r = (role || '').toLowerCase();
+    if (r.includes('admin')) return this.t.translate('admin.users.role.admin');
+    if (r.includes('grower')) return this.t.translate('admin.users.role.grower');
+    return this.t.translate('admin.users.role.agronomist');
+  }
+
+  /** Human-readable option label (never raw ids). */
+  formatUserOption(u: AdminUserDto): string {
+    const name = (u.fullName || '').trim();
+    const username = (u.username || '').trim();
+    const role = this.roleLabel(u.role);
+    if (name && username && name.toLowerCase() !== username.toLowerCase()) {
+      return `${name} · ${username} · ${role}`;
+    }
+    if (name) return `${name} · ${role}`;
+    if (username) return `${username} · ${role}`;
+    return role;
+  }
+
+  displayUserName(u: AdminUserDto | undefined, fallbackId?: number): string {
+    if (!u) return fallbackId ? String(fallbackId) : '';
+    return (u.fullName || u.username || '').trim() || String(fallbackId ?? '');
+  }
 
   reload(): void {
     this.loading.set(true);
@@ -166,7 +194,7 @@ export class AdminAccessComponent implements OnInit {
           this.success.set(
             this.t
               .translate('admin.access.activated')
-              .replace('{{name}}', u?.username || String(userId)),
+              .replace('{{name}}', this.displayUserName(u, userId)),
           );
         },
         error: (e) =>

@@ -43,15 +43,15 @@ export class AdminGrowersComponent implements OnInit {
     mode: ['existing' as 'existing' | 'create'],
     growerUserId: [''],
     // create grower
-    fullName: ['Productor demo'],
+    fullName: [''],
     username: [''],
     email: [''],
-    password: ['Grow#2026', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     // access
     planType: ['Seed'],
     amount: [149],
     // plantation
-    plantationName: ['Parcela demo'],
+    plantationName: [''],
     hectares: [12, [Validators.required, Validators.min(0.1)]],
     address: ['Pucallpa'],
     // iot
