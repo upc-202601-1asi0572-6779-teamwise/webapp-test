@@ -1,0 +1,4 @@
+# Cloudflare Pages — SPA output from Angular application builder
+name = "webapp-test"
+compatibility_date = "2025-07-01"
+pages_build_output_dir = "dist/web-app-smart-palm/browser"

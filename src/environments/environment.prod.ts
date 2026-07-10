@@ -6,8 +6,9 @@ export const environment = {
   demo: {
     plantationId: 1,
     agronomistId: 3,
-    deviceMac: '123456',
-    gatewayMac: '12345',
+    /** Align with backend seed when available on Render. */
+    deviceMac: 'AA:BB:CC:DD:EE:01',
+    gatewayMac: 'AA:BB:CC:00:00:01',
     sectorId: 1,
   },
   features: {

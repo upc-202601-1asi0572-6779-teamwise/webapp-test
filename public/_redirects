@@ -1,1 +1,3 @@
+# Cloudflare Pages SPA fallback.
+# Real files (*.js, *.css, assets) are served first; only missing routes fall through.
 /*    /index.html   200
